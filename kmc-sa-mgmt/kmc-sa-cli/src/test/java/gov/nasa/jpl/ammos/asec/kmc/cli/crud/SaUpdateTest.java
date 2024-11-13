@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
 
     @Test
     public void testUpdateBulkNotExist() throws KmcException {
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(5, sas.size());
         CommandLine cli = getCmd(new SaUpdate(), true);
         int exit = cli.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
@@ -35,7 +35,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
 
     @Test
     public void testUpdateBulk() throws KmcException {
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(5, sas.size());
         assertEquals(1, (int) sas.get(0).getSpi());
         CommandLine cli = getCmd(new SaUpdate(), true);
@@ -44,7 +44,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
         assertEquals(0, exit);
         sas = dao.getSas();
         assertEquals(5, sas.size());
-        sas.sort(Comparator.comparing(SecAssn::getSpi));
+        sas.sort(Comparator.comparing(ISecAssn::getSpi));
         assertEquals(ServiceType.ENCRYPTION, sas.get(0).getServiceType());
         assertEquals("140", sas.get(0).getEkid());
         assertEquals(ServiceType.AUTHENTICATION, sas.get(1).getServiceType());
@@ -68,7 +68,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetArsnFail() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(5, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(4, (short) sa.getArsnLen());
         assertArrayEquals(new byte[]{0x00, 0x00, 0x00, 0x01}, sa.getArsn());
 
@@ -83,7 +83,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetArsn() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(5, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(4, (short) sa.getArsnLen());
         assertArrayEquals(new byte[]{0x00, 0x00, 0x00, 0x01}, sa.getArsn());
         int exit = cli.execute("--spi=5", "--scid=46", "--arsn=0x0000000002", "--arsnlen=5");
@@ -97,7 +97,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetIv() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(0, (short) sa.getIvLen());
         assertNull(sa.getIv());
         int exit = cli.execute("--spi=1", "--scid=46", "--iv=0x00112233465566778899aabbccddeeff", "--ivlen=16");
@@ -126,7 +126,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetIvFail() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(0, (short) sa.getIvLen());
         assertNull(sa.getIv());
 
@@ -144,7 +144,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetShivf() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(12, (short) sa.getShivfLen());
         int exit = cli.execute("--spi=1", "--scid=46", "--shivflen=20");
         assertEquals(0, exit);
@@ -156,7 +156,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetShplf() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(0, (short) sa.getShplfLen());
         int exit = cli.execute("--spi=1", "--scid=46", "--shplflen=20");
         assertEquals(0, exit);
@@ -168,7 +168,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetShsnf() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(0, (short) sa.getShsnfLen());
         int exit = cli.execute("--spi=1", "--scid=46", "--shsnflen=20");
         assertEquals(0, exit);
@@ -180,7 +180,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetStmacf() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(16, (short) sa.getStmacfLen());
         int exit = cli.execute("--spi=1", "--scid=46", "--stmacflen=20");
         assertEquals(0, exit);
@@ -192,7 +192,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetEkidFail() throws KmcException {
         CommandLine cmd = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals("130", sa.getEkid());
         int exitCode = cmd.execute("--spi=1", "--scid=46", "--ekid=140");
         assertNotEquals(0, exitCode);
@@ -208,7 +208,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetEkid() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals("130", sa.getEkid());
         assertArrayEquals(new byte[]{0x01}, sa.getEcs());
         int exit = cli.execute("--spi=1", "--scid=46", "--ekid=140", "--ecs=0x02", "--ivlen=16");
@@ -222,7 +222,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetAkidFail() throws KmcException {
         CommandLine cmd = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertNull(sa.getAkid());
         assertArrayEquals(new byte[]{0x00}, sa.getAcs());
         int exitCode = cmd.execute("--spi=1", "--scid=46", "--akid=140");
@@ -239,7 +239,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetAkid() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertNull(sa.getAkid());
         assertArrayEquals(new byte[]{0x00}, sa.getAcs());
         int exit = cli.execute("--spi=1", "--scid=46", "--akid=140", "--acs=0x02");
@@ -253,7 +253,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetAbm() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(19, (int) sa.getAbmLen());
         assertArrayEquals(new byte[]{0x00,
                 0x00,
@@ -305,7 +305,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetAbmFail() throws KmcException {
         CommandLine cli = getCmd(new SaUpdate(), true);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertNull(sa.getAkid());
         assertArrayEquals(new byte[]{0x00}, sa.getAcs());
         int exit = cli.execute("--spi=1", "--scid=46", "--abm=0x1111111111111111111111111111111111111111",
@@ -323,7 +323,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetArsnw() throws KmcException {
         CommandLine cmd = getCmd(new SaUpdate(), true, null, null);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(5, (short) sa.getArsnw());
         int exitCode = cmd.execute("--scid=46", "--spi=1", "--arsnw=10");
         assertEquals(0, exitCode);
@@ -335,7 +335,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     public void testResetSt() throws KmcException {
         CommandLine cmd = getCmd(new SaUpdate(), true, null, null);
         SpiScid     id  = new SpiScid(1, (short) 46);
-        SecAssn     sa  = dao.getSa(id);
+        ISecAssn     sa  = dao.getSa(id);
         assertEquals(ServiceType.AUTHENTICATED_ENCRYPTION, sa.getServiceType());
         int exitCode = cmd.execute("--scid=46", "--spi=1", "--st=1");
         assertEquals(0, exitCode);

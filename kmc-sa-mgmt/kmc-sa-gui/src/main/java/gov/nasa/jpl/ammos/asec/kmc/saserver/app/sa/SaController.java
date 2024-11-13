@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
 import gov.nasa.jpl.ammos.asec.kmc.api.json.ByteArrayDeserializer;
 import gov.nasa.jpl.ammos.asec.kmc.api.json.ByteArraySerializer;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
@@ -52,7 +53,6 @@ import static gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao.*;
 
 /**
  * SADB REST Controller
- *
  */
 @RestController
 public class SaController {
@@ -98,13 +98,13 @@ public class SaController {
     }
 
     @GetMapping("/api/sa")
-    public List<SecAssn> getSa(@RequestParam(required = false) Short scid,
-                               @RequestParam(required = false) Integer spi, HttpServletRequest request) throws KmcException {
+    public List<? extends ISecAssn> getSa(@RequestParam(required = false) Short scid,
+                                          @RequestParam(required = false) Integer spi, HttpServletRequest request) throws KmcException {
         LOG.info("{} retrieving all SAs", request.getRemoteAddr());
         if (spi != null && scid != null) {
             return new ArrayList<>(Arrays.asList(dao.getSa(new SpiScid(spi, scid))));
         }
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         if (scid != null) {
             sas = sas.stream().filter(sa -> sa.getScid().equals(scid)).collect(Collectors.toList());
         }
@@ -115,19 +115,19 @@ public class SaController {
     }
 
     @PutMapping("/api/sa")
-    public SecAssn putSa(@RequestBody SecAssn sa, HttpServletRequest request) throws KmcException {
+    public ISecAssn putSa(@RequestBody SecAssn sa, HttpServletRequest request) throws KmcException {
         LOG.info("{} creating SA ({}/{})", request.getRemoteAddr(), sa.getSpi(), sa.getScid());
-        SecAssn newSa = dao.createSa(sa);
+        ISecAssn newSa = dao.createSa(sa);
         LOG.info("{} created SA ({}/{})", request.getRemoteAddr(), sa.getSpi(), sa.getScid());
         return newSa;
     }
 
     @PostMapping(value = "/api/sa", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public SecAssn postSa(@RequestBody SecAssn sa, HttpServletRequest request) throws KmcException {
+    public ISecAssn postSa(@RequestBody SecAssn sa, HttpServletRequest request) throws KmcException {
         LOG.info("{} updating SA ({}/{})", request.getRemoteAddr(), sa.getSpi(), sa.getScid());
         checkEncryption(sa);
         checkAuthentication(sa);
-        SecAssn original = dao.getSa(sa.getId());
+        ISecAssn original = dao.getSa(sa.getId());
         try (IDbSession dbSession = dao.newSession()) {
             dbSession.beginTransaction();
             if (original.getSaState() != sa.getSaState()) {
@@ -187,25 +187,25 @@ public class SaController {
     }
 
     @PostMapping(value = "/api/sa/start", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public SecAssn startSa(@RequestBody SpiScid id, HttpServletRequest request) throws KmcException {
+    public ISecAssn startSa(@RequestBody SpiScid id, HttpServletRequest request) throws KmcException {
         LOG.info("{} starting SA ({}/{})", request.getRemoteAddr(), id.getSpi(), id.getScid());
-        SecAssn sa = dao.startSa(id, true);
+        ISecAssn sa = dao.startSa(id, true);
         LOG.info("{} started SA ({}/{})", request.getRemoteAddr(), id.getSpi(), id.getScid());
         return sa;
     }
 
     @PostMapping(value = "/api/sa/stop", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public SecAssn stopSa(@RequestBody SpiScid id, HttpServletRequest request) throws KmcException {
+    public ISecAssn stopSa(@RequestBody SpiScid id, HttpServletRequest request) throws KmcException {
         LOG.info("{} stopping SA ({}/{})", request.getRemoteAddr(), id.getSpi(), id.getScid());
-        SecAssn sa = dao.stopSa(id);
+        ISecAssn sa = dao.stopSa(id);
         LOG.info("{} stopped SA ({}/{})", request.getRemoteAddr(), id.getSpi(), id.getScid());
         return sa;
     }
 
     @PostMapping(value = "/api/sa/expire", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public SecAssn expireSa(@RequestBody SpiScid id, HttpServletRequest request) throws KmcException {
+    public ISecAssn expireSa(@RequestBody SpiScid id, HttpServletRequest request) throws KmcException {
         LOG.info("{} expiring SA ({}/{})", request.getRemoteAddr(), id.getSpi(), id.getScid());
-        SecAssn sa = dao.expireSa(id);
+        ISecAssn sa = dao.expireSa(id);
         LOG.info("{} expired SA ({}/{})", request.getRemoteAddr(), id.getSpi(), id.getScid());
         return sa;
     }
@@ -214,7 +214,7 @@ public class SaController {
     public ResponseEntity<JsonNode> resetArsn(@RequestBody IdArsn idArsn, HttpServletRequest request) throws KmcException {
         LOG.info("{} resetting ARSN on SA ({}/{})", request.getRemoteAddr(), idArsn.id.getSpi(), idArsn.id.getScid());
         ObjectNode respBody = mapper.createObjectNode();
-        SecAssn    sa       = dao.getSa(idArsn.id);
+        ISecAssn   sa       = dao.getSa(idArsn.id);
         if (sa != null) {
             try {
                 if (idArsn.arsn.length < idArsn.arsnLen) {
@@ -275,7 +275,7 @@ public class SaController {
                     session.beginTransaction();
                     try {
                         SecAssnValidator.validate(sa);
-                        SecAssn exists = dao.getSa(sa.getId());
+                        ISecAssn exists = dao.getSa(sa.getId());
                         if (exists != null && force) {
                             dao.deleteSa(session, sa.getId());
                             session.flush();
@@ -314,9 +314,9 @@ public class SaController {
     @GetMapping(value = "/api/sa/csv")
     public ResponseEntity<String> downloadCsv(HttpServletRequest request) throws KmcException {
         LOG.info("{} downloading SAs as CSV", request.getRemoteAddr());
-        SaCsvOutput   out = new SaCsvOutput(true);
-        List<SecAssn> sas = dao.getSas();
-        StringWriter  w   = new StringWriter();
+        SaCsvOutput              out = new SaCsvOutput(true);
+        List<? extends ISecAssn> sas = dao.getSas();
+        StringWriter             w   = new StringWriter();
         try (PrintWriter pw = new PrintWriter(w)) {
             out.print(pw, sas);
         }
@@ -331,7 +331,7 @@ public class SaController {
         try (IDbSession dbSession = dao.newSession()) {
             try {
                 dbSession.beginTransaction();
-                SecAssn sa = dao.getSa(dbSession, idIv.id);
+                ISecAssn sa = dao.getSa(dbSession, idIv.id);
                 if (sa != null) {
                     try {
                         if (idIv.iv.length < idIv.ivLen) {
@@ -373,7 +373,7 @@ public class SaController {
         try (IDbSession dbSession = dao.newSession()) {
             try {
                 dbSession.beginTransaction();
-                SecAssn sa = dao.getSa(dbSession, rekey.id);
+                ISecAssn sa = dao.getSa(dbSession, rekey.id);
                 if (rekey.ekid != null && !rekey.ekid.equals(sa.getEkid())) {
                     dao.rekeySaEnc(dbSession, sa.getId(), rekey.ekid, sa.getEcs(), sa.getEcsLen());
                     dbSession.flush();

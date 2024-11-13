@@ -34,7 +34,7 @@ public class SecAssnValidator {
      * @param sa security association
      * @throws KmcException ex
      */
-    public static void validate(SecAssn sa) throws KmcException {
+    public static void validate(ISecAssn sa) throws KmcException {
         // validate required
         if (sa.getScid() == null || sa.getTfvn() == null || sa.getMapid() == null || sa.getVcid() == null) {
             throw new KmcException("invalid GVCID: SCID, VCID, TFVN, and MAPID are all required");
@@ -55,13 +55,13 @@ public class SecAssnValidator {
         }
     }
 
-    private static void verifyEst(SecAssn sa) throws KmcException {
+    private static void verifyEst(ISecAssn sa) throws KmcException {
         if (!ST_RANGE.contains(sa.getEst())) {
             throw new KmcException(String.format("invalid EST: %d", sa.getEst()));
         }
     }
 
-    private static void verifyAst(SecAssn sa) throws KmcException {
+    private static void verifyAst(ISecAssn sa) throws KmcException {
         if (!ST_RANGE.contains(sa.getAst())) {
             throw new KmcException(String.format("invalid AST: %d", sa.getAst()));
         }
@@ -263,7 +263,7 @@ public class SecAssnValidator {
      * @param sa security association
      * @throws KmcException ex
      */
-    public static void verifyAbm(SecAssn sa) throws KmcException {
+    public static void verifyAbm(ISecAssn sa) throws KmcException {
         if (sa.getAbm() != null && sa.getAbmLen() != null && sa.getAbm().length != sa.getAbmLen()) {
             throwEx("ABM and ABM length must agree");
         }
@@ -275,7 +275,7 @@ public class SecAssnValidator {
      * @param sa security association
      * @throws KmcException ex
      */
-    public static void verifyIv(SecAssn sa) throws KmcException {
+    public static void verifyIv(ISecAssn sa) throws KmcException {
        verifyIv(sa.getIv(),sa.getIvLen(), sa.getEst(),sa.getEcs()); 
 
     }
@@ -288,7 +288,7 @@ public class SecAssnValidator {
      * @param sa security association
      * @throws KmcException ex
      */
-    public static void verifyArsn(SecAssn sa) throws KmcException {
+    public static void verifyArsn(ISecAssn sa) throws KmcException {
 //        if (sa.getArsn().length != sa.getArsnLen()) {
 //            throw new KmcException("ARSN and ARSN length must agree");
 //        }

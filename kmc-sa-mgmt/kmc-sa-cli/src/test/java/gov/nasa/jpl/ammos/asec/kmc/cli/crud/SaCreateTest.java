@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
@@ -54,7 +55,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int exitCode = cmd.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
                 BULK_SA_FILE).getFile()));
         assertEquals( w.toString(),0, exitCode);
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals( w.toString(),86, sas.size());
     }
 
@@ -81,7 +82,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
 
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7");
@@ -99,7 +100,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=8", "--ekid=140", "--ecs=0x02", "--ivlen=16", "--st=AUTHENTICATED_ENCRYPTION");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(8, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(8, (short) 46));
         assertNotNull(sa);
 
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=8", "--ekid=140", "--ecs=0x02", "--ivlen=16", "--st=AUTHENTICATED_ENCRYPTION");
@@ -114,7 +115,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shivflen=20");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
         assertEquals(20, (short) sa.getShivfLen());
     }
@@ -126,7 +127,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shplflen=20");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
         assertEquals(20, (short) sa.getShplfLen());
     }
@@ -138,7 +139,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shsnflen=20");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
         assertEquals(20, (short) sa.getShsnfLen());
     }
@@ -150,7 +151,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--stmacflen=20");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
         assertEquals(20, (short) sa.getStmacfLen());
     }
@@ -176,7 +177,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--ekid=130", "--ecs" +
                 "=0x01", "--st=1");
         assertEquals(0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
         assertEquals(6, (int) sa.getId().getSpi());
         assertEquals(46, (short) sa.getId().getScid());
@@ -206,7 +207,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 "--acs=0x01", "--st=2");
         assertEquals(0, exitCode);
 
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNotNull(sa);
         assertEquals(6, (int) sa.getId().getSpi());
         assertEquals(46, (short) sa.getId().getScid());
@@ -224,7 +225,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" +
                 "=0x000000000000000000000001", "--ivlen=12", "--st=AUTHENTICATED_ENCRYPTION");
         assertEquals(0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertArrayEquals(new byte[]{0x00,
                 0x00,
                 0x00,
@@ -274,7 +275,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 "--ivlen=16");
 
         assertNotEquals(0, exitCode);
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(5, sas.size());
     }
 
@@ -287,7 +288,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         CommandLine cmd = getCmd(new SaCreate(), true, out, err);
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--ivlen=12","--ecs=0x01", "--ekid=130" );
         assertEquals("Incorrect error message: "+ w.toString(),0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertNull(sa.getIv());
         assertEquals(12,(short) sa.getIvLen());
         
@@ -313,7 +314,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 "=0x1111111111111111111111111111111111111111", "--abmlen=20");
                 
         assertEquals("got "+ w.toString(),0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertArrayEquals(new byte[]{0x11,
                 0x11,
                 0x11,
@@ -335,7 +336,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 0x11,
                 0x11}, sa.getAbm());
         assertEquals(20, (int) sa.getAbmLen());
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(6, sas.size());
     }
 
@@ -351,7 +352,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--abm" +
                 "=0x111111111111111111111111111111111111111111", "--abmlen=20");
         assertNotEquals(0, exitCode);
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(5, sas.size());
     }
 
@@ -361,7 +362,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--arsn=0x04"
                 , "--arsnlen=1");
         assertEquals(0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertArrayEquals(new byte[]{0x00,
                 0x00,
                 (byte) 0xFC,
@@ -382,7 +383,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 0x00,
                 0x00}, sa.getAbm());
         assertEquals(19, (int) sa.getAbmLen());
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(6, sas.size());
     }
 
@@ -398,9 +399,9 @@ public class SaCreateTest extends BaseCommandLineTest {
         CommandLine cmd      = getCmd(new SaCreate(), true, null, null);
         int         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--arsnw=5");
         assertEquals(0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertEquals(5, (short) sa.getArsnw());
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(6, sas.size());
     }
 
@@ -414,7 +415,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--ekid=130",
                 "--ecs=0x01", "--akid=130", "--acs=0x01", "--st=3");
         assertEquals("got " + w.toString(),0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(7, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(7, (short) 46));
         assertNotNull(sa);
         assertEquals(7, (int) sa.getSpi());
         assertEquals(0, (short) sa.getTfvn());
@@ -457,7 +458,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 , "--st=HI");
         assertNotEquals(0, exitCode);
 
-        List<SecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas();
         assertEquals(5, sas.size());
     }
 
@@ -467,7 +468,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--st" +
                 "=ENCRYPTION");
         assertEquals(0, exitCode);
-        SecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46));
         assertEquals(ServiceType.ENCRYPTION, sa.getServiceType());
         assertEquals(1, (short) sa.getEst());
         assertEquals(0, (short) sa.getAst());

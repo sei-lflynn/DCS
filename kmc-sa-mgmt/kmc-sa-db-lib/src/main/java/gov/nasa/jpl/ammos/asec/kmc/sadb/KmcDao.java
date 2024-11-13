@@ -3,15 +3,12 @@ package gov.nasa.jpl.ammos.asec.kmc.sadb;
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcStartException;
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcStopException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IDbSession;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -93,7 +90,7 @@ public class KmcDao implements IKmcDao {
         if (spi == null) {
             spi = getNextAvailableSpi(scid);
         }
-        SecAssn sa = new SecAssn(new SpiScid(spi, scid));
+        ISecAssn sa = new SecAssn(new SpiScid(spi, scid));
         sa.setTfvn(tvfn);
         sa.setVcid(vcid);
         sa.setMapid(mapid);
@@ -104,7 +101,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn createSa(Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid) throws KmcException {
+    public ISecAssn createSa(Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             createSa(session, spi, tvfn, scid, vcid, mapid);
@@ -121,6 +118,7 @@ public class KmcDao implements IKmcDao {
         isReady();
         Integer spi;
         try (Session session = factory.openSession()) {
+            // todo: extend to support tm/aos frames
             Integer maxSpi = session.createQuery("SELECT max(sa.id.spi) FROM SecAssn sa WHERE sa.id.scid = :scid",
                     Integer.class).setParameter("scid", scid).getSingleResult();
             if (maxSpi == null) {
@@ -138,7 +136,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn createSa(SecAssn sa) throws KmcException {
+    public ISecAssn createSa(ISecAssn sa) throws KmcException {
         try (DbSession session = new DbSession(factory.openSession())) {
             session.beginTransaction();
             createSa(session, sa);
@@ -154,7 +152,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public void createSa(IDbSession dbSession, SecAssn sa) throws KmcException {
+    public void createSa(IDbSession dbSession, ISecAssn sa) throws KmcException {
         isReady();
         try {
             SecAssnValidator.validate(sa);
@@ -164,7 +162,7 @@ public class KmcDao implements IKmcDao {
         if (sa.getSpi() == null) {
             sa.setSpi(getNextAvailableSpi(sa.getScid()));
         } else {
-            SecAssn exists = getSa(dbSession, sa.getId());
+            ISecAssn exists = getSa(dbSession, sa.getId());
             if (exists != null) {
                 throw new KmcException(String.format("SA create failed: an SA with the SPI/SCID combination %d/%d " + "already exists", sa.getSpi(), sa.getScid()));
             }
@@ -182,7 +180,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void rekeySaEnc(IDbSession session, SpiScid id, String ekid, byte[] ecs, Short ecsLen) throws KmcException {
         isReady();
-        SecAssn sa = getSa(session, id);
+        ISecAssn sa = getSa(session, id);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot rekey for encryption", id));
         }
@@ -196,7 +194,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn rekeySaEnc(SpiScid id, String ekid, byte[] ecs, Short ecsLen) throws KmcException {
+    public ISecAssn rekeySaEnc(SpiScid id, String ekid, byte[] ecs, Short ecsLen) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             rekeySaEnc(session, id, ekid, ecs, ecsLen);
@@ -210,7 +208,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void rekeySaAuth(IDbSession session, SpiScid id, String akid, byte[] acs, Short acsLen) throws KmcException {
         isReady();
-        SecAssn sa = getSa(session, id);
+        ISecAssn sa = getSa(session, id);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot rekey for authentication", id));
         }
@@ -225,7 +223,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn rekeySaAuth(SpiScid id, String akid, byte[] acs, Short acsLen) throws KmcException {
+    public ISecAssn rekeySaAuth(SpiScid id, String akid, byte[] acs, Short acsLen) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             rekeySaAuth(session, id, akid, acs, acsLen);
@@ -240,7 +238,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void expireSa(IDbSession session, SpiScid id) throws KmcException {
         isReady();
-        SecAssn sa = getSa(id);
+        ISecAssn sa = getSa(id);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot expire", id));
         } else {
@@ -254,7 +252,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn expireSa(SpiScid id) throws KmcException {
+    public ISecAssn expireSa(SpiScid id) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             expireSa(session, id);
@@ -268,24 +266,30 @@ public class KmcDao implements IKmcDao {
     @Override
     public void startSa(IDbSession session, SpiScid id, boolean force) throws KmcException {
         isReady();
-        SecAssn sa = getSa(id);
+        ISecAssn sa = getSa(id);
         if (sa == null) {
             throw new KmcStartException(String.format("SA %d/%d does not exist, cannot start", id.getSpi(),
                     id.getScid()));
         } else if (sa.getSaState() == SA_OPERATIONAL) {
             throw new KmcStartException(String.format("SA %d/%d is already operational", id.getSpi(), id.getScid()));
         } else {
-            Query<SecAssn> q = ((DbSession) session).getSession().createQuery("FROM SecAssn AS sa WHERE sa.id.scid = " +
-                    ":scid AND sa" +
-                    ".tfvn = " +
-                    ":tfvn AND sa.vcid = :vcid AND sa.mapid = :mapid AND sa.id.spi != :subjectSpi", SecAssn.class);
+            Query<? extends ISecAssn> q = ((DbSession) session).getSession().createQuery("FROM SecAssn AS sa WHERE sa" +
+                    ".id.scid = :scid" +
+                    " AND " +
+                    "sa.tfvn = :tfvn" +
+                    " AND " +
+                    "sa.vcid = :vcid" +
+                    " AND " +
+                    "sa.mapid = :mapid" +
+                    " AND " +
+                    "sa.id.spi != :subjectSpi", SecAssn.class);
             q.setParameter("scid", sa.getId().getScid());
             q.setParameter("tfvn", sa.getTfvn());
             q.setParameter("vcid", sa.getVcid());
             q.setParameter("mapid", sa.getMapid());
             q.setParameter("subjectSpi", sa.getSpi());
-            List<SecAssn> sas = q.list();
-            for (SecAssn s : sas) {
+            List<? extends ISecAssn> sas = q.list();
+            for (ISecAssn s : sas) {
                 if (s.getSaState() == SA_OPERATIONAL) {
                     if (force) {
                         stopSa(s.getId());
@@ -305,7 +309,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn startSa(SpiScid id, boolean force) throws KmcException {
+    public ISecAssn startSa(SpiScid id, boolean force) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             startSa(session, id, force);
@@ -322,7 +326,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void stopSa(IDbSession session, SpiScid id) throws KmcException {
         isReady();
-        SecAssn sa = getSa(id);
+        ISecAssn sa = getSa(id);
         if (sa == null) {
             throw new KmcStopException(String.format("SA %d/%d does not exist, cannot stop", id.getSpi(),
                     id.getScid()));
@@ -338,7 +342,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn stopSa(SpiScid id) throws KmcException {
+    public ISecAssn stopSa(SpiScid id) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             stopSa(session, id);
@@ -355,7 +359,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void deleteSa(IDbSession session, SpiScid id) throws KmcException {
         isReady();
-        SecAssn sa = getSa(id);
+        ISecAssn sa = getSa(id);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot delete", id));
         } else {
@@ -379,14 +383,14 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn getSa(IDbSession session, SpiScid id) throws KmcException {
+    public ISecAssn getSa(IDbSession session, SpiScid id) throws KmcException {
         isReady();
-        SecAssn sa = ((DbSession) session).getSession().find(SecAssn.class, id);
+        ISecAssn sa = ((DbSession) session).getSession().find(SecAssn.class, id);
         return sa;
     }
 
     @Override
-    public SecAssn getSa(SpiScid id) throws KmcException {
+    public ISecAssn getSa(SpiScid id) throws KmcException {
         try (IDbSession session = newSession()) {
             return getSa(session, id);
         } catch (KmcException e) {
@@ -397,15 +401,15 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public List<SecAssn> getSas(IDbSession session) throws KmcException {
+    public List<? extends ISecAssn> getSas(IDbSession session) throws KmcException {
         isReady();
         // todo: filters
-        List<SecAssn> sas = ((DbSession) session).getSession().createQuery("FROM SecAssn", SecAssn.class).list();
-        return sas;
+        // todo: extend query string to support tm/aos tables
+        return ((DbSession) session).getSession().createQuery("FROM SecAssn", SecAssn.class).list();
     }
 
     @Override
-    public List<SecAssn> getSas() throws KmcException {
+    public List<? extends ISecAssn> getSas() throws KmcException {
         try (IDbSession session = newSession()) {
             return getSas(session);
         } catch (KmcException e) {
@@ -415,23 +419,21 @@ public class KmcDao implements IKmcDao {
         }
     }
 
-    public List<SecAssn> getActiveSas() throws KmcException {
+    public List<? extends ISecAssn> getActiveSas() throws KmcException {
         isReady();
-        try (Session session = factory.openSession()) {
-            CriteriaBuilder        cb   = session.getCriteriaBuilder();
-            CriteriaQuery<SecAssn> cr   = cb.createQuery(SecAssn.class);
-            Root<SecAssn>          root = cr.from(SecAssn.class);
-            cr.select(root);
-            Predicate p = cb.equal(root.get("saState"), (short) 3);
-            cr.where(p);
-            Query<SecAssn> query = session.createQuery(cr);
-            List<SecAssn>  sas   = query.getResultList();
+        try (IDbSession session = newSession()) {
+            Query<? extends ISecAssn> query = ((DbSession) session).getSession()
+                    .createQuery("FROM SecAssn WHERE saState = :state", SecAssn.class);
+            query.setParameter("state", SA_OPERATIONAL);
+            List<? extends ISecAssn> sas = query.list();
             return sas;
+        } catch (Exception e) {
+            throw new KmcException(e);
         }
     }
 
     @Override
-    public void updateSa(IDbSession session, SecAssn sa) throws KmcException {
+    public void updateSa(IDbSession session, ISecAssn sa) throws KmcException {
         isReady();
         LOG.info("Updating SA {}/{}", sa.getId().getSpi(), sa.getId().getScid());
         session.merge(sa);
@@ -439,7 +441,7 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public SecAssn updateSa(SecAssn sa) throws KmcException {
+    public ISecAssn updateSa(ISecAssn sa) throws KmcException {
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             updateSa(session, sa);

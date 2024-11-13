@@ -1,16 +1,16 @@
 package gov.nasa.jpl.ammos.asec.kmc.api.sadb;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 
 import java.util.List;
 
 /**
  * KMC DAO
- *
  */
 public interface IKmcDao extends AutoCloseable {
+
     IDbSession newSession();
 
     /**
@@ -37,7 +37,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn createSa(Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid) throws KmcException;
+    ISecAssn createSa(Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid) throws KmcException;
 
     /**
      * Create an SA
@@ -46,7 +46,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn createSa(SecAssn sa) throws KmcException;
+    ISecAssn createSa(ISecAssn sa) throws KmcException;
 
     /**
      * Create an SA with the provided DB session
@@ -55,7 +55,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param sa         security association
      * @throws KmcException exception
      */
-    void createSa(IDbSession IdbSession, SecAssn sa) throws KmcException;
+    void createSa(IDbSession IdbSession, ISecAssn sa) throws KmcException;
 
     /**
      * Re/key an SA for encryption with the provided database session
@@ -79,7 +79,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn rekeySaEnc(SpiScid id, String ekid, byte[] ecs, Short ecsLen) throws KmcException;
+    ISecAssn rekeySaEnc(SpiScid id, String ekid, byte[] ecs, Short ecsLen) throws KmcException;
 
     /**
      * Rekey an SA for authentication with the provided database session
@@ -103,7 +103,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn rekeySaAuth(SpiScid id, String akid, byte[] acs, Short acsLen) throws KmcException;
+    ISecAssn rekeySaAuth(SpiScid id, String akid, byte[] acs, Short acsLen) throws KmcException;
 
     /**
      * Expire an SA with the provided database session
@@ -121,7 +121,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn expireSa(SpiScid id) throws KmcException;
+    ISecAssn expireSa(SpiScid id) throws KmcException;
 
     /**
      * Start an SA with the provided database session. Sets given SPI SA to ENABLED, all other SAs to KEYED.
@@ -141,7 +141,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn startSa(SpiScid id, boolean force) throws KmcException;
+    ISecAssn startSa(SpiScid id, boolean force) throws KmcException;
 
     /**
      * Stop an SA with the provided database session. Sets given SPI SA to KEYED.
@@ -159,7 +159,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn stopSa(SpiScid id) throws KmcException;
+    ISecAssn stopSa(SpiScid id) throws KmcException;
 
     /**
      * Delete an SA with the provided database session. Removes the SA from the DB.
@@ -186,7 +186,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return security association
      * @throws KmcException exception
      */
-    SecAssn getSa(IDbSession session, SpiScid id) throws KmcException;
+    ISecAssn getSa(IDbSession session, SpiScid id) throws KmcException;
 
     /**
      * Get an SA
@@ -195,7 +195,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return security association
      * @throws KmcException exception
      */
-    SecAssn getSa(SpiScid id) throws KmcException;
+    ISecAssn getSa(SpiScid id) throws KmcException;
 
     /**
      * Get all SAs with the provided database session
@@ -204,7 +204,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return a list of SAs
      * @throws KmcException exception
      */
-    List<SecAssn> getSas(IDbSession session) throws KmcException;
+    List<? extends ISecAssn> getSas(IDbSession session) throws KmcException;
 
     /**
      * Get all SAs
@@ -212,7 +212,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return a list of SAs
      * @throws KmcException exception
      */
-    List<SecAssn> getSas() throws KmcException;
+    List<? extends ISecAssn> getSas() throws KmcException;
 
     /**
      * Update an SA with the provided database session
@@ -221,7 +221,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param sa      security association
      * @throws KmcException exception
      */
-    void updateSa(IDbSession session, SecAssn sa) throws KmcException;
+    void updateSa(IDbSession session, ISecAssn sa) throws KmcException;
 
     /**
      * Update an SA
@@ -230,7 +230,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return sa
      * @throws KmcException exception
      */
-    SecAssn updateSa(SecAssn sa) throws KmcException;
+    ISecAssn updateSa(ISecAssn sa) throws KmcException;
 
     /**
      * Close the DAO

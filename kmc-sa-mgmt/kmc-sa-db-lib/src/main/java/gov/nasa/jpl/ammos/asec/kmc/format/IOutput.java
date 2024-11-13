@@ -1,6 +1,6 @@
 package gov.nasa.jpl.ammos.asec.kmc.format;
 
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -17,5 +17,5 @@ public interface IOutput {
      * @param writer output
      * @param saList list of security associations
      */
-    void print(PrintWriter writer, List<SecAssn> saList);
+    void print(PrintWriter writer, List<? extends ISecAssn> saList);
 }

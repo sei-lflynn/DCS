@@ -1,5 +1,6 @@
 package gov.nasa.jpl.ammos.asec.kmc.format;
 
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -30,7 +31,7 @@ public class SaCsvOutput implements IOutput {
     }
 
     @Override
-    public void print(PrintWriter writer, List<SecAssn> sas) {
+    public void print(PrintWriter writer, List<? extends ISecAssn> sas) {
         VelocityEngine engine = new VelocityEngine();
         engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());

@@ -1,7 +1,5 @@
 package gov.nasa.jpl.ammos.asec.kmc.api.sa;
 
-import java.util.EnumMap;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -158,226 +156,282 @@ public class SecAssn implements ISecAssn {
         }
     }
 
+    @Override
     public void setId(SpiScid id) {
         this.id = id;
     }
 
+    @Override
     public SpiScid getId() {
         return id;
     }
 
+    @Override
     public void setAkid(String akid) {
         this.akid = akid;
     }
 
+    @Override
     public String getAkid() {
         return akid;
     }
 
+    @Override
     public Integer getSpi() {
         return id.getSpi();
     }
 
+    @Override
     public void setSpi(Integer spi) {
         this.id.setSpi(spi);
     }
 
+    @Override
     public String getEkid() {
         return ekid;
     }
 
+    @Override
     public void setEkid(String ekid) {
         this.ekid = ekid;
     }
 
+    @Override
     public Short getSaState() {
         return saState;
     }
 
+    @Override
     public void setSaState(Short saState) {
         this.saState = saState;
     }
 
+    @Override
     public Byte getTfvn() {
         return tfvn;
     }
 
+    @Override
     public void setTfvn(Byte tfvn) {
         this.tfvn = tfvn;
     }
 
+    @Override
     public Short getScid() {
         return id.getScid();
     }
 
+    @Override
     public void setScid(Short scid) {
         this.id.setScid(scid);
     }
 
+    @Override
     public Byte getVcid() {
         return this.vcid;
     }
 
+    @Override
     public void setVcid(Byte vcid) {
         this.vcid = vcid;
     }
 
+    @Override
     public Byte getMapid() {
         return this.mapid;
     }
 
+    @Override
     public void setMapid(Byte mapid) {
         this.mapid = mapid;
     }
 
+    @Override
     public Short getLpid() {
         return lpid;
     }
 
+    @Override
     public void setLpid(Short lpid) {
         this.lpid = lpid;
     }
 
+    @Override
     public Short getEst() {
         return est;
     }
 
+    @Override
     public void setEst(Short est) {
         this.est = est;
     }
 
+    @Override
     public Short getAst() {
         return ast;
     }
 
+    @Override
     public void setAst(Short ast) {
         this.ast = ast;
     }
 
+    @Override
     public Short getShivfLen() {
         return shivfLen;
     }
 
+    @Override
     public void setShivfLen(Short shivfLen) {
         this.shivfLen = shivfLen;
     }
 
+    @Override
     public Short getShsnfLen() {
         return shsnfLen;
     }
 
+    @Override
     public void setShsnfLen(Short shsnfLen) {
         this.shsnfLen = shsnfLen;
     }
 
+    @Override
     public Short getShplfLen() {
         return shplfLen;
     }
 
+    @Override
     public void setShplfLen(Short shplfLen) {
         this.shplfLen = shplfLen;
     }
 
+    @Override
     public Short getStmacfLen() {
         return stmacfLen;
     }
 
+    @Override
     public void setStmacfLen(Short stmacfLen) {
         this.stmacfLen = stmacfLen;
     }
 
+    @Override
     public Short getEcsLen() {
         return ecsLen;
     }
 
+    @Override
     public void setEcsLen(Short ecsLen) {
         this.ecsLen = ecsLen;
     }
 
+    @Override
     public byte[] getEcs() {
         return ecs;
     }
 
+    @Override
     public void setEcs(byte[] ecs) {
         this.ecs = ecs;
     }
 
+    @Override
     public Short getIvLen() {
         return ivLen;
     }
 
+    @Override
     public void setIvLen(Short ivLen) {
         this.ivLen = ivLen;
     }
 
+    @Override
     public byte[] getIv() {
         return iv;
     }
 
+    @Override
     public void setIv(byte[] iv) {
         this.iv = iv;
     }
 
+    @Override
     public Short getAcsLen() {
         return acsLen;
     }
 
+    @Override
     public void setAcsLen(Short acsLen) {
         this.acsLen = acsLen;
     }
 
+    @Override
     public byte[] getAcs() {
         return acs;
     }
 
+    @Override
     public void setAcs(byte[] acs) {
         this.acs = acs;
     }
 
+    @Override
     public Integer getAbmLen() {
         return abmLen;
     }
 
+    @Override
     public void setAbmLen(int abmLen) {
         this.abmLen = abmLen;
     }
 
+    @Override
     public byte[] getAbm() {
         return abm;
     }
 
+    @Override
     public void setAbm(byte[] abm) {
         this.abm = abm;
     }
 
+    @Override
     public Short getArsnLen() {
         return arsnLen;
     }
 
+    @Override
     public void setArsnLen(Short arcLen) {
         this.arsnLen = arcLen;
     }
 
+    @Override
     public byte[] getArsn() {
         return arsn;
     }
 
+    @Override
     public void setArsn(byte[] arc) {
         this.arsn = arc;
     }
 
+    @Override
     public Short getArsnw() {
         return arsnw;
     }
 
+    @Override
     public void setArsnw(Short arcw) {
         this.arsnw = arcw;
     }
 
+    @Override
     public ServiceType getServiceType() {
         return ServiceType.getServiceType(getEst(), getAst());
     }
 
+    @Override
     public void setServiceType(ServiceType serviceType) {
         this.setEst(serviceType.getEncryptionType());
         this.setAst(serviceType.getAuthenticationType());
