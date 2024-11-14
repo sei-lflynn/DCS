@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +27,7 @@ public class SaExpireTest extends BaseCommandLineTest {
     public void testExpireNoConfirm() throws KmcException {
         int exit = cli.execute("--spi=1", "--scid=46", "-y");
         assertEquals(0, exit);
-        SecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
         assertEquals(1, (short) sa.getSaState());
     }
 
@@ -38,7 +38,7 @@ public class SaExpireTest extends BaseCommandLineTest {
         System.setIn(in);
         int exit = cli.execute("--spi=1", "--scid=46");
         assertEquals(0, exit);
-        SecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
         assertEquals(1, (short) sa.getSaState());
         System.setIn(old);
     }
@@ -50,7 +50,7 @@ public class SaExpireTest extends BaseCommandLineTest {
         System.setIn(in);
         int exit = cli.execute("--spi=1", "--scid=46");
         assertEquals(0, exit);
-        SecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
         assertEquals(3, (short) sa.getSaState());
         System.setIn(old);
     }

@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import org.junit.Test;
 import picocli.CommandLine;
@@ -14,7 +14,6 @@ import static org.junit.Assert.*;
 
 /**
  * Tests for keying an SA
- *
  */
 public class SaKeyTest extends BaseCommandLineTest {
 
@@ -23,7 +22,7 @@ public class SaKeyTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaKey(), true);
         int         exit = cli.execute("--spi=1", "--scid=46", "--akid=130", "--acs=0x01", "-y");
         assertEquals(0, exit);
-        SecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
         assertEquals("130", sa.getAkid());
         assertEquals(1, (short) sa.getAcsLen());
         assertArrayEquals(new byte[]{0x01}, sa.getAcs());
@@ -55,7 +54,7 @@ public class SaKeyTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaKey(), true);
         int         exit = cli.execute("--spi=1", "--scid=46", "--akid=130", "--acs=0x01");
         assertEquals(0, exit);
-        SecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
         assertEquals("130", sa.getAkid());
         assertEquals(1, (short) sa.getAcsLen());
         assertArrayEquals(new byte[]{0x01}, sa.getAcs());
@@ -70,7 +69,7 @@ public class SaKeyTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaKey(), true);
         int         exit = cli.execute("--spi=1", "--scid=46", "--akid=130", "--acs=0x01");
         assertEquals(0, exit);
-        SecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46));
         assertNull(sa.getAkid());
         assertEquals(0, (short) sa.getAcsLen());
         assertArrayEquals(new byte[]{0x00}, sa.getAcs());

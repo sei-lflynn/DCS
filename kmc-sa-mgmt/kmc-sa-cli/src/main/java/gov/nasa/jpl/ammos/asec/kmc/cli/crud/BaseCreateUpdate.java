@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IDbSession;
@@ -13,7 +13,6 @@ import java.io.IOException;
 
 /**
  * Base class for creating and updating Security Associations
- *
  */
 @CommandLine.Command
 public abstract class BaseCreateUpdate extends BaseCliApp {
@@ -96,9 +95,9 @@ public abstract class BaseCreateUpdate extends BaseCliApp {
         }
     }
 
-    protected void updateSa(final SecAssn sa, IKmcDao dao, IDbSession session) throws KmcException {
-        SecAssn mutableSa   = sa;
-        boolean needsUpdate = false;
+    protected void updateSa(final ISecAssn sa, IKmcDao dao, IDbSession session) throws KmcException {
+        ISecAssn mutableSa   = sa;
+        boolean  needsUpdate = false;
         if (updateEnc) {
             console(String.format("%s updating encryption key on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
@@ -182,11 +181,11 @@ public abstract class BaseCreateUpdate extends BaseCliApp {
         }
     }
 
-    protected void checkIvParams(String iv, Short ivLen,String stStr,String ecsBytes) throws KmcException {
+    protected void checkIvParams(String iv, Short ivLen, String stStr, String ecsBytes) throws KmcException {
         checkSt(stStr);
-        Short encryptionType=null;
-        if (st != null){
-            encryptionType= st.getEncryptionType();
+        Short encryptionType = null;
+        if (st != null) {
+            encryptionType = st.getEncryptionType();
         }
         this.ivBytes = SecAssnValidator.verifyIv(iv, ivLen, encryptionType, ecsBytes);
         this.ivLen = ivLen;

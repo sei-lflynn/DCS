@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
@@ -14,7 +14,6 @@ import java.util.Scanner;
 
 /**
  * Re/key a security association
- *
  */
 @CommandLine.Command(name = "key", description = "Key or rekey a Security Association", mixinStandardHelpOptions =
         true, versionProvider = Version.class)
@@ -65,7 +64,7 @@ public class SaKey extends BaseCliApp {
             }
         }
         try (IKmcDao dao = getDao()) {
-            SecAssn sa = dao.getSa(new SpiScid(spi, scid));
+            ISecAssn sa = dao.getSa(new SpiScid(spi, scid));
             if (sa == null) {
                 throwEx(String.format("Error keying SA, %d/%d does not exist", spi, scid));
             }

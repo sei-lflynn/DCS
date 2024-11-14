@@ -1,6 +1,6 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
 import gov.nasa.jpl.ammos.asec.kmc.format.IOutput;
@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 /**
  * List Security Assocations
- *
  */
 @CommandLine.Command(name = "list", description = "List security associations", mixinStandardHelpOptions = true,
         versionProvider = Version.class)
@@ -49,7 +48,7 @@ public class SaList extends BaseCliApp {
     @Override
     public Integer call() throws Exception {
         try (IKmcDao dao = getDao()) {
-            List<SecAssn> sas = null;
+            List<? extends ISecAssn> sas = null;
             if (filter != null) {
                 if (filter.activeOnly) {
                     sas = dao.getSas().stream().filter(secAssn -> secAssn.getSaState() == 3).collect(Collectors.toList());

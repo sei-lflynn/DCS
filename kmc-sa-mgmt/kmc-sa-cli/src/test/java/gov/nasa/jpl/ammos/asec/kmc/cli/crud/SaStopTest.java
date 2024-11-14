@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao;
 import org.junit.Test;
@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotEquals;
 
 /**
  * Tests for stopping SAs
- *
  */
 public class SaStopTest extends BaseCommandLineTest {
 
@@ -23,7 +22,7 @@ public class SaStopTest extends BaseCommandLineTest {
         int         exit = cli.execute();
         // no args
         assertNotEquals(0, exit);
-        SecAssn sa = dao.getSa(id);
+        ISecAssn sa = dao.getSa(id);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa.getSaState());
         exit = cli.execute("--scid", "46", "--spi", "1");
         assertEquals(0, exit);
@@ -33,11 +32,11 @@ public class SaStopTest extends BaseCommandLineTest {
 
     @Test
     public void testStopMultiple() throws KmcException {
-        SpiScid id1 = new SpiScid(1, (short) 46);
-        SecAssn sa1 = dao.getSa(id1);
+        SpiScid  id1 = new SpiScid(1, (short) 46);
+        ISecAssn sa1 = dao.getSa(id1);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        SpiScid id2 = new SpiScid(2, (short) 46);
-        SecAssn sa2 = dao.getSa(id2);
+        SpiScid  id2 = new SpiScid(2, (short) 46);
+        ISecAssn sa2 = dao.getSa(id2);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa2.getSaState());
 
         CommandLine cli  = getCmd(new SaStop(), true);
@@ -58,8 +57,8 @@ public class SaStopTest extends BaseCommandLineTest {
 
     @Test
     public void testAlreadyStopped() throws KmcException {
-        SpiScid id1 = new SpiScid(1, (short) 46);
-        SecAssn sa1 = dao.getSa(id1);
+        SpiScid  id1 = new SpiScid(1, (short) 46);
+        ISecAssn sa1 = dao.getSa(id1);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
         dao.stopSa(id1);
         sa1 = dao.getSa(id1);

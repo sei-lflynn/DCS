@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
@@ -33,8 +33,8 @@ public class SaExpire extends BaseCliApp {
         int exit = 0;
         try (IKmcDao dao = getDao()) {
             for (int s : spi) {
-                SpiScid id = new SpiScid(s, scid);
-                SecAssn sa = dao.getSa(id);
+                SpiScid  id = new SpiScid(s, scid);
+                ISecAssn sa = dao.getSa(id);
                 if (sa == null) {
                     warn(String.format("Expire error: SA %d/%d does not exist, skipping", s, scid));
                     exit = 1;

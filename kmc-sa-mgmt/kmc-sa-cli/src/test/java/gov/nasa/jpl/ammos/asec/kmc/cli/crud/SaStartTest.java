@@ -1,7 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao;
 import org.junit.Test;
@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotEquals;
 
 /**
  * Tests for starting SAs
- *
  */
 public class SaStartTest extends BaseCommandLineTest {
     @Test
@@ -29,8 +28,8 @@ public class SaStartTest extends BaseCommandLineTest {
         createExtraSas();
         exit = cli.execute("--spi", "8", "--scid", "46");
         assertEquals(0, exit);
-        SecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
-        SecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46));
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
+        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46));
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
         assertEquals(KmcDao.SA_UNKEYED, (short) sa2.getSaState());
     }
@@ -60,9 +59,9 @@ public class SaStartTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaStart(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "10");
         assertEquals(0, exit);
-        SecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        SecAssn sa2 = dao.getSa(new SpiScid(10, (short) 46));
+        ISecAssn sa2 = dao.getSa(new SpiScid(10, (short) 46));
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa2.getSaState());
     }
 
@@ -72,9 +71,9 @@ public class SaStartTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaStart(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "9");
         assertNotEquals(0, exit);
-        SecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        SecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46));
+        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46));
         assertEquals(KmcDao.SA_UNKEYED, (short) sa2.getSaState());
     }
 

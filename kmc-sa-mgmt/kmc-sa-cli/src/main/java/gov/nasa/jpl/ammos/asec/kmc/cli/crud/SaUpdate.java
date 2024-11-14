@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
@@ -20,7 +21,6 @@ import java.util.List;
 
 /**
  * Update a Security Assocation
- *
  */
 @CommandLine.Command(name = "update", description = "Update an existing Security Association",
         mixinStandardHelpOptions = true, versionProvider = Version.class)
@@ -52,8 +52,8 @@ public class SaUpdate extends BaseCreateUpdate {
 
     protected void doSingle() throws KmcException {
         try (IKmcDao dao = getDao()) {
-            SpiScid id = new SpiScid(spi, scid);
-            SecAssn sa = dao.getSa(id);
+            SpiScid  id = new SpiScid(spi, scid);
+            ISecAssn sa = dao.getSa(id);
             if (sa == null) {
                 error(String.format("SA %d/%d doesn't exist, can't update", id.getSpi(), id.getScid()));
             }
@@ -99,7 +99,7 @@ public class SaUpdate extends BaseCreateUpdate {
             try (IKmcDao dao = getDao()) {
                 for (SecAssn sa : sas) {
                     try {
-                        SecAssn check = dao.getSa(sa.getId());
+                        ISecAssn check = dao.getSa(sa.getId());
                         if (check == null) {
                             warn(String.format("SA %d/%d does not exist, skipping", sa.getSpi(), sa.getScid()));
                             continue;
@@ -136,7 +136,8 @@ public class SaUpdate extends BaseCreateUpdate {
                         checkEncParams(args.single.optionalArgs.ekid, args.single.optionalArgs.ecs);
                         checkAuthParams(args.single.optionalArgs.akid, args.single.optionalArgs.acs);
                         checkSt(args.single.optionalArgs.st);
-                        checkIvParams(args.single.optionalArgs.iv, args.single.optionalArgs.ivLen, args.single.optionalArgs.st, args.single.optionalArgs.ecs );
+                        checkIvParams(args.single.optionalArgs.iv, args.single.optionalArgs.ivLen,
+                                args.single.optionalArgs.st, args.single.optionalArgs.ecs);
                         checkArsnParams(args.single.optionalArgs.arsn, args.single.optionalArgs.arsnlen);
                         checkArsnWParams(args.single.optionalArgs.arsnw);
                         checkAbmParams(args.single.optionalArgs.abm, args.single.optionalArgs.abmLen);
