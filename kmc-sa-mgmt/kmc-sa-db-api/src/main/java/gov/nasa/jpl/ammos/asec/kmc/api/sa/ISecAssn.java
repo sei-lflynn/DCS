@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.api.sa;
 
 public interface ISecAssn {
+
     void setId(SpiScid id);
 
     SpiScid getId();
@@ -112,4 +113,6 @@ public interface ISecAssn {
     ServiceType getServiceType();
 
     void setServiceType(ServiceType serviceType);
+
+    FrameType getType();
 }

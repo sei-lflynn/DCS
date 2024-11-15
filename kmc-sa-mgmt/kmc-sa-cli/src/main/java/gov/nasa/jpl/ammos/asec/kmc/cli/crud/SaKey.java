@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
@@ -64,7 +65,7 @@ public class SaKey extends BaseCliApp {
             }
         }
         try (IKmcDao dao = getDao()) {
-            ISecAssn sa = dao.getSa(new SpiScid(spi, scid));
+            ISecAssn sa = dao.getSa(new SpiScid(spi, scid), FrameType.TC);
             if (sa == null) {
                 throwEx(String.format("Error keying SA, %d/%d does not exist", spi, scid));
             }

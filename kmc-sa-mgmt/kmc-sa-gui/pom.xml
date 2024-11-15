@@ -41,29 +41,29 @@
         <!-- Consider setting the property yarn-registry-url in an active profile your maven settings.xml if you would rather not modify this file. -->
         <!-- When set to empty, Yarn ignores this option and uses system defaults  -->
         <yarn-registry-url></yarn-registry-url>
-        
-        <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
+
+        <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
         <final.name>kmc-sa-mgmt</final.name>
         <app.profiles>mTLS</app.profiles>
         <spring.profiles.active>${app.profiles}</spring.profiles.active>
-       <!--  SEE PARENT POM for configuration of these options, they have been moved there.
-        <DEFAULT_BINPATH></DEFAULT_BINPATH>
-        <DEFAULT_LIBPATH></DEFAULT_LIBPATH>
-        <DEFAULT_CFGPATH></DEFAULT_CFGPATH>
-        <DEFAULT_LOGPATH></DEFAULT_LOGPATH> -->
-        
+        <!--  SEE PARENT POM for configuration of these options, they have been moved there.
+         <DEFAULT_BINPATH></DEFAULT_BINPATH>
+         <DEFAULT_LIBPATH></DEFAULT_LIBPATH>
+         <DEFAULT_CFGPATH></DEFAULT_CFGPATH>
+         <DEFAULT_LOGPATH></DEFAULT_LOGPATH> -->
+
         <DEFAULT_PREFIX>${DEFAULT_KMC_ROOT}/services/${final.name}</DEFAULT_PREFIX>
         <DEFAULT_TOMCAT_PREFIX>${DEFAULT_PREFIX}</DEFAULT_TOMCAT_PREFIX>
         <DEFAULT_PORT>8447</DEFAULT_PORT>
         <DEFAULT_ALLOWED_CIPHERS>
-        TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,\
-        TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,\
-        TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,\
-        TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,\
-        TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,\
-        TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,\
-        TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,\
-        TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+            TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,\
+            TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,\
+            TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,\
+            TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,\
+            TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,\
+            TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,\
+            TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,\
+            TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
         </DEFAULT_ALLOWED_CIPHERS>
         <DEFAULT_KEYSTORE>/etc/pki/tls/private/ammos-server-keystore.bcfks</DEFAULT_KEYSTORE>
         <DEFAULT_KEYSTORE_PASSWORD>changeit</DEFAULT_KEYSTORE_PASSWORD>
@@ -75,7 +75,7 @@
         <DEFAULT_TRUSTSTORE_TYPE>JKS</DEFAULT_TRUSTSTORE_TYPE>
         <DEFAULT_CLIENT_AUTH>NEED</DEFAULT_CLIENT_AUTH>
         <DEFAULT_ENABLED_PROTOCOLS>TLSv1.2</DEFAULT_ENABLED_PROTOCOLS>
-        </properties>
+    </properties>
 
     <profiles>
         <profile>
@@ -135,7 +135,7 @@
                     <mainClass>gov.nasa.jpl.ammos.asec.kmc.saserver.app.KmcSaMgmt</mainClass>
                     <layout>ZIP</layout>
                 </configuration>
-                    <executions>
+                <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
@@ -204,9 +204,9 @@
                                 </resource>
                             </resources>
                             <delimiters>
-		                    	<delimiter>@</delimiter>
-	                    	</delimiters>
-	                    	<useDefaultDelimiters>false</useDefaultDelimiters>
+                                <delimiter>@</delimiter>
+                            </delimiters>
+                            <useDefaultDelimiters>false</useDefaultDelimiters>
                         </configuration>
                     </execution>
                 </executions>
@@ -236,22 +236,22 @@
                     </execution>
                 </executions>
             </plugin>
-        <!--     <plugin>
+            <!--     <plugin>
 
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <archive>
-                    <manifest>
-                        <addClasspath>true</addClasspath>
-                        <classpathPrefix>lib/</classpathPrefix>
-                        <mainClass>gov.nasa.jpl.ammos.asec.kmc.saserver.app.KmcSaMgmt</mainClass>
-                    </manifest>
-                    </archive>
-                </configuration>
-            </plugin> -->
-            
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>gov.nasa.jpl.ammos.asec.kmc.saserver.app.KmcSaMgmt</mainClass>
+                        </manifest>
+                        </archive>
+                    </configuration>
+                </plugin> -->
+
         </plugins>
     </build>
 
@@ -276,10 +276,10 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-logging</artifactId>
                 </exclusion>
-             <!--    <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion> -->
+                <!--    <exclusion>
+                       <groupId>org.springframework.boot</groupId>
+                       <artifactId>spring-boot-starter-tomcat</artifactId>
+                   </exclusion> -->
             </exclusions>
         </dependency>
         <dependency>

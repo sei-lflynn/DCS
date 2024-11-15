@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
@@ -8,7 +9,6 @@ import picocli.CommandLine;
 
 /**
  * Stop security associations
- *
  */
 @CommandLine.Command(name = "stop", description = "Stop a Security Association", mixinStandardHelpOptions = true,
         versionProvider = Version.class)
@@ -28,7 +28,7 @@ public class SaStop extends BaseCliApp {
         try (IKmcDao dao = getDao()) {
             for (Integer s : spi) {
                 try {
-                    dao.stopSa(new SpiScid(s, scid));
+                    dao.stopSa(new SpiScid(s, scid), FrameType.TC);
                     console(String.format("%s stopped SA %d/%d", System.getProperty("user.name"), s, scid));
                 } catch (KmcException e) {
                     warn(String.format("%s, skipping stop on SA %d/%d", e.getMessage(), s, scid));

@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
@@ -34,7 +35,7 @@ public class SaDelete extends BaseCliApp {
         try (IKmcDao dao = getDao()) {
             for (int s : spi) {
                 SpiScid  id = new SpiScid(s, scid);
-                ISecAssn sa = dao.getSa(id);
+                ISecAssn sa = dao.getSa(id, FrameType.TC);
                 if (sa == null) {
                     warn(String.format("Error deleting: SA %d/%d does not exist, skipping", s, scid));
                     exit = 1;
@@ -62,7 +63,7 @@ public class SaDelete extends BaseCliApp {
                 }
                 if (!skip) {
                     try {
-                        dao.deleteSa(id);
+                        dao.deleteSa(id, FrameType.TC);
                     } catch (KmcException e) {
                         LOG.error(e.getMessage());
                         return 1;

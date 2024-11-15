@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
@@ -101,44 +102,44 @@ public abstract class BaseCreateUpdate extends BaseCliApp {
         if (updateEnc) {
             console(String.format("%s updating encryption key on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
-            dao.rekeySaEnc(session, mutableSa.getId(), ekid, ecsBytes, (short) 1);
+            dao.rekeySaEnc(session, mutableSa.getId(), ekid, ecsBytes, (short) 1, FrameType.TC);
             session.flush();
-            mutableSa = dao.getSa(session, mutableSa.getId());
+            mutableSa = dao.getSa(session, mutableSa.getId(), FrameType.TC);
         }
         if (updateAuth) {
             console(String.format("%s updating authentication key on SA %s/%s", user,
                     mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
-            dao.rekeySaAuth(session, mutableSa.getId(), akid, acsBytes, (short) 1);
+            dao.rekeySaAuth(session, mutableSa.getId(), akid, acsBytes, (short) 1, FrameType.TC);
             session.flush();
-            mutableSa = dao.getSa(session, mutableSa.getId());
+            mutableSa = dao.getSa(session, mutableSa.getId(), FrameType.TC);
         }
         if (arsnBytes != null) {
             console(String.format("%s updating ARSN on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setArsn(arsnBytes);
             mutableSa.setArsnLen(arsnlen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (arsnw != null) {
             console(String.format("%s updating ARSNW on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setArsnw(arsnw);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (ivBytes != null) {
             console(String.format("%s updating IV on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setIv(ivBytes);
             mutableSa.setIvLen(ivLen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (updateAbm) {
             console(String.format("%s updating ABM on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setAbm(abmBytes);
             mutableSa.setAbmLen(abmLen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (st != null) {
             console(String.format("%s updating ST on SA %s/%s", user, mutableSa.getId().getSpi(),
@@ -146,31 +147,31 @@ public abstract class BaseCreateUpdate extends BaseCliApp {
             mutableSa.setEst(st.getEncryptionType());
             mutableSa.setAst(st.getAuthenticationType());
 
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (shivfLen != null) {
             console(String.format("%s updating SHIVF length on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setShivfLen(shivfLen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (shplfLen != null) {
             console(String.format("%s updating SHPLF length on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setShplfLen(shplfLen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (shsnfLen != null) {
             console(String.format("%s updating SHSNF length on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setShsnfLen(shsnfLen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
         if (stmacfLen != null) {
             console(String.format("%s updating STMACF length on SA %s/%s", user, mutableSa.getId().getSpi(),
                     mutableSa.getId().getScid()));
             mutableSa.setStmacfLen(stmacfLen);
-            needsUpdate |= true;
+            needsUpdate = true;
         }
 
         if (needsUpdate) {

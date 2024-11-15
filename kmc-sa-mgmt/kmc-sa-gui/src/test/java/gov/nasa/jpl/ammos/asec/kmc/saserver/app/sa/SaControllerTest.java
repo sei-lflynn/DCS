@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
@@ -93,7 +94,7 @@ public class SaControllerTest extends BaseH2Test {
         assertEquals(100, body.get("spi").asInt());
         assertEquals(46, body.get("scid").asInt());
 
-        ISecAssn created = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn created = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertNotNull(created);
         assertArrayEquals(new byte[]{0x00}, created.getAcs());
         assertArrayEquals(new byte[]{(byte) 0xff,
@@ -142,7 +143,7 @@ public class SaControllerTest extends BaseH2Test {
         assertEquals(0, body.get("est").asInt());
         assertEquals(0, body.get("ast").asInt());
 
-        ISecAssn updated = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn updated = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals(1, updated.getTfvn().intValue());
         assertEquals(ServiceType.PLAINTEXT, updated.getServiceType());
         assertEquals(0, (short) updated.getEst());
@@ -183,7 +184,7 @@ public class SaControllerTest extends BaseH2Test {
         assertEquals(1, body.get("est").asInt());
         assertEquals(0, body.get("ast").asInt());
 
-        ISecAssn updated = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn updated = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals(1, updated.getTfvn().intValue());
         assertEquals(ServiceType.ENCRYPTION, updated.getServiceType());
         assertEquals(1, (short) updated.getEst());
@@ -232,7 +233,7 @@ public class SaControllerTest extends BaseH2Test {
         assertEquals(0, body.get("est").asInt());
         assertEquals(1, body.get("ast").asInt());
 
-        ISecAssn updated = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn updated = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals(1, updated.getTfvn().intValue());
         assertEquals(ServiceType.AUTHENTICATION, updated.getServiceType());
         assertEquals(0, (short) updated.getEst());
@@ -275,7 +276,7 @@ public class SaControllerTest extends BaseH2Test {
         idArsn.put("arsnLen", 8).put("arsn", "0000000000000001").put("arsnw", 10);
         ObjectNode body = restTemplate.postForObject(getUrl() + "/arsn", idArsn, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
-        ISecAssn arsn = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn arsn = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals(8, (short) arsn.getArsnLen());
         assertArrayEquals(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01}, arsn.getArsn());
         assertEquals(10, (short) arsn.getArsnw());
@@ -298,7 +299,7 @@ public class SaControllerTest extends BaseH2Test {
         idIv.put("ivLen", 16);
         ObjectNode body = restTemplate.postForObject(getUrl() + "/iv", idIv, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
-        ISecAssn iv = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn iv = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals(16, (short) iv.getIvLen());
         assertArrayEquals(new byte[]{0x00,
                 0x00,
@@ -320,7 +321,7 @@ public class SaControllerTest extends BaseH2Test {
         idIv.put("iv", "02");
         body = restTemplate.postForObject(getUrl() + "/iv", idIv, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
-        iv = dao.getSa(new SpiScid(100, (short) 46));
+        iv = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertArrayEquals(new byte[]{0x00,
                 0x00,
                 0x00,
@@ -352,20 +353,20 @@ public class SaControllerTest extends BaseH2Test {
         rekey.put("ekid", "bogus/ekid");
         ObjectNode body = restTemplate.postForObject(getUrl() + "/key", rekey, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
-        ISecAssn keyed = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn keyed = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals(keyed.getEkid(), "bogus/ekid");
         rekey.put("akid", "bogus/akid");
         rekey.put("ekid", "");
         body = restTemplate.postForObject(getUrl() + "/key", rekey, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
-        keyed = dao.getSa(new SpiScid(100, (short) 46));
+        keyed = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals("bogus/akid", keyed.getAkid());
         assertEquals("", keyed.getEkid());
         rekey.put("akid", "bogus/akid/2");
         rekey.put("ekid", "bogus/ekid/2");
         body = restTemplate.postForObject(getUrl() + "/key", rekey, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
-        keyed = dao.getSa(new SpiScid(100, (short) 46));
+        keyed = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertEquals("bogus/akid/2", keyed.getAkid());
         assertEquals("bogus/ekid/2", keyed.getEkid());
     }
@@ -416,7 +417,7 @@ public class SaControllerTest extends BaseH2Test {
         node.put("scid", 46);
         HttpEntity<JsonNode> entity = new HttpEntity<>(anode);
         restTemplate.exchange(getUrl(), HttpMethod.DELETE, entity, JsonNode.class);
-        ISecAssn deleted = dao.getSa(new SpiScid(100, (short) 46));
+        ISecAssn deleted = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
         assertNull(deleted);
     }
 

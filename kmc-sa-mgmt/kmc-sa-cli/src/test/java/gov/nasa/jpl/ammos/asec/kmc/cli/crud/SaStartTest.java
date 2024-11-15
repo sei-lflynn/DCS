@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao;
@@ -28,8 +29,8 @@ public class SaStartTest extends BaseCommandLineTest {
         createExtraSas();
         exit = cli.execute("--spi", "8", "--scid", "46");
         assertEquals(0, exit);
-        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
-        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46));
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), FrameType.TC);
+        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46), FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
         assertEquals(KmcDao.SA_UNKEYED, (short) sa2.getSaState());
     }
@@ -38,7 +39,7 @@ public class SaStartTest extends BaseCommandLineTest {
     public void testStartAlreadyOperational() throws KmcException {
         // start when already active per GVCID
         createExtraSas();
-        dao.startSa(new SpiScid(8, (short) 46), false);
+        dao.startSa(new SpiScid(8, (short) 46), false, FrameType.TC);
         CommandLine cli  = getCmd(new SaStart(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "9");
         assertNotEquals(0, exit);
@@ -47,7 +48,7 @@ public class SaStartTest extends BaseCommandLineTest {
     @Test
     public void testStartForce() throws KmcException {
         createExtraSas();
-        dao.startSa(new SpiScid(8, (short) 46), false);
+        dao.startSa(new SpiScid(8, (short) 46), false, FrameType.TC);
         CommandLine cli  = getCmd(new SaStart(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "9", "--force");
         assertEquals(0, exit);
@@ -59,9 +60,9 @@ public class SaStartTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaStart(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "10");
         assertEquals(0, exit);
-        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        ISecAssn sa2 = dao.getSa(new SpiScid(10, (short) 46));
+        ISecAssn sa2 = dao.getSa(new SpiScid(10, (short) 46), FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa2.getSaState());
     }
 
@@ -71,15 +72,15 @@ public class SaStartTest extends BaseCommandLineTest {
         CommandLine cli  = getCmd(new SaStart(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "9");
         assertNotEquals(0, exit);
-        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46));
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46));
+        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46), FrameType.TC);
         assertEquals(KmcDao.SA_UNKEYED, (short) sa2.getSaState());
     }
 
     private void createExtraSas() throws KmcException {
-        dao.createSa(8, (byte) 0, (short) 46, (byte) 10, (byte) 0);
-        dao.createSa(9, (byte) 0, (short) 46, (byte) 10, (byte) 0);
-        dao.createSa(10, (byte) 0, (short) 46, (byte) 11, (byte) 0);
+        dao.createSa(8, (byte) 0, (short) 46, (byte) 10, (byte) 0, FrameType.TC);
+        dao.createSa(9, (byte) 0, (short) 46, (byte) 10, (byte) 0, FrameType.TC);
+        dao.createSa(10, (byte) 0, (short) 46, (byte) 11, (byte) 0, FrameType.TC);
     }
 }

@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
@@ -53,7 +54,7 @@ public class SaUpdate extends BaseCreateUpdate {
     protected void doSingle() throws KmcException {
         try (IKmcDao dao = getDao()) {
             SpiScid  id = new SpiScid(spi, scid);
-            ISecAssn sa = dao.getSa(id);
+            ISecAssn sa = dao.getSa(id, FrameType.TC);
             if (sa == null) {
                 error(String.format("SA %d/%d doesn't exist, can't update", id.getSpi(), id.getScid()));
             }
@@ -99,7 +100,7 @@ public class SaUpdate extends BaseCreateUpdate {
             try (IKmcDao dao = getDao()) {
                 for (SecAssn sa : sas) {
                     try {
-                        ISecAssn check = dao.getSa(sa.getId());
+                        ISecAssn check = dao.getSa(sa.getId(), FrameType.TC);
                         if (check == null) {
                             warn(String.format("SA %d/%d does not exist, skipping", sa.getSpi(), sa.getScid()));
                             continue;

@@ -30,5 +30,7 @@
         <!--        <property name="connection.url">jdbc:mariadb://localhost/sadb</property>-->
         <!--        &lt;!&ndash; Names the annotated entity class &ndash;&gt;-->
         <mapping class="gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn"/>
+        <mapping class="gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnAos"/>
+        <mapping class="gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnTm"/>
     </session-factory>
 </hibernate-configuration>

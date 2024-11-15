@@ -1,8 +1,8 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.BaseH2Test;
 import org.junit.Test;
 import picocli.CommandLine;
@@ -22,10 +22,10 @@ public class SaDeleteTest extends BaseH2Test {
     @Test
     public void testDelete() throws KmcException {
         CommandLine              cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--scid=46", "-y");
-        sas = dao.getSas();
+        sas = dao.getSas(FrameType.TC);
         assertEquals(4, sas.size());
         for (ISecAssn sa : sas) {
             assertNotEquals(1, (int) sa.getId().getSpi());
@@ -37,11 +37,11 @@ public class SaDeleteTest extends BaseH2Test {
         InputStream old = System.in;
         InputStream is  = new ByteArrayInputStream("y".getBytes(StandardCharsets.UTF_8));
         System.setIn(is);
-        CommandLine   cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas();
+        CommandLine              cli = getCmd(true, null, null);
+        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--scid=46");
-        sas = dao.getSas();
+        sas = dao.getSas(FrameType.TC);
         assertEquals(4, sas.size());
         for (ISecAssn sa : sas) {
             assertNotEquals(1, (int) sa.getId().getSpi());
@@ -54,22 +54,22 @@ public class SaDeleteTest extends BaseH2Test {
         InputStream old = System.in;
         InputStream is  = new ByteArrayInputStream("n".getBytes(StandardCharsets.UTF_8));
         System.setIn(is);
-        CommandLine   cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas();
+        CommandLine              cli = getCmd(true, null, null);
+        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--scid=46");
-        sas = dao.getSas();
+        sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
         System.setIn(old);
     }
 
     @Test
     public void testDeleteMulti() throws KmcException {
-        CommandLine   cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas();
+        CommandLine              cli = getCmd(true, null, null);
+        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--spi=2", "--scid=46", "-y");
-        sas = dao.getSas();
+        sas = dao.getSas(FrameType.TC);
         assertEquals(3, sas.size());
         for (ISecAssn sa : sas) {
             assertNotEquals(1, (int) sa.getId().getSpi());
@@ -86,7 +86,7 @@ public class SaDeleteTest extends BaseH2Test {
 
     @Test
     public void testDeleteFail() throws KmcException {
-        List<? extends ISecAssn> sas = dao.getSas();
+        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
 
         CommandLine cli  = getCmd(true, null, null);
@@ -96,7 +96,7 @@ public class SaDeleteTest extends BaseH2Test {
         exit = cli.execute("--scid=46");
         assertNotEquals(0, exit);
 
-        sas = dao.getSas();
+        sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
     }
 

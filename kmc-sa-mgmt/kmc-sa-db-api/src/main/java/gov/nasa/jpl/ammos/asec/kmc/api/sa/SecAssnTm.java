@@ -3,18 +3,13 @@ package gov.nasa.jpl.ammos.asec.kmc.api.sa;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-/**
- * Security Assocation
- * <p>
- * // todo: move initial values to config
- */
-@Entity(name = "SecAssn")
-@Table(name = "security_associations")
-public class SecAssn extends ASecAssn {
+@Entity(name = "SecAssnTm")
+@Table(name = "security_associations_tm")
+public class SecAssnTm extends ASecAssn {
     /**
      * Constructor
      */
-    public SecAssn() {
+    public SecAssnTm() {
         this(new SpiScid());
     }
 
@@ -23,12 +18,12 @@ public class SecAssn extends ASecAssn {
      *
      * @param id
      */
-    public SecAssn(SpiScid id) {
+    public SecAssnTm(SpiScid id) {
         super(id);
     }
 
     @Override
     public FrameType getType() {
-        return FrameType.TC;
+        return FrameType.TM;
     }
 }

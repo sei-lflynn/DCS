@@ -1,5 +1,6 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
@@ -51,12 +52,12 @@ public class SaList extends BaseCliApp {
             List<? extends ISecAssn> sas = null;
             if (filter != null) {
                 if (filter.activeOnly) {
-                    sas = dao.getSas().stream().filter(secAssn -> secAssn.getSaState() == 3).collect(Collectors.toList());
+                    sas = dao.getSas(FrameType.TC).stream().filter(secAssn -> secAssn.getSaState() == 3).collect(Collectors.toList());
                 } else if (filter.inactiveOnly) {
-                    sas = dao.getSas().stream().filter(secAssn -> secAssn.getSaState() != 3).collect(Collectors.toList());
+                    sas = dao.getSas(FrameType.TC).stream().filter(secAssn -> secAssn.getSaState() != 3).collect(Collectors.toList());
                 }
             } else {
-                sas = dao.getSas();
+                sas = dao.getSas(FrameType.TC);
             }
             if (spi != null) {
                 sas = sas.stream().filter(secAssn -> secAssn.getSpi().equals(spi)).collect(Collectors.toList());

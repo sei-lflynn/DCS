@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
@@ -8,7 +9,6 @@ import picocli.CommandLine;
 
 /**
  * Start security associations
- *
  */
 @CommandLine.Command(name = "start", description =
         "Start a Security Assocation. Only one (1) SA can be active per " + "(SPI, GVCID) permutation",
@@ -30,7 +30,7 @@ public class SaStart extends BaseCliApp {
         try (IKmcDao dao = getDao()) {
             for (Integer s : spi) {
                 try {
-                    dao.startSa(new SpiScid(s, scid), force);
+                    dao.startSa(new SpiScid(s, scid), force, FrameType.TC);
                     console(String.format("%s started SA %d/%d", System.getProperty("user.name"), s, scid));
                 } catch (KmcException e) {
                     warn(String.format("%s, skipping start on SA %d/%d", e.getMessage(), s, scid));

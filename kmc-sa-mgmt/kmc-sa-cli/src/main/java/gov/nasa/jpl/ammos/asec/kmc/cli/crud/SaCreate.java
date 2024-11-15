@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
@@ -85,7 +86,7 @@ public class SaCreate extends BaseCreateUpdate {
         console(String.format("%s creating SA", user));
         try (IKmcDao dao = getDao()) {
             SpiScid  id = new SpiScid(spi, scid);
-            ISecAssn sa = dao.getSa(id);
+            ISecAssn sa = dao.getSa(id, FrameType.TC);
             if (sa != null) {
                 throwEx(String.format("Create error, SA %d/%d already exists", id.getSpi(), id.getScid()));
             }
@@ -99,7 +100,7 @@ public class SaCreate extends BaseCreateUpdate {
                 try {
                     dao.createSa(session, sa);
                     console(String.format("%s created SA %s/%s", user, sa.getId().getSpi(), sa.getId().getScid()));
-                    sa = dao.getSa(session, sa.getId());
+                    sa = dao.getSa(session, sa.getId(), FrameType.TC);
                     updateSa(sa, dao, session);
                 } catch (Exception e) {
                     session.rollback();

@@ -1,13 +1,10 @@
 package gov.nasa.jpl.ammos.asec.kmc.sadb;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import org.h2.tools.RunScript;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,14 +31,21 @@ public class BaseH2Test {
      */
     @Before
     public void beforeTest() throws SQLException {
-        Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test");
-        try (Reader reader = new InputStreamReader(getClass().getResourceAsStream(
-                "/create_sadb_jpl_unit_test_security_associations.sql"))) {
+        setupTable("/create_sadb_jpl_unit_test_security_associations.sql");
+        setupTable("/create_sadb_jpl_unit_test_security_associations_aos.sql");
+        setupTable("/create_sadb_jpl_unit_test_security_associations_tm.sql");
+    }
+
+    private void setupTable(String sqlFile) {
+        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test");
+             Reader reader = new InputStreamReader(getClass().getResourceAsStream(sqlFile))) {
             RunScript.execute(conn, reader);
         } catch (SQLException sqlException) {
-            throw new RuntimeException("Encountered unexpected SQLException while setting up unit test DB: ", sqlException);
+            throw new RuntimeException("Encountered unexpected SQLException while setting up unit test DB: ",
+                    sqlException);
         } catch (IOException ioException) {
-            throw new RuntimeException("Encountered unexpected IOException while setting up unit test DB: ", ioException);
+            throw new RuntimeException("Encountered unexpected IOException while setting up unit test DB: ",
+                    ioException);
         }
     }
 
@@ -52,7 +56,11 @@ public class BaseH2Test {
      */
     @After
     public void afterTest() throws SQLException {
-        Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test");
-        conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations");
+        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test")) {
+            conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations");
+            conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations_aos");
+            conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations_tm");
+        }
+
     }
 }

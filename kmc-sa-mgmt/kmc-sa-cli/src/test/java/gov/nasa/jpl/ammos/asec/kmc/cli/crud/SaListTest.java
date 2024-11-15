@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import org.junit.Test;
 import picocli.CommandLine;
 
@@ -12,7 +13,6 @@ import static org.junit.Assert.assertNotEquals;
 
 /**
  * Tests for listing SAs
- *
  */
 public class SaListTest extends BaseCommandLineTest {
 
@@ -53,7 +53,7 @@ public class SaListTest extends BaseCommandLineTest {
     public void testActive() throws KmcException {
         StringWriter w   = new StringWriter();
         PrintWriter  out = new PrintWriter(w);
-        dao.createSa(6, (byte) 0, (short) 44, (byte) 0, (byte) 0);
+        dao.createSa(6, (byte) 0, (short) 44, (byte) 0, (byte) 0, FrameType.TC);
         CommandLine cli  = getCmd(new SaList(), true, out, null);
         int         exit = cli.execute("--active");
         assertEquals(0, exit);
@@ -69,7 +69,7 @@ public class SaListTest extends BaseCommandLineTest {
     public void testInactive() throws KmcException {
         StringWriter w   = new StringWriter();
         PrintWriter  out = new PrintWriter(w);
-        dao.createSa(6, (byte) 0, (short) 46, (byte) 0, (byte) 0);
+        dao.createSa(6, (byte) 0, (short) 46, (byte) 0, (byte) 0, FrameType.TC);
         CommandLine cli  = getCmd(new SaList(), true, out, null);
         int         exit = cli.execute("--inactive");
         assertEquals(0, exit);

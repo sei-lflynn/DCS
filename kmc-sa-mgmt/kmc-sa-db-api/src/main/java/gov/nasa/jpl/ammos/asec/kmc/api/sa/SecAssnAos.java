@@ -5,5 +5,25 @@ import jakarta.persistence.Table;
 
 @Entity(name = "SecAssnAos")
 @Table(name = "security_associations_aos")
-public class SecAssnAos extends SecAssn {
+public class SecAssnAos extends ASecAssn {
+    /**
+     * Constructor
+     */
+    public SecAssnAos() {
+        this(new SpiScid());
+    }
+
+    /**
+     * Constructor
+     *
+     * @param id
+     */
+    public SecAssnAos(SpiScid id) {
+        super(id);
+    }
+
+    @Override
+    public FrameType getType() {
+        return FrameType.AOS;
+    }
 }

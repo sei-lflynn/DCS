@@ -1,6 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao;
@@ -22,29 +23,29 @@ public class SaStopTest extends BaseCommandLineTest {
         int         exit = cli.execute();
         // no args
         assertNotEquals(0, exit);
-        ISecAssn sa = dao.getSa(id);
+        ISecAssn sa = dao.getSa(id, FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa.getSaState());
         exit = cli.execute("--scid", "46", "--spi", "1");
         assertEquals(0, exit);
-        sa = dao.getSa(id);
+        sa = dao.getSa(id, FrameType.TC);
         assertEquals(KmcDao.SA_KEYED, (short) sa.getSaState());
     }
 
     @Test
     public void testStopMultiple() throws KmcException {
         SpiScid  id1 = new SpiScid(1, (short) 46);
-        ISecAssn sa1 = dao.getSa(id1);
+        ISecAssn sa1 = dao.getSa(id1, FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
         SpiScid  id2 = new SpiScid(2, (short) 46);
-        ISecAssn sa2 = dao.getSa(id2);
+        ISecAssn sa2 = dao.getSa(id2, FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa2.getSaState());
 
         CommandLine cli  = getCmd(new SaStop(), true);
         int         exit = cli.execute("--scid", "46", "--spi", "1", "--spi", "2");
         assertEquals(0, exit);
-        sa1 = dao.getSa(id1);
+        sa1 = dao.getSa(id1, FrameType.TC);
         assertEquals(KmcDao.SA_KEYED, (short) sa1.getSaState());
-        sa2 = dao.getSa(id2);
+        sa2 = dao.getSa(id2, FrameType.TC);
         assertEquals(KmcDao.SA_KEYED, (short) sa2.getSaState());
     }
 
@@ -58,10 +59,10 @@ public class SaStopTest extends BaseCommandLineTest {
     @Test
     public void testAlreadyStopped() throws KmcException {
         SpiScid  id1 = new SpiScid(1, (short) 46);
-        ISecAssn sa1 = dao.getSa(id1);
+        ISecAssn sa1 = dao.getSa(id1, FrameType.TC);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        dao.stopSa(id1);
-        sa1 = dao.getSa(id1);
+        dao.stopSa(id1, FrameType.TC);
+        sa1 = dao.getSa(id1, FrameType.TC);
         assertEquals(KmcDao.SA_KEYED, (short) sa1.getSaState());
         CommandLine cli  = getCmd(new SaStop(), true);
         int         exit = cli.execute("--scid=40", "--spi=1");

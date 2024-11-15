@@ -11,7 +11,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class ASecAssn implements ISecAssn {
+abstract class ASecAssn implements ISecAssn {
     private static final ObjectMapper mapper    = new ObjectMapper();
     @EmbeddedId
     protected            SpiScid      id;
@@ -62,7 +62,8 @@ public class ASecAssn implements ISecAssn {
     @JsonSerialize(using = ByteArraySerializer.class)
     @JsonDeserialize(using = ByteArrayDeserializer.class)
     private              byte[]       iv        = null;
-    //before AKMC-239, IV would default to: new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    //before AKMC-239, IV would default to: new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    // 0x00, 0x00};
     // authentication cipher suite len
     @Column(name = "acs_len")
     private              Short        acsLen    = 0;
