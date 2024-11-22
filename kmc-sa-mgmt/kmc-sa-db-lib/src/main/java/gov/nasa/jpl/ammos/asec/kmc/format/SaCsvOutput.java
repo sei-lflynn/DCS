@@ -1,7 +1,6 @@
 package gov.nasa.jpl.ammos.asec.kmc.format;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -13,7 +12,6 @@ import java.util.List;
 
 /**
  * CSV Output Formatter
- *
  */
 public class SaCsvOutput implements IOutput {
 

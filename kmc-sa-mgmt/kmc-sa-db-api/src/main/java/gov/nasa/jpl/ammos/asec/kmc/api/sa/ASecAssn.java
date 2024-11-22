@@ -10,6 +10,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.MappedSuperclass;
 
+/**
+ * Abstract Security Association
+ */
 @MappedSuperclass
 abstract class ASecAssn implements ISecAssn {
     private static final ObjectMapper mapper    = new ObjectMapper();
@@ -126,6 +129,11 @@ abstract class ASecAssn implements ISecAssn {
     // anti replay counter window
     private              Short        arsnw     = 0;
 
+    /**
+     * Constructor
+     *
+     * @param id spi/scid
+     */
     public ASecAssn(SpiScid id) {
         this.id = id;
     }

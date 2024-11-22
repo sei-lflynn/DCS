@@ -25,17 +25,18 @@ public class KmcSaMgmtServiceConfiguration implements EnvironmentAware {
         KmcSaMgmtServiceConfiguration.springEnv = environment;
     }
 
-    public KmcSaMgmtServiceConfiguration(){}
+    public KmcSaMgmtServiceConfiguration() {
+    }
 
     @PostConstruct
-    public Properties getConfiguration(){
-        Properties props = new Properties();
-        MutablePropertySources propSrcs = ((AbstractEnvironment) this.springEnv).getPropertySources();
+    public Properties getConfiguration() {
+        Properties             props    = new Properties();
+        MutablePropertySources propSrcs = ((AbstractEnvironment) springEnv).getPropertySources();
         StreamSupport.stream(propSrcs.spliterator(), false)
                 .filter(ps -> ps instanceof EnumerablePropertySource)
                 .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
                 .flatMap(Arrays::<String>stream)
-                .forEach(propName -> props.setProperty(propName, this.springEnv.getProperty(propName)));
+                .forEach(propName -> props.setProperty(propName, springEnv.getProperty(propName)));
 
         return props;
     }

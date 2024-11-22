@@ -17,7 +17,6 @@ import java.util.List;
 
 /**
  * Configuration for KMC CLI
- *
  */
 public class Config extends CompositeConfiguration {
 
@@ -144,7 +143,7 @@ public class Config extends CompositeConfiguration {
                     LOG.debug("Loading config from classpath under ./{}", filename);
                     this.addConfiguration(overrideConfig.getConfiguration());
                 } catch (ConfigurationException e1) {
-                    LOG.warn("Classpath config not found under ./{}", filename, e.getMessage());
+                    LOG.warn("Classpath config not found under ./{}, {}", filename, e.getMessage());
                 }
             }
             LOG.debug("Loading classpath default config under ./etc/defaults.properties");
@@ -207,20 +206,12 @@ public class Config extends CompositeConfiguration {
         this.useTls = getBoolean(DB_TLS);
         if (System.getenv(ENV_DB_TLS) != null) {
             LOG.info("{} env var found, overriding {}", ENV_DB_TLS, DB_TLS);
-            if (System.getenv(ENV_DB_TLS).equalsIgnoreCase("true")) {
-                this.useTls = true;
-            } else {
-                this.useTls = false;
-            }
+            this.useTls = System.getenv(ENV_DB_TLS).equalsIgnoreCase("true");
         }
         this.useMtls = getBoolean(DB_MTLS);
         if (System.getenv(ENV_DB_MTLS) != null) {
             LOG.info("{} env var found, overriding {}", ENV_DB_MTLS, DB_MTLS);
-            if (System.getenv(ENV_DB_MTLS).equalsIgnoreCase("true")) {
-                this.useMtls = true;
-            } else {
-                this.useMtls = false;
-            }
+            this.useMtls = System.getenv(ENV_DB_MTLS).equalsIgnoreCase("true");
         }
     }
 

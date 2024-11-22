@@ -5,6 +5,7 @@ import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IDbSession;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import picocli.CommandLine;
@@ -100,86 +101,76 @@ public abstract class BaseCreateUpdate extends BaseCliApp {
         ISecAssn mutableSa   = sa;
         boolean  needsUpdate = false;
         if (updateEnc) {
-            console(String.format("%s updating encryption key on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
-            dao.rekeySaEnc(session, mutableSa.getId(), ekid, ecsBytes, (short) 1, FrameType.TC);
+            console(getUpdateMessage(user, "encryption key", frameType, mutableSa.getId()));
+            dao.rekeySaEnc(session, mutableSa.getId(), ekid, ecsBytes, (short) 1, frameType);
             session.flush();
-            mutableSa = dao.getSa(session, mutableSa.getId(), FrameType.TC);
+            mutableSa = dao.getSa(session, mutableSa.getId(), frameType);
         }
         if (updateAuth) {
-            console(String.format("%s updating authentication key on SA %s/%s", user,
-                    mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
-            dao.rekeySaAuth(session, mutableSa.getId(), akid, acsBytes, (short) 1, FrameType.TC);
+            console(getUpdateMessage(user, "authentication key", frameType, mutableSa.getId()));
+            dao.rekeySaAuth(session, mutableSa.getId(), akid, acsBytes, (short) 1, frameType);
             session.flush();
-            mutableSa = dao.getSa(session, mutableSa.getId(), FrameType.TC);
+            mutableSa = dao.getSa(session, mutableSa.getId(), frameType);
         }
         if (arsnBytes != null) {
-            console(String.format("%s updating ARSN on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "ARSN", frameType, mutableSa.getId()));
             mutableSa.setArsn(arsnBytes);
             mutableSa.setArsnLen(arsnlen);
             needsUpdate = true;
         }
         if (arsnw != null) {
-            console(String.format("%s updating ARSNW on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "ARSNW", frameType, mutableSa.getId()));
             mutableSa.setArsnw(arsnw);
             needsUpdate = true;
         }
         if (ivBytes != null) {
-            console(String.format("%s updating IV on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "IV", frameType, mutableSa.getId()));
             mutableSa.setIv(ivBytes);
             mutableSa.setIvLen(ivLen);
             needsUpdate = true;
         }
         if (updateAbm) {
-            console(String.format("%s updating ABM on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "ABM", frameType, mutableSa.getId()));
             mutableSa.setAbm(abmBytes);
             mutableSa.setAbmLen(abmLen);
             needsUpdate = true;
         }
         if (st != null) {
-            console(String.format("%s updating ST on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "ST", frameType, mutableSa.getId()));
             mutableSa.setEst(st.getEncryptionType());
             mutableSa.setAst(st.getAuthenticationType());
-
             needsUpdate = true;
         }
         if (shivfLen != null) {
-            console(String.format("%s updating SHIVF length on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "SHIVF length", frameType, mutableSa.getId()));
             mutableSa.setShivfLen(shivfLen);
             needsUpdate = true;
         }
         if (shplfLen != null) {
-            console(String.format("%s updating SHPLF length on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "SHPLF length", frameType, mutableSa.getId()));
             mutableSa.setShplfLen(shplfLen);
             needsUpdate = true;
         }
         if (shsnfLen != null) {
-            console(String.format("%s updating SHSNF length on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "SHSNF length", frameType, mutableSa.getId()));
             mutableSa.setShsnfLen(shsnfLen);
             needsUpdate = true;
         }
         if (stmacfLen != null) {
-            console(String.format("%s updating STMACF length on SA %s/%s", user, mutableSa.getId().getSpi(),
-                    mutableSa.getId().getScid()));
+            console(getUpdateMessage(user, "STMACF length", frameType, mutableSa.getId()));
             mutableSa.setStmacfLen(stmacfLen);
             needsUpdate = true;
         }
-
         if (needsUpdate) {
             dao.updateSa(session, mutableSa);
             session.flush();
         } else {
             warn(String.format("SA %d/%d nothing to update", sa.getSpi(), sa.getScid()));
         }
+    }
+
+    private String getUpdateMessage(String user, String field, FrameType frameType, SpiScid id) {
+        return String.format("%s updating %s on %s SA %s/%s", user, field, frameType, id.getSpi(), id.getScid());
     }
 
     protected void checkIvParams(String iv, Short ivLen, String stStr, String ecsBytes) throws KmcException {

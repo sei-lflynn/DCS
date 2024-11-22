@@ -1,7 +1,6 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
@@ -28,7 +27,7 @@ public class SaStop extends BaseCliApp {
         try (IKmcDao dao = getDao()) {
             for (Integer s : spi) {
                 try {
-                    dao.stopSa(new SpiScid(s, scid), FrameType.TC);
+                    dao.stopSa(new SpiScid(s, scid), frameType);
                     console(String.format("%s stopped SA %d/%d", System.getProperty("user.name"), s, scid));
                 } catch (KmcException e) {
                     warn(String.format("%s, skipping stop on SA %d/%d", e.getMessage(), s, scid));

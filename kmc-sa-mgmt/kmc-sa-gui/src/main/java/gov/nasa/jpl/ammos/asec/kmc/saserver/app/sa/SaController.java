@@ -44,10 +44,10 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao.*;
@@ -58,8 +58,9 @@ import static gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao.*;
 @RestController
 public class SaController {
 
-    private static Logger  LOG = LoggerFactory.getLogger(SaController.class);
-    private final  IKmcDao dao;
+    private static final Logger       LOG    = LoggerFactory.getLogger(SaController.class);
+    private final        IKmcDao      dao;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public SaController(IKmcDao dao) {
@@ -69,7 +70,7 @@ public class SaController {
     /**
      * Convenience class for reset ARSN operation
      */
-    private static class IdArsn implements Serializable {
+    public static class IdArsn implements Serializable {
         public SpiScid id;
         @JsonSerialize(using = ByteArraySerializer.class)
         @JsonDeserialize(using = ByteArrayDeserializer.class)
@@ -81,7 +82,7 @@ public class SaController {
     /**
      * Convenience class for reset IV operation
      */
-    private static class IdIv implements Serializable {
+    public static class IdIv implements Serializable {
         public SpiScid id;
         @JsonSerialize(using = ByteArraySerializer.class)
         @JsonDeserialize(using = ByteArrayDeserializer.class)
@@ -92,7 +93,7 @@ public class SaController {
     /**
      * Convenience class for rekey operation
      */
-    private static class Rekey implements Serializable {
+    public static class Rekey implements Serializable {
         public SpiScid id;
         public String  ekid;
         public String  akid;
@@ -103,7 +104,7 @@ public class SaController {
                                           @RequestParam(required = false) Integer spi, HttpServletRequest request) throws KmcException {
         LOG.info("{} retrieving all SAs", request.getRemoteAddr());
         if (spi != null && scid != null) {
-            return new ArrayList<>(Arrays.asList(dao.getSa(new SpiScid(spi, scid), FrameType.TC)));
+            return Collections.singletonList(dao.getSa(new SpiScid(spi, scid), FrameType.TC));
         }
         List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
         if (scid != null) {
@@ -131,7 +132,7 @@ public class SaController {
         ISecAssn original = dao.getSa(sa.getId(), FrameType.TC);
         try (IDbSession dbSession = dao.newSession()) {
             dbSession.beginTransaction();
-            if (original.getSaState() != sa.getSaState()) {
+            if (!Objects.equals(original.getSaState(), sa.getSaState())) {
                 switch (sa.getSaState()) {
                     case SA_OPERATIONAL:
                         dao.startSa(dbSession, sa.getId(), true, FrameType.TC);
@@ -270,9 +271,9 @@ public class SaController {
         int        count  = 0;
         int        errs   = 0;
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            List<SecAssn> sas = input.parseCsv(reader);
+            List<ISecAssn> sas = input.parseCsv(reader, FrameType.TC);
             try (IDbSession session = dao.newSession()) {
-                for (SecAssn sa : sas) {
+                for (ISecAssn sa : sas) {
                     session.beginTransaction();
                     try {
                         SecAssnValidator.validate(sa);
@@ -294,8 +295,6 @@ public class SaController {
                         }
                     }
                 }
-            } catch (KmcException e) {
-                handleException(e);
             } catch (Exception e) {
                 handleException(e);
             }
@@ -327,7 +326,7 @@ public class SaController {
     }
 
     @PostMapping(value = "/api/sa/iv", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<JsonNode> resetIv(@RequestBody IdIv idIv) throws KmcException {
+    public ResponseEntity<JsonNode> resetIv(@RequestBody IdIv idIv) {
         ObjectNode respBody = mapper.createObjectNode();
         try (IDbSession dbSession = dao.newSession()) {
             try {
@@ -369,7 +368,7 @@ public class SaController {
     }
 
     @PostMapping(value = "/api/sa/key", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<JsonNode> rekeySa(@RequestBody Rekey rekey, HttpServletRequest request) throws KmcException {
+    public ResponseEntity<JsonNode> rekeySa(@RequestBody Rekey rekey, HttpServletRequest request) {
         LOG.info("{} Rekeying SA {}/{}", request.getRemoteAddr(), rekey.id.getSpi(), rekey.id.getScid());
         try (IDbSession dbSession = dao.newSession()) {
             try {
@@ -408,15 +407,12 @@ public class SaController {
         return "Service is UP\n";
     }
 
-    private static ObjectMapper mapper = new ObjectMapper();
-
     @ExceptionHandler({KmcException.class, Exception.class})
     public ResponseEntity<Object> handleException(Exception e) {
         LOG.error("An exception occurred", e);
         ObjectNode node = mapper.createObjectNode();
         node.put("status", "error");
         node.withArray("messages").add(e.getMessage());
-        ResponseEntity<Object> entity = new ResponseEntity<>(node, HttpStatus.BAD_REQUEST);
-        return entity;
+        return new ResponseEntity<>(node, HttpStatus.BAD_REQUEST);
     }
 }

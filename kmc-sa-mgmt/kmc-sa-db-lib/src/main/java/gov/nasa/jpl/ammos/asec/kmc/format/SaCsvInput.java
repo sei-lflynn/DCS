@@ -1,7 +1,9 @@
 package gov.nasa.jpl.ammos.asec.kmc.format;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnFactory;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ServiceType;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -17,7 +19,6 @@ import java.util.List;
 
 /**
  * CSV Input
- *
  */
 public class SaCsvInput {
     private static final Logger LOG = LoggerFactory.getLogger(SaCsvInput.class);
@@ -29,22 +30,22 @@ public class SaCsvInput {
      * @return list of SAs from CSV
      * @throws KmcException ex
      */
-    public List<SecAssn> parseCsv(Reader reader) throws KmcException {
-        List<SecAssn> sas = new ArrayList<>();
+    public List<ISecAssn> parseCsv(Reader reader, FrameType type) throws KmcException {
+        List<ISecAssn> sas = new ArrayList<>();
         try {
             Iterable<CSVRecord> records =
                     CSVFormat.Builder.create(CSVFormat.EXCEL).setHeader().setSkipHeaderRecord(false).build().parse(reader);
             for (CSVRecord record : records) {
-                SecAssn sa = convertRecord(record);
+                ISecAssn sa = convertRecord(record, type);
                 if (sa != null) {
                     sas.add(sa);
                 }
             }
         } catch (IOException e) {
-            LOG.error("Encountered an I/O error while parsing CSV: ", e.getMessage());
+            LOG.error("Encountered an I/O error while parsing CSV: {}", e.getMessage());
             throw new KmcException("Unable to parse CSV due to I/O error: ", e);
         } catch (Exception e) {
-            LOG.error("Encountered unexpected exception while parsing CSV: ", e.getMessage());
+            LOG.error("Encountered unexpected exception while parsing CSV: {}", e.getMessage());
             throw new KmcException("Unable to parse CSV due to unexpected error: ", e);
         }
         return sas;
@@ -57,16 +58,16 @@ public class SaCsvInput {
      * @return sa
      * @throws KmcException ex
      */
-    public SecAssn convertRecord(CSVRecord record) throws KmcException {
+    public ISecAssn convertRecord(CSVRecord record, FrameType type) throws KmcException {
         try {
-            SecAssn sa = new SecAssn();
+            ISecAssn sa = SecAssnFactory.createSecAssn(type);
             sa.setSpi(parseInt(record.get("spi")));
             sa.setScid(parseShort(record.get("scid")));
             sa.setVcid(parseByte(record.get("vcid")));
             sa.setTfvn(parseByte(record.get("tfvn")));
             sa.setMapid(parseByte(record.get("mapid")));
             sa.setSaState(parseShort(record.get("sa_state")));
-            ServiceType st = null;
+            ServiceType st;
             try {
                 st = ServiceType.fromShort(parseShort(record.get("st")));
                 if (st == ServiceType.UNKNOWN) {
@@ -76,7 +77,7 @@ public class SaCsvInput {
             } catch (Exception e) {
                 // try to parse out text value
                 LOG.warn("Encountered an error while attempting to parse 'service type' as short, " +
-                        "will attempt to parse value as text: ", e.getMessage());
+                        "will attempt to parse value as text: {}", e.getMessage());
                 try {
                     st = ServiceType.valueOf(record.get("st"));
                 } catch (Exception e1) {

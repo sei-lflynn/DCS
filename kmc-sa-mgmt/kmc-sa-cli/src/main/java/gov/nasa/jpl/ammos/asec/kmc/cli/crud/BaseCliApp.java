@@ -1,5 +1,7 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
+import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.DaoFactory;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.config.Config;
@@ -15,17 +17,16 @@ import java.util.concurrent.Callable;
 
 /**
  * Base class for CLI apps
- *
  */
 @CommandLine.Command
 abstract class BaseCliApp implements Callable<Integer> {
-    
+
     static {
-        java.io.InputStream is = BaseCliApp.class.getClassLoader().getResourceAsStream("kmc.properties");
-        java.util.Properties p = new Properties();
+        java.io.InputStream  is = BaseCliApp.class.getClassLoader().getResourceAsStream("kmc.properties");
+        java.util.Properties p  = new Properties();
         try {
             p.load(is);
-          
+
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
@@ -38,11 +39,14 @@ abstract class BaseCliApp implements Callable<Integer> {
     public static final String DEFAULT_KMC_HOME;
 
 
-
     protected static final Logger LOG = LoggerFactory.getLogger(BaseCliApp.class);
 
     @CommandLine.Spec
     protected CommandLine.Model.CommandSpec spec;
+
+    @CommandLine.Option(names = "--type", required = false, defaultValue = "TC", description = "frame type. TC " +
+            "(default), TM, or AOS", converter = FrameTypeConverter.class)
+    public FrameType frameType = FrameType.TC;
 
     public BaseCliApp() {
 
@@ -112,6 +116,18 @@ abstract class BaseCliApp implements Callable<Integer> {
      */
     protected void throwEx(String message) throws CommandLine.ParameterException {
         throw new CommandLine.ParameterException(spec.commandLine(), message);
+    }
+
+    private static class FrameTypeConverter implements CommandLine.ITypeConverter<FrameType> {
+
+        @Override
+        public FrameType convert(String value) throws Exception {
+            FrameType type = FrameType.fromString(value);
+            if (type == FrameType.UNKNOWN) {
+                throw new KmcException("Unknown frame type: " + value);
+            }
+            return type;
+        }
     }
 
 }

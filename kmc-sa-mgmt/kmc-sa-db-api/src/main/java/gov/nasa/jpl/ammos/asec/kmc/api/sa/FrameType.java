@@ -3,7 +3,8 @@ package gov.nasa.jpl.ammos.asec.kmc.api.sa;
 public enum FrameType {
     TC("SecAssn", SecAssn.class), // telecommand
     TM("SecAssnTm", SecAssnTm.class), // telemetry
-    AOS("SecAssnAos", SecAssnAos.class); // advanced orbiting systems
+    AOS("SecAssnAos", SecAssnAos.class),
+    UNKNOWN("Unknown", null); // advanced orbiting systems
 
     private String                    tableName;
     private Class<? extends ISecAssn> clazz;
@@ -20,5 +21,14 @@ public enum FrameType {
 
     public Class<? extends ISecAssn> getClazz() {
         return clazz;
+    }
+
+    public static FrameType fromString(String input) {
+        return switch (input) {
+            case "TC" -> TC;
+            case "TM" -> TM;
+            case "AOS" -> AOS;
+            default -> UNKNOWN;
+        };
     }
 }

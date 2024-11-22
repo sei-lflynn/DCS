@@ -36,8 +36,8 @@ public class KmcDao implements IKmcDao {
     public static final  String HIBERNATE_CONNECTION_PASSWORD = "hibernate.connection.password";
     public static final  String HIBERNATE_CONNECTION_URL      = "hibernate.connection.url";
 
-    private Properties    properties = new Properties();
-    private Configuration config     = new Configuration();
+    private final Properties    properties = new Properties();
+    private       Configuration config     = new Configuration();
 
     private SessionFactory factory;
 
@@ -128,7 +128,7 @@ public class KmcDao implements IKmcDao {
 
     private Integer getNextAvailableSpi(Short scid, FrameType type) throws KmcException {
         isReady();
-        Integer spi;
+        int spi;
         try (Session session = factory.openSession()) {
             Integer maxSpi = session
                     .createQuery("SELECT max(sa.id.spi) FROM " + type.toString() + " sa WHERE sa.id.scid = :scid",
@@ -400,8 +400,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public ISecAssn getSa(IDbSession session, SpiScid id, FrameType type) throws KmcException {
         isReady();
-        ISecAssn sa = ((DbSession) session).getSession().find(type.getClazz(), id);
-        return sa;
+        return ((DbSession) session).getSession().find(type.getClazz(), id);
     }
 
     @Override

@@ -19,7 +19,8 @@ public class OptionalOptions {
     @CommandLine.Option(names = "--iv", required = false, description = "initialization vector (hex string)")
     public String iv;
 
-    @CommandLine.Option(names = "--ivlen", required = false, description = "initialization vector length, in bytes", defaultValue = "12")
+    @CommandLine.Option(names = "--ivlen", required = false, description = "initialization vector length, in bytes",
+            defaultValue = "12")
     public Short ivLen;
 
     @CommandLine.Option(names = "--arsn", required = false, description =

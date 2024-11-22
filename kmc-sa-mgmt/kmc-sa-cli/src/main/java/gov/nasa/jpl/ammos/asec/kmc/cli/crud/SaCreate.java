@@ -1,9 +1,8 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli.crud;
 
 import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.FrameType;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.ISecAssn;
-import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssn;
+import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnFactory;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SecAssnValidator;
 import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IDbSession;
@@ -57,9 +56,9 @@ public class SaCreate extends BaseCreateUpdate {
             throwEx(String.format("File does not exist: %s", file));
         }
         try (Reader reader = new FileReader(file)) {
-            List<SecAssn> sas = input.parseCsv(reader);
+            List<ISecAssn> sas = input.parseCsv(reader, frameType);
             try (IKmcDao dao = getDao(); IDbSession session = dao.newSession()) {
-                for (SecAssn sa : sas) {
+                for (ISecAssn sa : sas) {
                     try {
                         session.beginTransaction();
                         SecAssnValidator.validate(sa);
@@ -86,11 +85,11 @@ public class SaCreate extends BaseCreateUpdate {
         console(String.format("%s creating SA", user));
         try (IKmcDao dao = getDao()) {
             SpiScid  id = new SpiScid(spi, scid);
-            ISecAssn sa = dao.getSa(id, FrameType.TC);
+            ISecAssn sa = dao.getSa(id, frameType);
             if (sa != null) {
                 throwEx(String.format("Create error, SA %d/%d already exists", id.getSpi(), id.getScid()));
             }
-            sa = new SecAssn(new SpiScid(spi, scid));
+            sa = SecAssnFactory.createSecAssn(id, frameType);
 
             sa.setTfvn(tfvn);
             sa.setVcid(vcid);
@@ -100,7 +99,7 @@ public class SaCreate extends BaseCreateUpdate {
                 try {
                     dao.createSa(session, sa);
                     console(String.format("%s created SA %s/%s", user, sa.getId().getSpi(), sa.getId().getScid()));
-                    sa = dao.getSa(session, sa.getId(), FrameType.TC);
+                    sa = dao.getSa(session, sa.getId(), frameType);
                     updateSa(sa, dao, session);
                 } catch (Exception e) {
                     session.rollback();

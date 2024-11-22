@@ -12,13 +12,11 @@ import java.util.List;
 
 /**
  * Security Association JSON output format
- *
  */
 public class SaJsonOutput implements IOutput {
     public SaJsonOutput() {
 
     }
-
 
     @Override
     public void print(PrintWriter writer, List<? extends ISecAssn> saList) {

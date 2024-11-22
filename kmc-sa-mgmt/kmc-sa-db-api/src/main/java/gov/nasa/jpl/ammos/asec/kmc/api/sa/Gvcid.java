@@ -13,7 +13,6 @@ import java.io.Serializable;
  * 2. Spacecraft ID (SCID)
  * 3. Virtual Channel ID (VCID)
  * 4. Multiplexer Access ID (MAPID)
- *
  */
 @Embeddable
 public class Gvcid implements Serializable {
@@ -24,10 +23,14 @@ public class Gvcid implements Serializable {
     private              Byte         vcid;
     private              Byte         mapid;
 
+    /**
+     * Constructor
+     */
     public Gvcid() {
 
     }
 
+    @Override
     public String toString() {
         try {
             return mapper.writeValueAsString(this);
