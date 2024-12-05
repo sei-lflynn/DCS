@@ -30,8 +30,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     }
 
     public void createSasBulkFail(FrameType type) {
-        CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute(String.format("--file=%s", BULK_SA_FILE), String.format("--type=%s",
+        CommandLine cmd      = getCmd(new SaCreate(), true, null, null);
+        int         exitCode = cmd.execute(String.format("--file=%s", BULK_SA_FILE), String.format("--type=%s",
                 type.name()));
         assertNotEquals(0, exitCode);
     }
@@ -52,12 +52,12 @@ public class SaCreateTest extends BaseCommandLineTest {
         dao.createSa(20, (byte) 0, (short) 44, (byte) 20, (byte) 0, type);
         assertEquals(6, dao.getSas(type).size());
         CommandLine cmd = getCmd(new SaCreate(), true, out, err);
-        int exitCode = cmd.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
-                        BULK_SA_FILE).getFile()),
-                String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute(String.format("--file=%s",
+                getClass().getClassLoader().getResource(BULK_SA_FILE).getFile()), String.format("--type=%s",
+                type.name()));
 
-        assertTrue("Incorrect error message: " + w, w.toString().contains("SA create failed: an SA with " +
-                "the SPI/SCID combination 20/44 already exists"));
+        assertTrue("Incorrect error message: " + w, w.toString().contains("SA create failed: an SA with " + "the " +
+                "SPI/SCID combination 20/44 already exists"));
     }
 
     @Test
@@ -73,9 +73,9 @@ public class SaCreateTest extends BaseCommandLineTest {
         StringWriter o   = new StringWriter();
         PrintWriter  out = new PrintWriter(o);
         CommandLine  cmd = getCmd(new SaCreate(), true, out, err);
-        int exitCode = cmd.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
-                        BULK_SA_FILE).getFile()),
-                String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute(String.format("--file=%s",
+                getClass().getClassLoader().getResource(BULK_SA_FILE).getFile()), String.format("--type=%s",
+                type.name()));
         assertEquals(w.toString(), 0, exitCode);
         List<? extends ISecAssn> sas = dao.getSas(type);
         assertEquals(w.toString(), 86, sas.size());
@@ -100,7 +100,6 @@ public class SaCreateTest extends BaseCommandLineTest {
 
         exitCode = cmd.execute("--tfvn 0", "--scid 44", "--vcid 0", String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
-
     }
 
     @Test
@@ -113,8 +112,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSa(FrameType type) throws KmcException {
 
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", String.format("--type=%s"
-                , type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", String.format("--type=%s",
+                type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
@@ -138,8 +137,8 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaDupeFail(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=8", "--ekid=140",
-                "--ecs=0x02", "--ivlen=16", "--st=AUTHENTICATED_ENCRYPTION", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=8", "--ekid=140", "--ecs" +
+                "=0x02", "--ivlen=16", "--st=AUTHENTICATED_ENCRYPTION", String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(8, (short) 46), type);
@@ -160,8 +159,8 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaShivf(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shivflen=20",
-                String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shivflen=20", String.format(
+                "--type=%s", type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
@@ -179,8 +178,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSaShplf(FrameType type) throws KmcException {
 
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shplflen=20",
-                String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shplflen=20", String.format(
+                "--type=%s", type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
@@ -198,8 +197,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSaShsnf(FrameType type) throws KmcException {
 
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shsnflen=20",
-                String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--shsnflen=20", String.format(
+                "--type=%s", type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
@@ -217,8 +216,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSaStmacf(FrameType type) throws KmcException {
 
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--stmacflen=20",
-                String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--stmacflen=20", String.format(
+                "--type=%s", type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
@@ -259,8 +258,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSaEkid(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
 
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--ekid=130", "--ecs" +
-                "=0x01", "--st=1", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--ekid=130",
+                "--ecs" + "=0x01", "--st=1", String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertNotNull(sa);
@@ -285,8 +284,8 @@ public class SaCreateTest extends BaseCommandLineTest {
                 String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--acs=1",
-                String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--acs=1", String.format(
+                "--type=%s", type.name()));
         assertNotEquals(0, exitCode);
 
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--akid=130", "--acs=1",
@@ -303,8 +302,8 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaAkid(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--akid=130",
-                "--acs=0x01", "--st=2", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--akid=130", "--acs" +
+                "=0x01", "--st=2", String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
 
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
@@ -328,8 +327,8 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSaIv(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" +
-                        "=0x000000000000000000000001", "--ivlen=12", "--st=AUTHENTICATED_ENCRYPTION",
-                String.format("--type=%s", type.name()));
+                "=0x000000000000000000000001", "--ivlen=12", "--st=AUTHENTICATED_ENCRYPTION", String.format("--type" +
+                "=%s", type.name()));
         assertEquals(0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertArrayEquals(new byte[]{0x00,
@@ -372,12 +371,12 @@ public class SaCreateTest extends BaseCommandLineTest {
     public void createSaIvFail(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
         int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" +
-                "=0x000000000000000000000001", "--ivlen=11", "--st=AUTHENTICATED_ENCRYPTION", "--ekid=130", "--ecs" +
-                "=0x01", String.format("--type=%s", type.name()));
+                        "=0x000000000000000000000001", "--ivlen=11", "--st=AUTHENTICATED_ENCRYPTION", "--ekid=130",
+                "--ecs" + "=0x01", String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" +
-                "=0x000000000000000000000001", "--ivlen=13", "--st=AUTHENTICATED_ENCRYPTION", "--ekid=130", "--ecs" +
-                "=0x01", String.format("--type=%s", type.name()));
+                        "=0x000000000000000000000001", "--ivlen=13", "--st=AUTHENTICATED_ENCRYPTION", "--ekid=130",
+                "--ecs" + "=0x01", String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" +
                 "=0x0000000000000000000001", "--ivlen=12", String.format("--type=%s", type.name()));
@@ -387,13 +386,13 @@ public class SaCreateTest extends BaseCommandLineTest {
                 "=0x01", String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
         //Test if the word null in IV settings are accepted
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" +
-                "=null", "--ivlen=12", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--iv" + "=null",
+                "--ivlen=12", String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
         //Test only incorrect IV len for algo
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--st" +
-                        "=AUTHENTICATED_ENCRYPTION", "--ekid=130", "--ecs=0x01", "--ivlen=16",
-                String.format("--type=%s", type.name()));
+                "=AUTHENTICATED_ENCRYPTION", "--ekid=130", "--ecs=0x01", "--ivlen=16", String.format("--type=%s",
+                type.name()));
 
         assertNotEquals(0, exitCode);
         List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
@@ -413,8 +412,8 @@ public class SaCreateTest extends BaseCommandLineTest {
         StringWriter o   = new StringWriter();
         PrintWriter  out = new PrintWriter(o);
         CommandLine  cmd = getCmd(new SaCreate(), true, out, err);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--ivlen=12"
-                , "--ecs=0x01", "--ekid=130", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--ivlen=12", "--ecs" +
+                "=0x01", "--ekid=130", String.format("--type=%s", type.name()));
         assertEquals("Incorrect error message: " + w.toString(), 0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertNull(sa.getIv());
@@ -506,8 +505,8 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaArsn(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--arsn=0x04"
-                , "--arsnlen=1", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--arsn=0x04",
+                "--arsnlen=1", String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertArrayEquals(new byte[]{0x00,
@@ -543,8 +542,8 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaArsnFail(FrameType type) {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6",
-                "--arsn=0x04", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--arsn=0x04",
+                String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
     }
 
@@ -557,8 +556,8 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaArsnw(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6",
-                "--arsnw=5", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--arsnw=5",
+                String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertEquals(5, (short) sa.getArsnw());
@@ -579,8 +578,8 @@ public class SaCreateTest extends BaseCommandLineTest {
         StringWriter o   = new StringWriter();
         PrintWriter  out = new PrintWriter(o);
         CommandLine  cmd = getCmd(new SaCreate(), true, out, err);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--ekid=130",
-                "--ecs=0x01", "--akid=130", "--acs=0x01", "--st=3", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--ekid=130", "--ecs" +
+                "=0x01", "--akid=130", "--acs=0x01", "--st=3", String.format("--type=%s", type.name()));
         assertEquals("got " + w.toString(), 0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(7, (short) 46), type);
         assertNotNull(sa);
@@ -609,8 +608,8 @@ public class SaCreateTest extends BaseCommandLineTest {
                 String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--st=4",
-                String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--st=4", String.format(
+                "--type=%s", type.name()));
         assertNotEquals(0, exitCode);
 
         exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--ekid=130", "--ecs=0x01"
@@ -646,32 +645,32 @@ public class SaCreateTest extends BaseCommandLineTest {
 
     public void createSaSt(FrameType type) throws KmcException {
         CommandLine cmd = getCmd(new SaCreate(), true, null, null);
-        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--st" +
-                "=ENCRYPTION", String.format("--type=%s", type.name()));
+        int exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=6", "--st" + "=ENCRYPTION"
+                , String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertEquals(ServiceType.ENCRYPTION, sa.getServiceType());
         assertEquals(1, (short) sa.getEst());
         assertEquals(0, (short) sa.getAst());
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--st" +
-                "=1", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=7", "--st" + "=1",
+                String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         sa = dao.getSa(new SpiScid(7, (short) 46), type);
         assertEquals(ServiceType.ENCRYPTION, sa.getServiceType());
         assertEquals(1, (short) sa.getEst());
         assertEquals(0, (short) sa.getAst());
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=8", "--st" +
-                "=AUTHENTICATION", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=8", "--st" + "=AUTHENTICATION"
+                , String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         sa = dao.getSa(new SpiScid(8, (short) 46), type);
         assertEquals(ServiceType.AUTHENTICATION, sa.getServiceType());
         assertEquals(0, (short) sa.getEst());
         assertEquals(1, (short) sa.getAst());
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=9", "--st" +
-                "=2", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=9", "--st" + "=2",
+                String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         sa = dao.getSa(new SpiScid(9, (short) 46), type);
         assertEquals(ServiceType.AUTHENTICATION, sa.getServiceType());
@@ -686,24 +685,24 @@ public class SaCreateTest extends BaseCommandLineTest {
         assertEquals(1, (short) sa.getEst());
         assertEquals(1, (short) sa.getAst());
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=11", "--st" +
-                "=3", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=11", "--st" + "=3",
+                String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         sa = dao.getSa(new SpiScid(11, (short) 46), type);
         assertEquals(ServiceType.AUTHENTICATED_ENCRYPTION, sa.getServiceType());
         assertEquals(1, (short) sa.getEst());
         assertEquals(1, (short) sa.getAst());
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=12", "--st" +
-                "=PLAINTEXT", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=12", "--st" + "=PLAINTEXT",
+                String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         sa = dao.getSa(new SpiScid(12, (short) 46), type);
         assertEquals(ServiceType.PLAINTEXT, sa.getServiceType());
         assertEquals(0, (short) sa.getEst());
         assertEquals(0, (short) sa.getAst());
 
-        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=13", "--st" +
-                "=0", String.format("--type=%s", type.name()));
+        exitCode = cmd.execute("--tfvn=0", "--scid=46", "--vcid=0", "--mapid=0", "--spi=13", "--st" + "=0",
+                String.format("--type=%s", type.name()));
         assertEquals(0, exitCode);
         sa = dao.getSa(new SpiScid(13, (short) 46), type);
         assertEquals(ServiceType.PLAINTEXT, sa.getServiceType());

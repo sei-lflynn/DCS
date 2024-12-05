@@ -26,43 +26,68 @@ public class SaExpireTest extends BaseCommandLineTest {
 
     @Test
     public void testExpireNoConfirm() throws KmcException {
-        int exit = cli.execute("--spi=1", "--scid=46", "-y");
+        testExpireNoConfirm(FrameType.AOS);
+        testExpireNoConfirm(FrameType.TC);
+        testExpireNoConfirm(FrameType.TM);
+    }
+
+    public void testExpireNoConfirm(FrameType type) throws KmcException {
+        int exit = cli.execute("--spi=1", "--scid=46", "-y", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46), FrameType.TC);
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46), type);
         assertEquals(1, (short) sa.getSaState());
     }
 
     @Test
     public void testExpireConfirm() throws KmcException {
+        testExpireConfirm(FrameType.AOS);
+        testExpireConfirm(FrameType.TC);
+        testExpireConfirm(FrameType.TM);
+    }
+
+    public void testExpireConfirm(FrameType type) throws KmcException {
         InputStream old = System.in;
         InputStream in  = new ByteArrayInputStream("y".getBytes(StandardCharsets.UTF_8));
         System.setIn(in);
-        int exit = cli.execute("--spi=1", "--scid=46");
+        int exit = cli.execute("--spi=1", "--scid=46", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46), FrameType.TC);
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46), type);
         assertEquals(1, (short) sa.getSaState());
         System.setIn(old);
     }
 
     @Test
     public void testExpireRefuse() throws KmcException {
+        testExpireRefuse(FrameType.TC);
+        testExpireRefuse(FrameType.AOS);
+        testExpireRefuse(FrameType.TM);
+
+    }
+
+    public void testExpireRefuse(FrameType type) throws KmcException {
         InputStream old = System.in;
         InputStream in  = new ByteArrayInputStream("n".getBytes(StandardCharsets.UTF_8));
         System.setIn(in);
-        int exit = cli.execute("--spi=1", "--scid=46");
+        int exit = cli.execute("--spi=1", "--scid=46", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46), FrameType.TC);
+        ISecAssn sa = dao.getSa(new SpiScid(1, (short) 46), type);
         assertEquals(3, (short) sa.getSaState());
         System.setIn(old);
     }
 
     @Test
     public void testExpireFail() {
-        int exit = cli.execute("--spi=8");
+        testExpireFail(FrameType.TM);
+        testExpireFail(FrameType.AOS);
+        testExpireFail(FrameType.TC);
+    }
+
+    public void testExpireFail(FrameType type) {
+        int exit = cli.execute("--spi=8", String.format("--type=%s", type.name()));
         assertNotEquals(0, exit);
-        exit = cli.execute("--scid=46");
+        exit = cli.execute("--scid=46", String.format("--type=%s", type.name()));
         assertNotEquals(0, exit);
-        exit = cli.execute("--spi=8", "--scid=46");
+        exit = cli.execute("--spi=8", "--scid=46", String.format("--type=%s", type.name()));
         assertNotEquals(0, exit);
     }
 }

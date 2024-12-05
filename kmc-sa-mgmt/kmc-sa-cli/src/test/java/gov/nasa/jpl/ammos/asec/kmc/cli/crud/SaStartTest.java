@@ -17,70 +17,103 @@ import static org.junit.Assert.assertNotEquals;
 public class SaStartTest extends BaseCommandLineTest {
     @Test
     public void testStart() throws KmcException {
+        testStart(FrameType.TC);
+        testStart(FrameType.TM);
+        testStart(FrameType.AOS);
+    }
+
+    public void testStart(FrameType type) throws KmcException {
         CommandLine cli  = getCmd(new SaStart(), true);
-        int         exit = cli.execute();
+        int         exit = cli.execute(String.format("--type=%s", type.name()));
         // no args
         assertNotEquals(0, exit);
-        exit = cli.execute("--spi=2", "--scid=46");
+        exit = cli.execute("--spi=2", "--scid=46", String.format("--type=%s", type.name()));
         // already started
         assertNotEquals(0, exit);
 
         // start
-        createExtraSas();
-        exit = cli.execute("--spi", "8", "--scid", "46");
+        createExtraSas(type);
+        exit = cli.execute("--spi", "8", "--scid", "46", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), FrameType.TC);
-        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46), FrameType.TC);
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), type);
+        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46), type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
         assertEquals(KmcDao.SA_UNKEYED, (short) sa2.getSaState());
     }
 
     @Test
     public void testStartAlreadyOperational() throws KmcException {
+        testStartAlreadyOperational(FrameType.TC);
+        testStartAlreadyOperational(FrameType.TM);
+        testStartAlreadyOperational(FrameType.AOS);
+    }
+
+    public void testStartAlreadyOperational(FrameType type) throws KmcException {
         // start when already active per GVCID
-        createExtraSas();
-        dao.startSa(new SpiScid(8, (short) 46), false, FrameType.TC);
+        createExtraSas(type);
+        dao.startSa(new SpiScid(8, (short) 46), false, type);
         CommandLine cli  = getCmd(new SaStart(), true);
-        int         exit = cli.execute("--scid", "46", "--spi", "9");
+        int         exit = cli.execute("--scid", "46", "--spi", "9", String.format("--type=%s", type.name()));
         assertNotEquals(0, exit);
     }
 
     @Test
     public void testStartForce() throws KmcException {
-        createExtraSas();
-        dao.startSa(new SpiScid(8, (short) 46), false, FrameType.TC);
+        testStartForce(FrameType.TC);
+        testStartForce(FrameType.TM);
+        testStartForce(FrameType.AOS);
+    }
+
+    public void testStartForce(FrameType type) throws KmcException {
+        createExtraSas(type);
+        dao.startSa(new SpiScid(8, (short) 46), false, type);
         CommandLine cli  = getCmd(new SaStart(), true);
-        int         exit = cli.execute("--scid", "46", "--spi", "9", "--force");
+        int         exit = cli.execute("--scid", "46", "--spi", "9", "--force", String.format("--type=%s",
+                type.name()));
         assertEquals(0, exit);
     }
 
     @Test
     public void testStartMultiple() throws KmcException {
-        createExtraSas();
+        testStartMultiple(FrameType.TC);
+        testStartMultiple(FrameType.TM);
+        testStartMultiple(FrameType.AOS);
+    }
+
+    public void testStartMultiple(FrameType type) throws KmcException {
+        createExtraSas(type);
         CommandLine cli  = getCmd(new SaStart(), true);
-        int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "10");
+        int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "10", String.format("--type=%s",
+                type.name()));
         assertEquals(0, exit);
-        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), FrameType.TC);
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        ISecAssn sa2 = dao.getSa(new SpiScid(10, (short) 46), FrameType.TC);
+        ISecAssn sa2 = dao.getSa(new SpiScid(10, (short) 46), type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa2.getSaState());
     }
 
     @Test
     public void testStartMultipleFail() throws KmcException {
-        createExtraSas();
+        testStartMultipleFail(FrameType.TC);
+        testStartMultipleFail(FrameType.TM);
+        testStartMultipleFail(FrameType.AOS);
+    }
+
+    public void testStartMultipleFail(FrameType type) throws KmcException {
+        createExtraSas(type);
         CommandLine cli  = getCmd(new SaStart(), true);
-        int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "9");
+        int         exit = cli.execute("--scid", "46", "--spi", "8", "--spi", "9", String.format("--type=%s",
+                type.name()));
         assertNotEquals(0, exit);
-        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), FrameType.TC);
+        ISecAssn sa1 = dao.getSa(new SpiScid(8, (short) 46), type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46), FrameType.TC);
+        ISecAssn sa2 = dao.getSa(new SpiScid(9, (short) 46), type);
         assertEquals(KmcDao.SA_UNKEYED, (short) sa2.getSaState());
     }
 
-    private void createExtraSas() throws KmcException {
-        dao.createSa(8, (byte) 0, (short) 46, (byte) 10, (byte) 0, FrameType.TC);
-        dao.createSa(9, (byte) 0, (short) 46, (byte) 10, (byte) 0, FrameType.TC);
-        dao.createSa(10, (byte) 0, (short) 46, (byte) 11, (byte) 0, FrameType.TC);
+    private void createExtraSas(FrameType type) throws KmcException {
+        dao.createSa(8, (byte) 0, (short) 46, (byte) 10, (byte) 0, type);
+        dao.createSa(9, (byte) 0, (short) 46, (byte) 10, (byte) 0, type);
+        dao.createSa(10, (byte) 0, (short) 46, (byte) 11, (byte) 0, type);
     }
 }

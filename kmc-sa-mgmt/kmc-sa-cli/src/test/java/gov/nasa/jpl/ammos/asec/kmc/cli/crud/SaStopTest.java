@@ -18,54 +18,79 @@ public class SaStopTest extends BaseCommandLineTest {
 
     @Test
     public void testStop() throws KmcException {
+        testStop(FrameType.TC);
+        testStop(FrameType.TM);
+        testStop(FrameType.AOS);
+    }
+
+    public void testStop(FrameType type) throws KmcException {
         SpiScid     id   = new SpiScid(1, (short) 46);
         CommandLine cli  = getCmd(new SaStop(), true);
-        int         exit = cli.execute();
+        int         exit = cli.execute(String.format("--type=%s", type.name()));
         // no args
         assertNotEquals(0, exit);
-        ISecAssn sa = dao.getSa(id, FrameType.TC);
+        ISecAssn sa = dao.getSa(id, type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa.getSaState());
-        exit = cli.execute("--scid", "46", "--spi", "1");
+        exit = cli.execute("--scid", "46", "--spi", "1", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        sa = dao.getSa(id, FrameType.TC);
+        sa = dao.getSa(id, type);
         assertEquals(KmcDao.SA_KEYED, (short) sa.getSaState());
     }
 
     @Test
     public void testStopMultiple() throws KmcException {
+        testStopMultiple(FrameType.TC);
+        testStopMultiple(FrameType.TM);
+        testStopMultiple(FrameType.AOS);
+    }
+
+    public void testStopMultiple(FrameType type) throws KmcException {
         SpiScid  id1 = new SpiScid(1, (short) 46);
-        ISecAssn sa1 = dao.getSa(id1, FrameType.TC);
+        ISecAssn sa1 = dao.getSa(id1, type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
         SpiScid  id2 = new SpiScid(2, (short) 46);
-        ISecAssn sa2 = dao.getSa(id2, FrameType.TC);
+        ISecAssn sa2 = dao.getSa(id2, type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa2.getSaState());
 
         CommandLine cli  = getCmd(new SaStop(), true);
-        int         exit = cli.execute("--scid", "46", "--spi", "1", "--spi", "2");
+        int         exit = cli.execute("--scid", "46", "--spi", "1", "--spi", "2", String.format("--type=%s",
+                type.name()));
         assertEquals(0, exit);
-        sa1 = dao.getSa(id1, FrameType.TC);
+        sa1 = dao.getSa(id1, type);
         assertEquals(KmcDao.SA_KEYED, (short) sa1.getSaState());
-        sa2 = dao.getSa(id2, FrameType.TC);
+        sa2 = dao.getSa(id2, type);
         assertEquals(KmcDao.SA_KEYED, (short) sa2.getSaState());
     }
 
     @Test
     public void testStopDne() {
+        testStopDne(FrameType.TC);
+        testStopDne(FrameType.TM);
+        testStopDne(FrameType.AOS);
+    }
+
+    public void testStopDne(FrameType type) {
         CommandLine cli  = getCmd(new SaStop(), true);
-        int         exit = cli.execute("--scid=40", "--spi=1");
+        int         exit = cli.execute("--scid=40", "--spi=1", String.format("--type=%s", type.name()));
         assertNotEquals(0, exit);
     }
 
     @Test
     public void testAlreadyStopped() throws KmcException {
+        testAlreadyStopped(FrameType.TC);
+        testAlreadyStopped(FrameType.TM);
+        testAlreadyStopped(FrameType.AOS);
+    }
+
+    public void testAlreadyStopped(FrameType type) throws KmcException {
         SpiScid  id1 = new SpiScid(1, (short) 46);
-        ISecAssn sa1 = dao.getSa(id1, FrameType.TC);
+        ISecAssn sa1 = dao.getSa(id1, type);
         assertEquals(KmcDao.SA_OPERATIONAL, (short) sa1.getSaState());
-        dao.stopSa(id1, FrameType.TC);
-        sa1 = dao.getSa(id1, FrameType.TC);
+        dao.stopSa(id1, type);
+        sa1 = dao.getSa(id1, type);
         assertEquals(KmcDao.SA_KEYED, (short) sa1.getSaState());
         CommandLine cli  = getCmd(new SaStop(), true);
-        int         exit = cli.execute("--scid=40", "--spi=1");
+        int         exit = cli.execute("--scid=40", "--spi=1", String.format("--type=%s", type.name()));
         assertNotEquals(0, exit);
     }
 
