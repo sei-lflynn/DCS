@@ -4,8 +4,6 @@ import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
 import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.DaoFactory;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.config.Config;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.filters.HttpHeaderSecurityFilter;
@@ -26,35 +24,36 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
+import javax.annotation.PreDestroy;
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Security;
 
-import javax.annotation.PreDestroy;
-import javax.servlet.DispatcherType;
-
 @SpringBootApplication
 public class KmcSaMgmt extends SpringBootServletInitializer {
-	{
-        //Insert the bcfips provider into the java security providers list up front, so that tomcat and friends can see it.
-		Security.insertProviderAt(new BouncyCastleFipsProvider(), 1);
+    {
+        //Insert the bcfips provider into the java security providers list up front, so that tomcat and friends can
+        // see it.
+        Security.insertProviderAt(new BouncyCastleFipsProvider(), 1);
         Security.insertProviderAt(new BouncyCastleJsseProvider("fips:BCFIPS"), 2);
-	}
-    
+    }
 
     private static final Logger  LOG = LoggerFactory.getLogger(KmcSaMgmt.class);
     private              IKmcDao dao;
 
     public static void main(String[] args) {
-        System.setProperty("spring.config.name","kmc-sa-mgmt-service");
+        System.setProperty("spring.config.name", "kmc-sa-mgmt-service");
         SpringApplication.run(KmcSaMgmt.class, args);
     }
 
     @Bean
     @Scope("singleton")
     public IKmcDao getDao() {
-        //NOTE: this hardcoded path may need to be set via params to pull from $CFGPATH  in the future, evaluate the config method's behavior
+        //NOTE: this hardcoded path may need to be set via params to pull from $CFGPATH  in the future, evaluate the
+        // config method's behavior
         Config cfg = new Config(defaultKmcCfgPath, "kmc-sa-mgmt-service.properties");
-        cfg.setOverrideJvmTrustore(false);
+        cfg.setOverrideJvmTruststore(false);
         try {
             dao = DaoFactory.getDao(cfg);
             dao.init();
@@ -68,21 +67,20 @@ public class KmcSaMgmt extends SpringBootServletInitializer {
         return dao;
     }
 
+    @Value("${gov.nasa.jpl.ammos.asec.kmc.saserver.app.default-config-path}")
+    private String defaultKmcCfgPath; // was "/opt/ammos/kmc/etc"
 
-	@Value("${gov.nasa.jpl.ammos.asec.kmc.saserver.app.default-config-path}")
-	private String defaultKmcCfgPath; // was "/opt/ammos/kmc/etc"
+    @Value("${hsts.url-pattern}")
+    private String hstsUrlPattern;
 
-	@Value("${hsts.url-pattern}")
-	private String hstsUrlPattern;
+    @Value("${hsts.enabled}")
+    private String hstsEnabled;
 
-	@Value("${hsts.enabled}") 
-	private String hstsEnabled;
+    @Value("${hsts.hsts-max-age-seconds}")
+    private String hstsMaxAgeSeconds;
 
-	@Value("${hsts.hsts-max-age-seconds}") 
-	private String hstsMaxAgeSeconds;
-
-	@Value("${hsts.hsts-include-sub-domains}") 
-	private String hstsIncludeSubDomains;
+    @Value("${hsts.hsts-include-sub-domains}")
+    private String hstsIncludeSubDomains;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -129,7 +127,8 @@ public class KmcSaMgmt extends SpringBootServletInitializer {
         @Override
         public void invoke(Request request, Response response) throws IOException, javax.servlet.ServletException {
 
-            if (!clientAuth.equalsIgnoreCase("NONE") && !request.getRequestURI().startsWith(contextPath + "/api/health")) {
+            if (!clientAuth.equalsIgnoreCase("NONE") && !request.getRequestURI().startsWith(contextPath + "/api" +
+                    "/health")) {
                 // Enforce client cert for all resources except for /health
                 if (request.getConnector().getSecure()) {
                     Object cert = request.getAttribute("javax.servlet.request.X509Certificate");
@@ -146,21 +145,21 @@ public class KmcSaMgmt extends SpringBootServletInitializer {
         }
     }
 
-	@Bean
-	public FilterRegistrationBean<HttpHeaderSecurityFilter> httpHeaderSecurityFilterRegistration() {
-		FilterRegistrationBean<HttpHeaderSecurityFilter> registration = new FilterRegistrationBean<HttpHeaderSecurityFilter>();
-		registration.setDispatcherTypes(DispatcherType.REQUEST);
-		registration.setFilter(new HttpHeaderSecurityFilter());
+    @Bean
+    public FilterRegistrationBean<HttpHeaderSecurityFilter> httpHeaderSecurityFilterRegistration() {
+        FilterRegistrationBean<HttpHeaderSecurityFilter> registration =
+                new FilterRegistrationBean<HttpHeaderSecurityFilter>();
+        registration.setDispatcherTypes(DispatcherType.REQUEST);
+        registration.setFilter(new HttpHeaderSecurityFilter());
+        registration.addUrlPatterns(hstsUrlPattern);
+        registration.addInitParameter("hstsEnabled", hstsEnabled);
+        registration.addInitParameter("hstsMaxAgeSeconds", hstsMaxAgeSeconds);
+        registration.addInitParameter("hstsIncludeSubDomains", hstsMaxAgeSeconds);
 
-		registration.addUrlPatterns(hstsUrlPattern);
-		registration.addInitParameter("hstsEnabled", hstsEnabled);
-		registration.addInitParameter("hstsMaxAgeSeconds", hstsMaxAgeSeconds);
-		registration.addInitParameter("hstsIncludeSubDomains", hstsMaxAgeSeconds);
-
-		registration.setName("httpHeaderSecurity");
-		registration.setOrder(1);
-		return registration;	
-	}
+        registration.setName("httpHeaderSecurity");
+        registration.setOrder(1);
+        return registration;
+    }
 
     @Bean
     public CommonsRequestLoggingFilter requestLoggingFilter() {

@@ -25,16 +25,45 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * KMC DAO
+ */
 public class KmcDao implements IKmcDao {
-
+    /**
+     * Logger
+     */
     private static final Logger LOG                           = LoggerFactory.getLogger(IKmcDao.class);
+    /**
+     * SA Unkeyed constant
+     */
     public static final  short  SA_UNKEYED                    = 1;
+    /**
+     * SA keyed constant
+     */
     public static final  short  SA_KEYED                      = 2;
+    /**
+     * SA expire constant
+     */
     public static final  short  SA_EXPIRE                     = 1;
+    /**
+     * SA operational constant
+     */
     public static final  short  SA_OPERATIONAL                = 3;
+    /**
+     * Hibernate config
+     */
     public static final  String ETC_HIBERNATE_CFG_XML         = "etc/hibernate.cfg.xml";
+    /**
+     * Hibernate connection username key
+     */
     public static final  String HIBERNATE_CONNECTION_USERNAME = "hibernate.connection.username";
+    /**
+     * Hibernate connection pass key
+     */
     public static final  String HIBERNATE_CONNECTION_PASSWORD = "hibernate.connection.password";
+    /**
+     * Hibernate connection URL key
+     */
     public static final  String HIBERNATE_CONNECTION_URL      = "hibernate.connection.url";
 
     private final Properties    properties = new Properties();
@@ -42,14 +71,31 @@ public class KmcDao implements IKmcDao {
 
     private SessionFactory factory;
 
+    /**
+     * Constructor
+     */
     public KmcDao() {
         config.configure(ETC_HIBERNATE_CFG_XML);
     }
 
+    /**
+     * Constructor
+     *
+     * @param user     user
+     * @param password pass
+     * @param url      url
+     */
     public KmcDao(String user, char[] password, String url) {
         this(user, new String(password), url);
     }
 
+    /**
+     * Constructor
+     *
+     * @param user     user
+     * @param password pass
+     * @param url      url
+     */
     public KmcDao(String user, String password, String url) {
         properties.put(HIBERNATE_CONNECTION_USERNAME, user);
         properties.put(HIBERNATE_CONNECTION_PASSWORD, password);
@@ -57,6 +103,12 @@ public class KmcDao implements IKmcDao {
         configure();
     }
 
+    /**
+     * Constructor
+     *
+     * @param user     user
+     * @param password pass
+     */
     public KmcDao(String user, String password) {
         properties.put(HIBERNATE_CONNECTION_USERNAME, user);
         properties.put(HIBERNATE_CONNECTION_PASSWORD, password);
@@ -442,6 +494,13 @@ public class KmcDao implements IKmcDao {
         }
     }
 
+    /**
+     * Get active SAs
+     *
+     * @param type frame type
+     * @return active SAs
+     * @throws KmcException exception
+     */
     public List<? extends ISecAssn> getActiveSas(FrameType type) throws KmcException {
         isReady();
         try (IDbSession session = newSession()) {

@@ -1,5 +1,8 @@
 package gov.nasa.jpl.ammos.asec.kmc.api.sa;
 
+/**
+ * Security Association interface
+ */
 public interface ISecAssn {
 
     /**
@@ -80,7 +83,7 @@ public interface ISecAssn {
     /**
      * Set TFVN
      *
-     * @param tfvn
+     * @param tfvn TFVN
      */
     void setTfvn(Byte tfvn);
 
@@ -115,7 +118,7 @@ public interface ISecAssn {
     /**
      * Get MAP ID
      *
-     * @return
+     * @return MAP ID
      */
     Byte getMapid();
 
@@ -136,7 +139,7 @@ public interface ISecAssn {
     /**
      * Set LPID
      *
-     * @param lpid
+     * @param lpid LPID
      */
     void setLpid(Short lpid);
 
@@ -238,49 +241,164 @@ public interface ISecAssn {
      */
     void setEcsLen(Short ecsLen);
 
+    /**
+     * Get ECS
+     *
+     * @return ECS
+     */
     byte[] getEcs();
 
+    /**
+     * Set ECS
+     *
+     * @param ecs ECS
+     */
     void setEcs(byte[] ecs);
 
+    /**
+     * Get IV length
+     *
+     * @return IV length
+     */
     Short getIvLen();
 
+    /**
+     * Set IV length
+     *
+     * @param ivLen IV length
+     */
     void setIvLen(Short ivLen);
 
+    /**
+     * Get IV
+     *
+     * @return IV
+     */
     byte[] getIv();
 
+    /**
+     * Set IV
+     *
+     * @param iv IV
+     */
     void setIv(byte[] iv);
 
+    /**
+     * Get ACS length
+     *
+     * @return ACS length
+     */
     Short getAcsLen();
 
+    /**
+     * Set ACS length
+     *
+     * @param acsLen ACS length
+     */
     void setAcsLen(Short acsLen);
 
+    /**
+     * Get ACS
+     *
+     * @return ACS
+     */
     byte[] getAcs();
 
+    /**
+     * Set ACS
+     *
+     * @param acs ACS
+     */
     void setAcs(byte[] acs);
 
+    /**
+     * Get ABM length
+     *
+     * @return ABM length
+     */
     Integer getAbmLen();
 
+    /**
+     * Set ABM length
+     *
+     * @param abmLen ABM length
+     */
     void setAbmLen(int abmLen);
 
+    /**
+     * Get ABM
+     *
+     * @return ABM
+     */
     byte[] getAbm();
 
+    /**
+     * Set ABM
+     *
+     * @param abm ABM
+     */
     void setAbm(byte[] abm);
 
+    /**
+     * Get ARSN length
+     *
+     * @return ARSN length
+     */
     Short getArsnLen();
 
-    void setArsnLen(Short arcLen);
+    /**
+     * Set ARSN length
+     *
+     * @param arsnLen ARSN length
+     */
+    void setArsnLen(Short arsnLen);
 
+    /**
+     * Get ARSN
+     *
+     * @return ARSN
+     */
     byte[] getArsn();
 
-    void setArsn(byte[] arc);
+    /**
+     * Set ARSN
+     *
+     * @param arsn ARSN
+     */
+    void setArsn(byte[] arsn);
 
+    /**
+     * Get ARSNW
+     *
+     * @return ARSNW
+     */
     Short getArsnw();
 
-    void setArsnw(Short arcw);
+    /**
+     * Set ARSNW
+     *
+     * @param arsnw ARSNW
+     */
+    void setArsnw(Short arsnw);
 
+    /**
+     * Get service type
+     *
+     * @return service type
+     */
     ServiceType getServiceType();
 
+    /**
+     * Set service type
+     *
+     * @param serviceType service type
+     */
     void setServiceType(ServiceType serviceType);
 
+    /**
+     * Get frame type
+     *
+     * @return frame type
+     */
     FrameType getType();
 }

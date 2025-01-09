@@ -16,6 +16,9 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 abstract class ASecAssn implements ISecAssn {
     private static final ObjectMapper mapper    = new ObjectMapper();
+    /**
+     * SPI SCID
+     */
     @EmbeddedId
     protected            SpiScid      id;
     // transfer frame version number
@@ -393,8 +396,8 @@ abstract class ASecAssn implements ISecAssn {
     }
 
     @Override
-    public void setArsnLen(Short arcLen) {
-        this.arsnLen = arcLen;
+    public void setArsnLen(Short arsnLen) {
+        this.arsnLen = arsnLen;
     }
 
     @Override
@@ -403,8 +406,8 @@ abstract class ASecAssn implements ISecAssn {
     }
 
     @Override
-    public void setArsn(byte[] arc) {
-        this.arsn = arc;
+    public void setArsn(byte[] arsn) {
+        this.arsn = arsn;
     }
 
     @Override
@@ -413,8 +416,8 @@ abstract class ASecAssn implements ISecAssn {
     }
 
     @Override
-    public void setArsnw(Short arcw) {
-        this.arsnw = arcw;
+    public void setArsnw(Short arsnw) {
+        this.arsnw = arsnw;
     }
 
     @Override

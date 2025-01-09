@@ -20,10 +20,13 @@ public enum FrameType {
      * All
      */
     ALL("", null),
+    /**
+     * Unknown
+     */
     UNKNOWN("Unknown", null);
 
-    private String                    tableName;
-    private Class<? extends ISecAssn> clazz;
+    private final String                    tableName;
+    private final Class<? extends ISecAssn> clazz;
 
     /**
      * Constructor
@@ -53,8 +56,8 @@ public enum FrameType {
     /**
      * Return frame type from string
      *
-     * @param input
-     * @return
+     * @param input frame type
+     * @return frame type
      */
     public static FrameType fromString(String input) {
         return switch (input) {

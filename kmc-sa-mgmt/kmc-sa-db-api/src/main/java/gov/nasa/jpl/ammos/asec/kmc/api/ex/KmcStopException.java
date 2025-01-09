@@ -7,7 +7,7 @@ public class KmcStopException extends KmcException {
     /**
      * Constructor
      *
-     * @param format
+     * @param format message format
      */
     public KmcStopException(String format) {
         super(format);

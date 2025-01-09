@@ -3,6 +3,9 @@ package gov.nasa.jpl.ammos.asec.kmc.api.sa;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+/**
+ * AOS Security Association
+ */
 @Entity(name = "SecAssnAos")
 @Table(name = "security_associations_aos")
 public class SecAssnAos extends ASecAssn {
@@ -16,7 +19,7 @@ public class SecAssnAos extends ASecAssn {
     /**
      * Constructor
      *
-     * @param id
+     * @param id SPI SCID
      */
     public SecAssnAos(SpiScid id) {
         super(id);

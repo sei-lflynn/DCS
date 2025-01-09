@@ -11,6 +11,9 @@ import picocli.CommandLine;
 
 import java.util.Scanner;
 
+/**
+ * Expire SAs
+ */
 @CommandLine.Command(
         name = "expire",
         description = "Expire a Security Assocation",
@@ -75,6 +78,11 @@ public class SaExpire extends BaseCliApp {
         return exit;
     }
 
+    /**
+     * Main
+     *
+     * @param args args
+     */
     public static void main(String... args) {
         int exit = new CommandLine(new SaExpire()).execute(args);
         System.exit(exit);

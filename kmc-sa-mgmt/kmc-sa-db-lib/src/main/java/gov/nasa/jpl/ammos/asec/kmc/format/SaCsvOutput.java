@@ -15,7 +15,13 @@ import java.util.List;
  */
 public class SaCsvOutput implements IOutput {
 
+    /**
+     * Extended output template
+     */
     public static final String  TEMPLATES_EXTENDED_VM  = "templates/extended.vm";
+    /**
+     * Condensed output template
+     */
     public static final String  TEMPLATES_CONDENSED_VM = "templates/condensed.vm";
     private final       boolean extended;
 

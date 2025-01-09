@@ -84,6 +84,11 @@ public class SaList extends BaseCliApp {
         return 0;
     }
 
+    /**
+     * Main
+     *
+     * @param args args
+     */
     public static void main(String... args) {
         int exitCode = new CommandLine(new SaList()).execute(args);
         System.exit(exitCode);

@@ -27,6 +27,7 @@ public class SaCsvInput {
      * Parse CSV from reader
      *
      * @param reader CSV input
+     * @param type   frame type
      * @return list of SAs from CSV
      * @throws KmcException ex
      */
@@ -79,6 +80,7 @@ public class SaCsvInput {
      * Convert a parsed CSV record to a Security Association object
      *
      * @param record csv record
+     * @param type   frame type
      * @return sa
      * @throws KmcException ex
      */

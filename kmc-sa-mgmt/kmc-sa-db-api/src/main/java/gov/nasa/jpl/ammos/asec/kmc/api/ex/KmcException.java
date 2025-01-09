@@ -15,7 +15,7 @@ public class KmcException extends Exception {
     /**
      * Constructor
      *
-     * @param format
+     * @param format format string
      */
     public KmcException(String format) {
         super(format);
@@ -33,8 +33,8 @@ public class KmcException extends Exception {
     /**
      * Constructor
      *
-     * @param message
-     * @param cause
+     * @param message message
+     * @param cause   cause
      */
     public KmcException(String message, Throwable cause) {
         super(message, cause);

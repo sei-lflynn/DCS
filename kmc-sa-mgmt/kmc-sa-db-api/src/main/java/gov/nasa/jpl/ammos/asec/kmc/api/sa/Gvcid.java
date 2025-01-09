@@ -18,10 +18,23 @@ import java.io.Serializable;
 public class Gvcid implements Serializable {
 
     private static final ObjectMapper mapper = new ObjectMapper();
-    private              Byte         tfvn;
-    private              Short        scid;
-    private              Byte         vcid;
-    private              Byte         mapid;
+
+    /**
+     * TFVN
+     */
+    private Byte  tfvn;
+    /**
+     * SCID
+     */
+    private Short scid;
+    /**
+     * VCID
+     */
+    private Byte  vcid;
+    /**
+     * MAP ID
+     */
+    private Byte  mapid;
 
     /**
      * Constructor

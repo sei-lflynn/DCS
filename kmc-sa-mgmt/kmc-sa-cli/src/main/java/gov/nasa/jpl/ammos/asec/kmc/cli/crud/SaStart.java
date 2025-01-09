@@ -41,6 +41,11 @@ public class SaStart extends BaseCliApp {
         return exit;
     }
 
+    /**
+     * Main
+     *
+     * @param args args
+     */
     public static void main(String... args) {
         int exit = new CommandLine(new SaStart()).execute(args);
         System.exit(exit);

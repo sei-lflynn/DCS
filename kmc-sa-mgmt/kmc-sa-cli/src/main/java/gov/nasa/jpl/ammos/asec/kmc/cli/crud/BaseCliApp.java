@@ -38,35 +38,67 @@ abstract class BaseCliApp implements Callable<Integer> {
      */
     public static final String DEFAULT_KMC_HOME;
 
-
+    /**
+     * Logger
+     */
     protected static final Logger LOG = LoggerFactory.getLogger(BaseCliApp.class);
 
+    /**
+     * CLI spec
+     */
     @CommandLine.Spec
     protected CommandLine.Model.CommandSpec spec;
 
+    /**
+     * Frame type
+     */
     @CommandLine.Option(names = "--type", required = false, defaultValue = "TC", description = "frame type. TC " +
             "(default), TM, or AOS", converter = FrameTypeConverter.class)
     public FrameType frameType = FrameType.TC;
 
+    /**
+     * Constructor
+     */
     public BaseCliApp() {
 
     }
 
+    /**
+     * Log message to console
+     *
+     * @param message message
+     */
     public void console(String message) {
         spec.commandLine().getOut().println(message);
         LOG.info(message);
     }
 
+    /**
+     * Log message to error
+     *
+     * @param message message
+     */
     public void error(String message) {
         spec.commandLine().getErr().println(message);
         LOG.error(message);
     }
 
+    /**
+     * Log exception to error
+     *
+     * @param message message
+     * @param e       exception
+     */
     public void error(String message, Exception e) {
         spec.commandLine().getErr().println(message);
         LOG.error(message, e);
     }
 
+    /**
+     * Log message to warn
+     *
+     * @param message message
+     */
     public void warn(String message) {
         spec.commandLine().getErr().println(message);
         LOG.warn(message);

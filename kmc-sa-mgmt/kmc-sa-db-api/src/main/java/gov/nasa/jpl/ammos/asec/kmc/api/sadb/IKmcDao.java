@@ -12,6 +12,11 @@ import java.util.List;
  */
 public interface IKmcDao extends AutoCloseable {
 
+    /**
+     * Get a New DB session
+     *
+     * @return DB session
+     */
     IDbSession newSession();
 
     /**
@@ -23,6 +28,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param scid       spacecraft id
      * @param vcid       virtual channel id
      * @param mapid      multiplexer access point id
+     * @param type       frame type
      * @throws KmcException exception
      */
     void createSa(IDbSession IdbSession, Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid, FrameType type) throws KmcException;
@@ -35,6 +41,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param scid  spacecraft id
      * @param vcid  virtual channel id
      * @param mapid multiplexer access point id
+     * @param type  frame type
      * @return sa
      * @throws KmcException exception
      */
@@ -66,6 +73,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param ekid    encryption key id
      * @param ecs     encryption cipher suite
      * @param ecsLen  ecs length
+     * @param type    frame type
      * @throws KmcException exception
      */
     void rekeySaEnc(IDbSession session, SpiScid id, String ekid, byte[] ecs, Short ecsLen, FrameType type) throws KmcException;
@@ -77,6 +85,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param ekid   encryption key id
      * @param ecs    encryption cipher suite
      * @param ecsLen ecs length
+     * @param type   frame type
      * @return sa
      * @throws KmcException exception
      */
@@ -90,6 +99,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param akid    authentication key id
      * @param acs     authentication cipher suite
      * @param acsLen  acs length
+     * @param type    frame type
      * @throws KmcException exception
      */
     void rekeySaAuth(IDbSession session, SpiScid id, String akid, byte[] acs, Short acsLen, FrameType type) throws KmcException;
@@ -101,6 +111,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param akid   authentication key id
      * @param acs    authentication cipher suite
      * @param acsLen acs length
+     * @param type   frame type
      * @return sa
      * @throws KmcException exception
      */
@@ -111,6 +122,7 @@ public interface IKmcDao extends AutoCloseable {
      *
      * @param session database session
      * @param id      spi + scid
+     * @param type    frame type
      * @throws KmcException exception
      */
     void expireSa(IDbSession session, SpiScid id, FrameType type) throws KmcException;
@@ -118,7 +130,8 @@ public interface IKmcDao extends AutoCloseable {
     /**
      * Expire an SA
      *
-     * @param id spi + scid
+     * @param id   spi + scid
+     * @param type frame type
      * @return sa
      * @throws KmcException exception
      */
@@ -130,6 +143,7 @@ public interface IKmcDao extends AutoCloseable {
      * @param session database session
      * @param id      spi + scid
      * @param force   start SA, stopping other SAs with same GVCID
+     * @param type    frame type
      * @throws KmcException exception
      */
     void startSa(IDbSession session, SpiScid id, boolean force, FrameType type) throws KmcException;
@@ -139,6 +153,7 @@ public interface IKmcDao extends AutoCloseable {
      *
      * @param id    spi + scid
      * @param force start SA, stopping other SAs with same GVCID
+     * @param type  frame type
      * @return sa
      * @throws KmcException exception
      */
@@ -149,6 +164,7 @@ public interface IKmcDao extends AutoCloseable {
      *
      * @param session database session
      * @param id      spi + scid
+     * @param type    frame type
      * @throws KmcException exception
      */
     void stopSa(IDbSession session, SpiScid id, FrameType type) throws KmcException;
@@ -156,7 +172,8 @@ public interface IKmcDao extends AutoCloseable {
     /**
      * Stop an SA. Sets given SPI SA to KEYED.
      *
-     * @param id spi + scid
+     * @param id   spi + scid
+     * @param type frame type
      * @return sa
      * @throws KmcException exception
      */
@@ -167,6 +184,7 @@ public interface IKmcDao extends AutoCloseable {
      *
      * @param session database session
      * @param id      spi + scid
+     * @param type    frame type
      * @throws KmcException exception
      */
     void deleteSa(IDbSession session, SpiScid id, FrameType type) throws KmcException;
@@ -174,7 +192,8 @@ public interface IKmcDao extends AutoCloseable {
     /**
      * Delete an SA. Removes the SA from the DB.
      *
-     * @param id spi + scid
+     * @param id   spi + scid
+     * @param type frame type
      * @throws KmcException exception
      */
     void deleteSa(SpiScid id, FrameType type) throws KmcException;
@@ -184,6 +203,7 @@ public interface IKmcDao extends AutoCloseable {
      *
      * @param session database session
      * @param id      spi + scid
+     * @param type    frame type
      * @return security association
      * @throws KmcException exception
      */
@@ -192,7 +212,8 @@ public interface IKmcDao extends AutoCloseable {
     /**
      * Get an SA
      *
-     * @param id spi + scid
+     * @param id   spi + scid
+     * @param type frame type
      * @return security association
      * @throws KmcException exception
      */
@@ -202,6 +223,7 @@ public interface IKmcDao extends AutoCloseable {
      * Get all SAs with the provided database session
      *
      * @param session database session
+     * @param type    frame type
      * @return a list of SAs
      * @throws KmcException exception
      */
@@ -210,6 +232,7 @@ public interface IKmcDao extends AutoCloseable {
     /**
      * Get all SAs
      *
+     * @param type frame type
      * @return a list of SAs
      * @throws KmcException exception
      */

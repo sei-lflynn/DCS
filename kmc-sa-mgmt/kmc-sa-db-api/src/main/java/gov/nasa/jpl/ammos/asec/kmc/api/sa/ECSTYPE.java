@@ -24,8 +24,8 @@ public enum ECSTYPE {
     /**
      * constructor
      *
-     * @param value
-     * @param ivLen
+     * @param value ECS type byte value
+     * @param ivLen IV length
      */
     ECSTYPE(final byte[] value, final short ivLen) {
         this.value = Arrays.copyOf(value, value.length);
@@ -34,6 +34,9 @@ public enum ECSTYPE {
 
     /**
      * Return the specific enum for a given bytes, or NULL if it can't be found
+     *
+     * @param value ECS bytes
+     * @return ECS type
      */
     public static ECSTYPE fromBytes(byte[] value) {
         Optional<ECSTYPE> result =
@@ -47,6 +50,9 @@ public enum ECSTYPE {
 
     /**
      * Check if a given IV length would be acceptable for this ECS. Currently just a check of the ivLen field.
+     *
+     * @param proposedIvLen proposed IV length
+     * @return valid or invalid
      */
     public boolean validIvLen(short proposedIvLen) {
         return proposedIvLen == this.ivLen;

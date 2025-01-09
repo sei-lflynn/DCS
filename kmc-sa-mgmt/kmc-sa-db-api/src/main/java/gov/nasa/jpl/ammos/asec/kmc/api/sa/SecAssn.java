@@ -21,7 +21,7 @@ public class SecAssn extends ASecAssn {
     /**
      * Constructor
      *
-     * @param id
+     * @param id SPI SCID
      */
     public SecAssn(SpiScid id) {
         super(id);

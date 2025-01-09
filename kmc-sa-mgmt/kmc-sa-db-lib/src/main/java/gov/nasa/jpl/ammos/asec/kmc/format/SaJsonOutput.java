@@ -14,6 +14,9 @@ import java.util.List;
  * Security Association JSON output format
  */
 public class SaJsonOutput implements IOutput {
+    /**
+     * Constructor
+     */
     public SaJsonOutput() {
 
     }

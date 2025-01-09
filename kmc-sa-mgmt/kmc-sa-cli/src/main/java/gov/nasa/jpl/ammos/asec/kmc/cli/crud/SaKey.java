@@ -119,6 +119,11 @@ public class SaKey extends BaseCliApp {
         updateEnc = ecsBytes != null;
     }
 
+    /**
+     * Main
+     *
+     * @param args args
+     */
     public static void main(String... args) {
         int exit = new CommandLine(new SaKey()).execute(args);
         System.exit(exit);

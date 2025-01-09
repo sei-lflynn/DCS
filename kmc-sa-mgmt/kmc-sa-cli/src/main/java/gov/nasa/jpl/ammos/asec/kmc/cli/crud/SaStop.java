@@ -39,6 +39,11 @@ public class SaStop extends BaseCliApp {
         return exit;
     }
 
+    /**
+     * Main
+     *
+     * @param args args
+     */
     public static void main(String... args) {
         int exit = new CommandLine(new SaStop()).execute(args);
         System.exit(exit);

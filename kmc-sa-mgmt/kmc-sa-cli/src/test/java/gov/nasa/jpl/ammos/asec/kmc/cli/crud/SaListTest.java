@@ -217,7 +217,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
-                           type: %s
+                           type: %s -- note: field not present in DB, maps to a specific frame table
                      *************************** 2. row ***************************
                             spi: 2
                            ekid: 130
@@ -244,7 +244,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
-                           type: %s
+                           type: %s -- note: field not present in DB, maps to a specific frame table
                      *************************** 3. row ***************************
                             spi: 3
                            ekid: 130
@@ -271,7 +271,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
-                           type: %s
+                           type: %s -- note: field not present in DB, maps to a specific frame table
                      *************************** 4. row ***************************
                             spi: 4
                            ekid: 130
@@ -298,7 +298,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
-                           type: %s
+                           type: %s -- note: field not present in DB, maps to a specific frame table
                      *************************** 5. row ***************************
                             spi: 5
                            ekid:\s
@@ -325,7 +325,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 4
                            arsn: 0x00000001
                           arsnw: 5
-                           type: %s
+                           type: %s -- note: field not present in DB, maps to a specific frame table
                      """.formatted(type.name(), type.name(), type.name(), type.name(), type.name()), w.toString());
     }
 

@@ -1,12 +1,18 @@
 package gov.nasa.jpl.ammos.asec.kmc.cli;
 
-import gov.nasa.jpl.ammos.asec.kmc.cli.crud.*;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaCreate;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaDelete;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaExpire;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaKey;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaList;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaStart;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaStop;
+import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaUpdate;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
 import picocli.CommandLine;
 
 /**
  * Main CLI launcher class
- *
  */
 @CommandLine.Command(name = "kmc-sa-mgmt", subcommands = {SaList.class,
         SaCreate.class,
@@ -18,6 +24,11 @@ import picocli.CommandLine;
         SaExpire.class}, description = "KMC Security Association Management CLI", mixinStandardHelpOptions = true,
         versionProvider = Version.class)
 public class Main {
+    /**
+     * Main
+     *
+     * @param args args
+     */
     public static void main(String... args) {
         int exit =
                 new CommandLine(new Main()).setExecutionExceptionHandler(new PrintExceptionMessageHandler()).execute(args);
@@ -27,7 +38,6 @@ public class Main {
 
 /**
  * Exception handler
- *
  */
 class PrintExceptionMessageHandler implements CommandLine.IExecutionExceptionHandler {
     @Override

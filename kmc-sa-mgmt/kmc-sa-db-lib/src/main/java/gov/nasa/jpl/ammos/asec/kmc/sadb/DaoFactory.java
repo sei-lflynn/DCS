@@ -29,7 +29,7 @@ public class DaoFactory {
                     throw new KmcException("When TLS is enabled, the " + "truststore and truststore password must be "
                             + "configured");
                 }
-                builder.useTls(cfg.getTruststore(), cfg.getTruststorePass(), cfg.getOverrideJvmTrustore());
+                builder.useTls(cfg.getTruststore(), cfg.getTruststorePass(), cfg.getOverrideJvmTruststore());
             }
 
             if (cfg.getUseMtls()) {

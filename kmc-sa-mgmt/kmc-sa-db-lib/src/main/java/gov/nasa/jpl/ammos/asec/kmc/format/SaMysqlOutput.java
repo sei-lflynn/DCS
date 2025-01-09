@@ -14,6 +14,9 @@ import java.util.List;
  * Security Association output format that imitates the MySQL key-value format
  */
 public class SaMysqlOutput implements IOutput {
+    /**
+     * Constructor
+     */
     public SaMysqlOutput() {
 
     }
