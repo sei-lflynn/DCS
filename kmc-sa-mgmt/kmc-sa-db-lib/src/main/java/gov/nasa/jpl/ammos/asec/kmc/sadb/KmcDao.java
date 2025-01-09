@@ -20,6 +20,7 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -425,7 +426,15 @@ public class KmcDao implements IKmcDao {
     @Override
     public List<? extends ISecAssn> getSas(FrameType type) throws KmcException {
         try (IDbSession session = newSession()) {
-            return getSas(session, type);
+            if (type == FrameType.ALL) {
+                List<ISecAssn> sas = new ArrayList<>();
+                sas.addAll(getSas(session, FrameType.TC));
+                sas.addAll(getSas(session, FrameType.TM));
+                sas.addAll(getSas(session, FrameType.AOS));
+                return sas;
+            } else {
+                return getSas(session, type);
+            }
         } catch (KmcException e) {
             throw e;
         } catch (Exception e) {

@@ -65,7 +65,6 @@ public class SaCreate extends BaseCreateUpdate {
                         console(String.format("%s creating SA %d/%d", user, sa.getSpi(), sa.getScid()));
                         dao.createSa(session, sa);
                         console(String.format("%s created SA %d/%d", user, sa.getSpi(), sa.getScid()));
-
                     } catch (KmcException e) {
                         console(String.format("SA %d/%d creation FAILED", sa.getSpi(), sa.getScid()));
                         error(e.getMessage());

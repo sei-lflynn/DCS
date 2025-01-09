@@ -8,6 +8,7 @@ import gov.nasa.jpl.ammos.asec.kmc.api.sa.SpiScid;
 import org.junit.Test;
 import picocli.CommandLine;
 
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -18,8 +19,9 @@ import static org.junit.Assert.*;
  */
 public class SaUpdateTest extends BaseCommandLineTest {
 
-    public static final String BULK_SA_FILE  = "kmc-all-SAs.csv";
-    public static final String H2_SA_UPDATES = "test-sas-h2.csv";
+    public static final String BULK_SA_FILE   = "kmc-all-SAs.csv";
+    public static final String BULK_SA_FILE_2 = "kmc-all-SAs-type.csv";
+    public static final String H2_SA_UPDATES  = "test-sas-h2.csv";
 
     @Test
     public void testUpdateBulkNotExist() throws KmcException {
@@ -37,6 +39,33 @@ public class SaUpdateTest extends BaseCommandLineTest {
         assertEquals(0, exit);
         sas = dao.getSas(type);
         assertEquals(5, sas.size());
+    }
+
+    @Test
+    public void testUpdateBulkNotExistType() throws KmcException, SQLException {
+        testUpdateBulkNotExistType(FrameType.TC, 5);
+        afterTest();
+        beforeTest();
+        testUpdateBulkNotExistType(FrameType.TM, 5);
+        afterTest();
+        beforeTest();
+        testUpdateBulkNotExistType(FrameType.AOS, 5);
+        afterTest();
+        beforeTest();
+        testUpdateBulkNotExistType(FrameType.ALL, 15);
+        afterTest();
+        beforeTest();
+    }
+
+    public void testUpdateBulkNotExistType(FrameType type, int expect) throws KmcException {
+        List<? extends ISecAssn> sas = dao.getSas(type);
+        assertEquals(type.name(), expect, sas.size());
+        CommandLine cli = getCmd(new SaUpdate(), true);
+        int exit = cli.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
+                BULK_SA_FILE_2).getFile()), String.format("--type=%s", type.name()));
+        assertEquals(type.name(), 0, exit);
+        sas = dao.getSas(type);
+        assertEquals(type.name(), expect, sas.size());
     }
 
     @Test

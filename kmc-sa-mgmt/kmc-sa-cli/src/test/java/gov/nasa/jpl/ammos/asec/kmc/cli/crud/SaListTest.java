@@ -30,9 +30,9 @@ public class SaListTest extends BaseCommandLineTest {
         int          exit = cli.execute("--spi=1", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
         assertEquals("""
-                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast"
-                     "1","46","0","0","0","3","130","1","","1"
-                     """, w.toString());
+                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast","type"
+                     "1","46","0","0","0","3","130","1","","1","%s"
+                     """.formatted(type.name()), w.toString());
     }
 
     @Test
@@ -48,8 +48,8 @@ public class SaListTest extends BaseCommandLineTest {
         CommandLine  cli  = getCmd(new SaList(), true, out, null);
         int          exit = cli.execute("--scid=1", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        assertEquals("\"spi\",\"scid\",\"vcid\",\"tfvn\",\"mapid\",\"sa_state\",\"ekid\",\"est\",\"akid\"," + "\"ast" +
-                "\"\n", w.toString());
+        assertEquals("\"spi\",\"scid\",\"vcid\",\"tfvn\",\"mapid\",\"sa_state\",\"ekid\",\"est\",\"akid\",\"ast\"," +
+                "\"type\"\n", w.toString());
     }
 
     @Test
@@ -66,9 +66,9 @@ public class SaListTest extends BaseCommandLineTest {
         int          exit = cli.execute("--spi=2", "--scid=46", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
         assertEquals("""
-                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast"
-                     "2","46","1","0","0","3","130","1","","1"
-                     """, w.toString());
+                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast","type"
+                     "2","46","1","0","0","3","130","1","","1","%s"
+                     """.formatted(type.name()), w.toString());
     }
 
     @Test
@@ -86,13 +86,13 @@ public class SaListTest extends BaseCommandLineTest {
         int         exit = cli.execute("--active", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
         assertEquals("""
-                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast"
-                     "1","46","0","0","0","3","130","1","","1"
-                     "2","46","1","0","0","3","130","1","","1"
-                     "3","46","2","0","0","3","130","1","","1"
-                     "4","46","3","0","0","3","130","0","","1"
-                     "5","46","7","0","0","3","","0","130","1"
-                     """, w.toString());
+                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast","type"
+                     "1","46","0","0","0","3","130","1","","1","%s"
+                     "2","46","1","0","0","3","130","1","","1","%s"
+                     "3","46","2","0","0","3","130","1","","1","%s"
+                     "4","46","3","0","0","3","130","0","","1","%s"
+                     "5","46","7","0","0","3","","0","130","1","%s"
+                     """.formatted(type.name(), type.name(), type.name(), type.name(), type.name()), w.toString());
     }
 
     @Test
@@ -110,14 +110,16 @@ public class SaListTest extends BaseCommandLineTest {
         int         exit = cli.execute("--inactive", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
         assertEquals("""
-                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast"
-                     "6","46","0","0","0","1","","0","","0"
-                     """, w.toString());
+                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast","type"
+                     "6","46","0","0","0","1","","0","","0","%s"
+                     """.formatted(type.name()), w.toString());
     }
 
     @Test
     public void listFail() {
-
+        listFail(FrameType.TC);
+        listFail(FrameType.TM);
+        listFail(FrameType.AOS);
     }
 
     public void listFail(FrameType type) {
@@ -143,13 +145,13 @@ public class SaListTest extends BaseCommandLineTest {
         int          exit = cli.execute(String.format("--type=%s", type.name()));
         assertEquals(0, exit);
         assertEquals("""
-                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast"
-                     "1","46","0","0","0","3","130","1","","1"
-                     "2","46","1","0","0","3","130","1","","1"
-                     "3","46","2","0","0","3","130","1","","1"
-                     "4","46","3","0","0","3","130","0","","1"
-                     "5","46","7","0","0","3","","0","130","1"
-                     """, w.toString());
+                     "spi","scid","vcid","tfvn","mapid","sa_state","ekid","est","akid","ast","type"
+                     "1","46","0","0","0","3","130","1","","1","%s"
+                     "2","46","1","0","0","3","130","1","","1","%s"
+                     "3","46","2","0","0","3","130","1","","1","%s"
+                     "4","46","3","0","0","3","130","0","","1","%s"
+                     "5","46","7","0","0","3","","0","130","1","%s"
+                     """.formatted(type.name(), type.name(), type.name(), type.name(), type.name()), w.toString());
     }
 
     @Test
@@ -166,13 +168,13 @@ public class SaListTest extends BaseCommandLineTest {
         int          exit = cli.execute("--extended", String.format("--type=%s", type.name()));
         assertEquals(0, exit);
         assertEquals("""
-                     "spi","scid","vcid","tfvn","mapid","sa_state","st","shivf_len","shsnf_len","shplf_len","stmacf_len","ecs","ekid","iv_len","iv","acs","akid","abm_len","abm","arsn_len","arsn","arsnw"
-                     "1","46","0","0","0","3","AUTHENTICATED_ENCRYPTION","12","0","0","16","0x01","130","0","","0x00","","19","0x00000000000000000000000000000000000000","0","0x0000000000000000000000000000000000000000","5"
-                     "2","46","1","0","0","3","AUTHENTICATED_ENCRYPTION","12","0","0","16","0x01","130","12","0x000000000000000000000001","0x00","","19","0x00000000000000000000000000000000000000","0","0x0000000000000000000000000000000000000000","5"
-                     "3","46","2","0","0","3","AUTHENTICATED_ENCRYPTION","12","0","0","16","0x01","130","12","0x000000000000000000000001","0x00","","19","0x00000000000000000000000000000000000000","0","0x0000000000000000000000000000000000000000","5"
-                     "4","46","3","0","0","3","AUTHENTICATION","12","0","0","16","0x01","130","12","0x000000000000000000000001","0x00","","1024","0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","0","0x0000000000000000000000000000000000000000","5"
-                     "5","46","7","0","0","3","AUTHENTICATION","0","4","0","16","0x00","","0","","0x01","130","1024","0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","4","0x00000001","5"
-                     """, w.toString());
+                     "spi","scid","vcid","tfvn","mapid","sa_state","st","shivf_len","shsnf_len","shplf_len","stmacf_len","ecs","ekid","iv_len","iv","acs","akid","abm_len","abm","arsn_len","arsn","arsnw","type"
+                     "1","46","0","0","0","3","AUTHENTICATED_ENCRYPTION","12","0","0","16","0x01","130","0","","0x00","","19","0x00000000000000000000000000000000000000","0","0x0000000000000000000000000000000000000000","5","%s"
+                     "2","46","1","0","0","3","AUTHENTICATED_ENCRYPTION","12","0","0","16","0x01","130","12","0x000000000000000000000001","0x00","","19","0x00000000000000000000000000000000000000","0","0x0000000000000000000000000000000000000000","5","%s"
+                     "3","46","2","0","0","3","AUTHENTICATED_ENCRYPTION","12","0","0","16","0x01","130","12","0x000000000000000000000001","0x00","","19","0x00000000000000000000000000000000000000","0","0x0000000000000000000000000000000000000000","5","%s"
+                     "4","46","3","0","0","3","AUTHENTICATION","12","0","0","16","0x01","130","12","0x000000000000000000000001","0x00","","1024","0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","0","0x0000000000000000000000000000000000000000","5","%s"
+                     "5","46","7","0","0","3","AUTHENTICATION","0","4","0","16","0x00","","0","","0x01","130","1024","0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","4","0x00000001","5","%s"
+                     """.formatted(type.name(), type.name(), type.name(), type.name(), type.name()), w.toString());
     }
 
     @Test
@@ -215,6 +217,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
+                           type: %s
                      *************************** 2. row ***************************
                             spi: 2
                            ekid: 130
@@ -241,6 +244,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
+                           type: %s
                      *************************** 3. row ***************************
                             spi: 3
                            ekid: 130
@@ -267,6 +271,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
+                           type: %s
                      *************************** 4. row ***************************
                             spi: 4
                            ekid: 130
@@ -293,6 +298,7 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 0
                            arsn: 0x0000000000000000000000000000000000000000
                           arsnw: 5
+                           type: %s
                      *************************** 5. row ***************************
                             spi: 5
                            ekid:\s
@@ -319,7 +325,8 @@ public class SaListTest extends BaseCommandLineTest {
                        arsn_len: 4
                            arsn: 0x00000001
                           arsnw: 5
-                     """, w.toString());
+                           type: %s
+                     """.formatted(type.name(), type.name(), type.name(), type.name(), type.name()), w.toString());
     }
 
     @Test
@@ -361,7 +368,8 @@ public class SaListTest extends BaseCommandLineTest {
                              "abm": "0x00000000000000000000000000000000000000",
                              "arsn_len": 0,
                              "arsn": "0x0000000000000000000000000000000000000000",
-                             "arsnw": 5
+                             "arsnw": 5,
+                             "type": "%s"
                          }
                          {
                              "spi": 2,
@@ -387,7 +395,8 @@ public class SaListTest extends BaseCommandLineTest {
                              "abm": "0x00000000000000000000000000000000000000",
                              "arsn_len": 0,
                              "arsn": "0x0000000000000000000000000000000000000000",
-                             "arsnw": 5
+                             "arsnw": 5,
+                             "type": "%s"
                          }
                          {
                              "spi": 3,
@@ -413,7 +422,8 @@ public class SaListTest extends BaseCommandLineTest {
                              "abm": "0x00000000000000000000000000000000000000",
                              "arsn_len": 0,
                              "arsn": "0x0000000000000000000000000000000000000000",
-                             "arsnw": 5
+                             "arsnw": 5,
+                             "type": "%s"
                          }
                          {
                              "spi": 4,
@@ -439,7 +449,8 @@ public class SaListTest extends BaseCommandLineTest {
                              "abm": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                              "arsn_len": 0,
                              "arsn": "0x0000000000000000000000000000000000000000",
-                             "arsnw": 5
+                             "arsnw": 5,
+                             "type": "%s"
                          }
                          {
                              "spi": 5,
@@ -465,9 +476,10 @@ public class SaListTest extends BaseCommandLineTest {
                              "abm": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                              "arsn_len": 4,
                              "arsn": "0x00000001",
-                             "arsnw": 5
+                             "arsnw": 5,
+                             "type": "%s"
                          }
                      }
-                     """, w.toString());
+                     """.formatted(type.name(), type.name(), type.name(), type.name(), type.name()), w.toString());
     }
 }

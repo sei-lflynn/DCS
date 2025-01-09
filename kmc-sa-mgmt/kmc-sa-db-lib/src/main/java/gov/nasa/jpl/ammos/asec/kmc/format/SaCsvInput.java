@@ -31,12 +31,36 @@ public class SaCsvInput {
      * @throws KmcException ex
      */
     public List<ISecAssn> parseCsv(Reader reader, FrameType type) throws KmcException {
+        // come in with a desired frame type.
         List<ISecAssn> sas = new ArrayList<>();
         try {
             Iterable<CSVRecord> records =
                     CSVFormat.Builder.create(CSVFormat.EXCEL).setHeader().setSkipHeaderRecord(false).build().parse(reader);
             for (CSVRecord record : records) {
-                ISecAssn sa = convertRecord(record, type);
+                // if the type column is mapped, then we only want to include those that match the desired type (or ALL)
+                ISecAssn sa;
+                if (record.isMapped("type")) {
+                    FrameType recType = FrameType.fromString(record.get("type"));
+                    if (type == FrameType.ALL || recType == type) {
+                        // convert if the desired type is ALL, or the recType == the desired type
+                        sa = convertRecord(record, recType);
+                        // else, skip
+                    } else if (type == FrameType.UNKNOWN) {
+                        LOG.warn("Unknown frame type encountered, skipping: {}", record.get("type"));
+                        continue;
+                    } else {
+                        continue;
+                    }
+                } else {
+                    // unmapped, need to coerce it to desired type, default to TC
+                    FrameType coerceTo;
+                    if (type == FrameType.ALL) {
+                        coerceTo = FrameType.TC;
+                    } else {
+                        coerceTo = type;
+                    }
+                    sa = convertRecord(record, coerceTo);
+                }
                 if (sa != null) {
                     sas.add(sa);
                 }

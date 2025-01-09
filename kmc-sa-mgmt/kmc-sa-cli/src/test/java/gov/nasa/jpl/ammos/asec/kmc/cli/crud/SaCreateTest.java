@@ -11,7 +11,9 @@ import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +22,8 @@ import static org.junit.Assert.*;
  */
 public class SaCreateTest extends BaseCommandLineTest {
 
-    public static final String BULK_SA_FILE = "kmc-all-SAs.csv";
+    public static final String BULK_SA_FILE   = "kmc-all-SAs.csv";
+    public static final String BULK_SA_FILE_2 = "kmc-all-SAs-type.csv";
 
     @Test
     public void testCreateSasBulkFail() {
@@ -30,14 +33,13 @@ public class SaCreateTest extends BaseCommandLineTest {
     }
 
     public void createSasBulkFail(FrameType type) {
-        CommandLine cmd      = getCmd(new SaCreate(), true, null, null);
-        int         exitCode = cmd.execute(String.format("--file=%s", BULK_SA_FILE), String.format("--type=%s",
+        CommandLine cmd = getCmd(new SaCreate(), true, null, null);
+        int exitCode = cmd.execute(String.format("--file=%s", BULK_SA_FILE), String.format("--type=%s",
                 type.name()));
         assertNotEquals(0, exitCode);
     }
 
     @Test
-
     public void testCreateSasBulkFailDupe() throws KmcException {
         createSasBulkFailDupe(FrameType.TC);
         createSasBulkFailDupe(FrameType.TM);
@@ -81,6 +83,40 @@ public class SaCreateTest extends BaseCommandLineTest {
         assertEquals(w.toString(), 86, sas.size());
     }
 
+    @Test
+    public void testCreateSasBulkByType() throws KmcException, SQLException {
+        afterTest();
+        testCreateSasBulkType(FrameType.TC, 32);
+        afterTest();
+        testCreateSasBulkType(FrameType.TM, 32);
+        afterTest();
+        testCreateSasBulkType(FrameType.AOS, 17);
+        afterTest();
+        testCreateSasBulkType(FrameType.ALL, 81);
+        List<? extends ISecAssn> sas = dao.getSas(FrameType.ALL);
+        List<ISecAssn> tc =
+                sas.stream().filter(sa -> sa.getType() == FrameType.TC).collect(Collectors.toList());
+        assertEquals("bulk ALL tc records", 32, tc.size());
+        List<ISecAssn> tm = sas.stream().filter(sa -> sa.getType() == FrameType.TM).collect(Collectors.toList());
+        assertEquals("bulk ALL tm records", 32, tm.size());
+        List<ISecAssn> aos = sas.stream().filter(sa -> sa.getType() == FrameType.AOS).collect(Collectors.toList());
+        assertEquals("bulk ALL aos records", 17, aos.size());
+        afterTest();
+    }
+
+    public void testCreateSasBulkType(FrameType type, int expected) throws KmcException {
+        StringWriter w   = new StringWriter();
+        PrintWriter  err = new PrintWriter(w);
+        StringWriter o   = new StringWriter();
+        PrintWriter  out = new PrintWriter(o);
+        CommandLine  cmd = getCmd(new SaCreate(), true, out, err);
+        int exitCode = cmd.execute(String.format("--file=%s",
+                getClass().getClassLoader().getResource(BULK_SA_FILE_2).getFile()), String.format("--type=%s",
+                type.name()));
+        assertEquals(w.toString(), 0, exitCode);
+        List<? extends ISecAssn> sas = dao.getSas(type);
+        assertEquals(w.toString(), expected, sas.size());
+    }
 
     @Test
     public void testCreateSaFail() {
