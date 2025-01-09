@@ -15,7 +15,6 @@
  * @author panjames
  */
 import React, {useEffect, useState} from "react";
-import SaTable from "./sa/SaTable";
 import {
     AppBar,
     Box,
@@ -24,7 +23,8 @@ import {
     CssBaseline,
     IconButton,
     ThemeProvider,
-    Toolbar, Tooltip,
+    Toolbar,
+    Tooltip,
     Typography
 } from "@mui/material";
 import '@fontsource/roboto/300.css'
@@ -40,6 +40,7 @@ import {Brightness3, Brightness7, Circle} from "@mui/icons-material";
 import {useLocalStorageBool} from "./sa/useLocalStorage";
 import ErrorBoundary from "./sa/ErrorBoundary";
 import {status} from "./sa/api";
+import BasicTabs from "./sa/SaTabs";
 
 function App() {
 
@@ -98,7 +99,8 @@ function App() {
                             marginY: 2,
                         }}>
                             <ErrorBoundary>
-                                <SaTable/>
+                                <BasicTabs/>
+                                {/*<SaTable/>*/}
                             </ErrorBoundary>
                         </Box>
                     </Container>
