@@ -354,7 +354,7 @@ public class SaControllerTest extends BaseH2Test {
         ObjectNode body = restTemplate.postForObject(getUrl() + "/key", rekey, ObjectNode.class);
         assertEquals("success", body.get("status").asText());
         ISecAssn keyed = dao.getSa(new SpiScid(100, (short) 46), FrameType.TC);
-        assertEquals(keyed.getEkid(), "bogus/ekid");
+        assertEquals("bogus/ekid", keyed.getEkid());
         rekey.put("akid", "bogus/akid");
         rekey.put("ekid", "");
         body = restTemplate.postForObject(getUrl() + "/key", rekey, ObjectNode.class);

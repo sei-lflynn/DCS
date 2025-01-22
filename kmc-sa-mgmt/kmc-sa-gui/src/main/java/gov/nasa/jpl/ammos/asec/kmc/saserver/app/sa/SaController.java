@@ -74,39 +74,119 @@ public class SaController {
      * Convenience class for reset ARSN operation
      */
     public static class IdArsn implements Serializable {
-        public SpiScid id;
+        private SpiScid id;
         @JsonSerialize(using = ByteArraySerializer.class)
         @JsonDeserialize(using = ByteArrayDeserializer.class)
-        public byte[]  arsn;
-        public Short   arsnLen;
-        public Short   arsnw;
+        private byte[]  arsn;
+        private Short   arsnLen;
+        private Short   arsnw;
+
+        public SpiScid getId() {
+            return id;
+        }
+
+        public void setId(SpiScid id) {
+            this.id = id;
+        }
+
+        public byte[] getArsn() {
+            return arsn;
+        }
+
+        public void setArsn(byte[] arsn) {
+            this.arsn = arsn;
+        }
+
+        public Short getArsnLen() {
+            return arsnLen;
+        }
+
+        public void setArsnLen(Short arsnLen) {
+            this.arsnLen = arsnLen;
+        }
+
+        public Short getArsnw() {
+            return arsnw;
+        }
+
+        public void setArsnw(Short arsnw) {
+            this.arsnw = arsnw;
+        }
     }
 
     /**
      * Convenience class for reset IV operation
      */
     public static class IdIv implements Serializable {
-        public SpiScid id;
+        private SpiScid id;
         @JsonSerialize(using = ByteArraySerializer.class)
         @JsonDeserialize(using = ByteArrayDeserializer.class)
-        public byte[]  iv;
-        public Short   ivLen;
+        private byte[]  iv;
+        private Short   ivLen;
+
+        public SpiScid getId() {
+            return id;
+        }
+
+        public void setId(SpiScid id) {
+            this.id = id;
+        }
+
+        public byte[] getIv() {
+            return iv;
+        }
+
+        public void setIv(byte[] iv) {
+            this.iv = iv;
+        }
+
+        public Short getIvLen() {
+            return ivLen;
+        }
+
+        public void setIvLen(Short ivLen) {
+            this.ivLen = ivLen;
+        }
     }
 
     /**
      * Convenience class for rekey operation
      */
     public static class Rekey implements Serializable {
-        public SpiScid id;
-        public String  ekid;
-        public String  akid;
+        private SpiScid id;
+        private String  ekid;
+        private String  akid;
+
+        public SpiScid getId() {
+            return id;
+        }
+
+        public void setId(SpiScid id) {
+            this.id = id;
+        }
+
+        public String getEkid() {
+            return ekid;
+        }
+
+        public void setEkid(String ekid) {
+            this.ekid = ekid;
+        }
+
+        public String getAkid() {
+            return akid;
+        }
+
+        public void setAkid(String akid) {
+            this.akid = akid;
+        }
     }
 
     @GetMapping("/api/sa")
     public List<ISecAssn> getSa(@RequestParam(required = false) String type,
                                 @RequestParam(required = false) Short scid,
                                 @RequestParam(required = false) Integer spi, HttpServletRequest request) throws KmcException {
-        FrameType frameType = FrameType.fromString(type);
+        FrameType frameType = type == null ? FrameType.ALL : FrameType.fromString(type);
         if (frameType == FrameType.UNKNOWN) {
             throw new KmcException(String.format("%s is an unknown frame type", type));
         }

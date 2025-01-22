@@ -32,7 +32,7 @@ import java.security.Security;
 
 @SpringBootApplication
 public class KmcSaMgmt extends SpringBootServletInitializer {
-    {
+    static {
         //Insert the bcfips provider into the java security providers list up front, so that tomcat and friends can
         // see it.
         Security.insertProviderAt(new BouncyCastleFipsProvider(), 1);
@@ -49,7 +49,7 @@ public class KmcSaMgmt extends SpringBootServletInitializer {
 
     @Bean
     @Scope("singleton")
-    public IKmcDao getDao() {
+    public IKmcDao getDao() throws KmcException {
         //NOTE: this hardcoded path may need to be set via params to pull from $CFGPATH  in the future, evaluate the
         // config method's behavior
         Config cfg = new Config(defaultKmcCfgPath, "kmc-sa-mgmt-service.properties");
@@ -60,9 +60,8 @@ public class KmcSaMgmt extends SpringBootServletInitializer {
         } catch (KmcException e) {
             if (e.getCause() instanceof HibernateException) {
                 LOG.error("Error starting database", e);
-            } else {
-                throw new RuntimeException(e);
             }
+            throw e;
         }
         return dao;
     }
@@ -148,7 +147,7 @@ public class KmcSaMgmt extends SpringBootServletInitializer {
     @Bean
     public FilterRegistrationBean<HttpHeaderSecurityFilter> httpHeaderSecurityFilterRegistration() {
         FilterRegistrationBean<HttpHeaderSecurityFilter> registration =
-                new FilterRegistrationBean<HttpHeaderSecurityFilter>();
+                new FilterRegistrationBean<>();
         registration.setDispatcherTypes(DispatcherType.REQUEST);
         registration.setFilter(new HttpHeaderSecurityFilter());
         registration.addUrlPatterns(hstsUrlPattern);

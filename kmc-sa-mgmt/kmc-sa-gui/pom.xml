@@ -25,7 +25,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>groupId</groupId>
     <artifactId>kmc-sa-gui</artifactId>
     <name>ASEC KMC SA GUI Server and Frontend</name>
     <version>3.7.0</version>
@@ -236,22 +235,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--     <plugin>
-
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.1.0</version>
-                    <configuration>
-                        <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>gov.nasa.jpl.ammos.asec.kmc.saserver.app.KmcSaMgmt</mainClass>
-                        </manifest>
-                        </archive>
-                    </configuration>
-                </plugin> -->
-
         </plugins>
     </build>
 

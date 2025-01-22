@@ -60,6 +60,9 @@ public enum FrameType {
      * @return frame type
      */
     public static FrameType fromString(String input) {
+        if (input == null) {
+            return UNKNOWN;
+        }
         return switch (input) {
             case "TC" -> TC;
             case "TM" -> TM;
