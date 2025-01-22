@@ -27,8 +27,8 @@ public class SaDeleteTest extends BaseH2Test {
     }
 
     public void testDelete(FrameType type) throws KmcException {
-        CommandLine              cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        CommandLine    cli = getCmd(true, null, null);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--scid=46", "-y", String.format("--type=%s", type.name()));
         sas = dao.getSas(type);
@@ -49,8 +49,8 @@ public class SaDeleteTest extends BaseH2Test {
         InputStream old = System.in;
         InputStream is  = new ByteArrayInputStream("y".getBytes(StandardCharsets.UTF_8));
         System.setIn(is);
-        CommandLine              cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        CommandLine    cli = getCmd(true, null, null);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--scid=46", String.format("--type=%s", type.name()));
         sas = dao.getSas(type);
@@ -72,8 +72,8 @@ public class SaDeleteTest extends BaseH2Test {
         InputStream old = System.in;
         InputStream is  = new ByteArrayInputStream("n".getBytes(StandardCharsets.UTF_8));
         System.setIn(is);
-        CommandLine              cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        CommandLine    cli = getCmd(true, null, null);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--scid=46", String.format("--type=%s", type.name()));
         sas = dao.getSas(type);
@@ -89,8 +89,8 @@ public class SaDeleteTest extends BaseH2Test {
     }
 
     public void testDeleteMulti(FrameType type) throws KmcException {
-        CommandLine              cli = getCmd(true, null, null);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        CommandLine    cli = getCmd(true, null, null);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
         cli.execute("--spi=1", "--spi=2", "--scid=46", "-y", String.format("--type=%s", type.name()));
         sas = dao.getSas(type);
@@ -122,7 +122,7 @@ public class SaDeleteTest extends BaseH2Test {
     }
 
     public void testDeleteFail(FrameType type) throws KmcException {
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
 
         CommandLine cli  = getCmd(true, null, null);

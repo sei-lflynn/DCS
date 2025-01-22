@@ -13,7 +13,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -79,7 +78,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 getClass().getClassLoader().getResource(BULK_SA_FILE).getFile()), String.format("--type=%s",
                 type.name()));
         assertEquals(w.toString(), 0, exitCode);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(w.toString(), 86, sas.size());
     }
 
@@ -93,13 +92,13 @@ public class SaCreateTest extends BaseCommandLineTest {
         testCreateSasBulkType(FrameType.AOS, 17);
         afterTest();
         testCreateSasBulkType(FrameType.ALL, 81);
-        List<? extends ISecAssn> sas = dao.getSas(FrameType.ALL);
+        List<ISecAssn> sas = dao.getSas(FrameType.ALL);
         List<ISecAssn> tc =
-                sas.stream().filter(sa -> sa.getType() == FrameType.TC).collect(Collectors.toList());
+                sas.stream().filter(sa -> sa.getType() == FrameType.TC).toList();
         assertEquals("bulk ALL tc records", 32, tc.size());
-        List<ISecAssn> tm = sas.stream().filter(sa -> sa.getType() == FrameType.TM).collect(Collectors.toList());
+        List<ISecAssn> tm = sas.stream().filter(sa -> sa.getType() == FrameType.TM).toList();
         assertEquals("bulk ALL tm records", 32, tm.size());
-        List<ISecAssn> aos = sas.stream().filter(sa -> sa.getType() == FrameType.AOS).collect(Collectors.toList());
+        List<ISecAssn> aos = sas.stream().filter(sa -> sa.getType() == FrameType.AOS).toList();
         assertEquals("bulk ALL aos records", 17, aos.size());
         afterTest();
     }
@@ -114,7 +113,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 getClass().getClassLoader().getResource(BULK_SA_FILE_2).getFile()), String.format("--type=%s",
                 type.name()));
         assertEquals(w.toString(), 0, exitCode);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(w.toString(), expected, sas.size());
     }
 
@@ -431,7 +430,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 type.name()));
 
         assertNotEquals(0, exitCode);
-        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
+        List<ISecAssn> sas = dao.getSas(FrameType.TC);
         assertEquals(5, sas.size());
     }
 
@@ -505,7 +504,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 0x11,
                 0x11}, sa.getAbm());
         assertEquals(20, (int) sa.getAbmLen());
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(6, sas.size());
     }
 
@@ -528,7 +527,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 "=0x111111111111111111111111111111111111111111", "--abmlen=20", String.format("--type=%s",
                 type.name()));
         assertNotEquals(0, exitCode);
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
     }
 
@@ -565,7 +564,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 0x00,
                 0x00}, sa.getAbm());
         assertEquals(19, (int) sa.getAbmLen());
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(6, sas.size());
     }
 
@@ -597,7 +596,7 @@ public class SaCreateTest extends BaseCommandLineTest {
         assertEquals(0, exitCode);
         ISecAssn sa = dao.getSa(new SpiScid(6, (short) 46), type);
         assertEquals(5, (short) sa.getArsnw());
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(6, sas.size());
     }
 
@@ -668,7 +667,7 @@ public class SaCreateTest extends BaseCommandLineTest {
                 , "--st=HI", String.format("--type=%s", type.name()));
         assertNotEquals(0, exitCode);
 
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
     }
 

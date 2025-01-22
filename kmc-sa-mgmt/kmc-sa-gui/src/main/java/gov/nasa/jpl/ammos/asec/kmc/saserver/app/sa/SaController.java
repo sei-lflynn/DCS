@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao.*;
 
@@ -58,9 +57,13 @@ import static gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao.*;
 @RestController
 public class SaController {
 
-    private static final Logger       LOG    = LoggerFactory.getLogger(SaController.class);
+    private static final Logger       LOG            = LoggerFactory.getLogger(SaController.class);
+    public static final  String       STATUS_KEY     = "status";
+    public static final  String       ERROR_STATUS   = "error";
+    public static final  String       SUCCESS_STATUS = "success";
+    public static final  String       MESSAGES_KEY   = "messages";
     private final        IKmcDao      dao;
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper         = new ObjectMapper();
 
     @Autowired
     public SaController(IKmcDao dao) {
@@ -100,18 +103,26 @@ public class SaController {
     }
 
     @GetMapping("/api/sa")
-    public List<? extends ISecAssn> getSa(@RequestParam(required = false) Short scid,
-                                          @RequestParam(required = false) Integer spi, HttpServletRequest request) throws KmcException {
-        LOG.info("{} retrieving all SAs", request.getRemoteAddr());
-        if (spi != null && scid != null) {
-            return Collections.singletonList(dao.getSa(new SpiScid(spi, scid), FrameType.TC));
+    public List<ISecAssn> getSa(@RequestParam(required = false) String type,
+                                @RequestParam(required = false) Short scid,
+                                @RequestParam(required = false) Integer spi, HttpServletRequest request) throws KmcException {
+        FrameType frameType = FrameType.fromString(type);
+        if (frameType == FrameType.UNKNOWN) {
+            throw new KmcException(String.format("%s is an unknown frame type", type));
         }
-        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
+        if (spi != null && scid != null) {
+            if (frameType == FrameType.ALL) {
+                throw new KmcException("must provide frame type when specifying SPI and SCID");
+            }
+            return Collections.singletonList(dao.getSa(new SpiScid(spi, scid), frameType));
+        }
+        LOG.info("{} retrieving {} SAs", request.getRemoteAddr(), type);
+        List<ISecAssn> sas = dao.getSas(frameType);
         if (scid != null) {
-            sas = sas.stream().filter(sa -> sa.getScid().equals(scid)).collect(Collectors.toList());
+            sas = sas.stream().filter(sa -> sa.getScid().equals(scid)).toList();
         }
         if (spi != null) {
-            sas = sas.stream().filter(sa -> sa.getSpi().equals(spi)).collect(Collectors.toList());
+            sas = sas.stream().filter(sa -> sa.getSpi().equals(spi)).toList();
         }
         return sas;
     }
@@ -224,27 +235,27 @@ public class SaController {
                     byte[] newArsn = new byte[idArsn.arsnLen];
                     System.arraycopy(idArsn.arsn, 0, newArsn, diff, idArsn.arsn.length);
                     idArsn.arsn = newArsn;
-                    respBody.withArray("messages").add("Array left padded with " + diff + " bytes");
+                    respBody.withArray(MESSAGES_KEY).add("Array left padded with " + diff + " bytes");
                 } else if (idArsn.arsn.length > idArsn.arsnLen) {
-                    respBody.put("status", "error");
-                    respBody.withArray("messages").add("ARSN is larger than ARSN length in bytes");
+                    respBody.put(STATUS_KEY, ERROR_STATUS);
+                    respBody.withArray(MESSAGES_KEY).add("ARSN is larger than ARSN length in bytes");
                     return ResponseEntity.badRequest().body(respBody);
                 }
                 sa.setArsn(idArsn.arsn);
                 sa.setArsnLen(idArsn.arsnLen);
                 sa.setArsnw(idArsn.arsnw);
                 dao.updateSa(sa);
-                respBody.put("status", "success");
+                respBody.put(STATUS_KEY, SUCCESS_STATUS);
                 LOG.info("{} reset ARSN on SA ({}/{})", request.getRemoteAddr(), idArsn.id.getSpi(),
                         idArsn.id.getScid());
                 return ResponseEntity.ok().body(respBody);
             } catch (IllegalArgumentException e) {
-                respBody.put("status", "error");
-                respBody.withArray("messages").add("ARSN input not a valid hex string");
+                respBody.put(STATUS_KEY, ERROR_STATUS);
+                respBody.withArray(MESSAGES_KEY).add("ARSN input not a valid hex string");
             }
         }
-        respBody.put("status", "error");
-        respBody.withArray("messages").add("An unknown error occurred");
+        respBody.put(STATUS_KEY, ERROR_STATUS);
+        respBody.withArray(MESSAGES_KEY).add("An unknown error occurred");
         LOG.info("{} failed to reset ARSN on SA ({}/{})", request.getRemoteAddr(), idArsn.id.getSpi(),
                 idArsn.id.getScid());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respBody);
@@ -287,7 +298,7 @@ public class SaController {
                     } catch (KmcException e) {
                         errors = true;
                         errs++;
-                        resp.withArray("messages").add(e.getMessage());
+                        resp.withArray(MESSAGES_KEY).add(e.getMessage());
                         session.rollback();
                     } finally {
                         if (session.isActive()) {
@@ -301,11 +312,11 @@ public class SaController {
         }
         HttpStatus status = HttpStatus.CREATED;
         if (!errors) {
-            resp.put("status", "success");
+            resp.put(STATUS_KEY, SUCCESS_STATUS);
             LOG.info("{} created {} SAs from file", request.getRemoteAddr(), count);
         } else {
             status = HttpStatus.BAD_REQUEST;
-            resp.put("status", "error");
+            resp.put(STATUS_KEY, ERROR_STATUS);
             LOG.info("{} failed to create SAs from file with {} errors", request.getRemoteAddr(), errs);
         }
         return new ResponseEntity<>(resp, status);
@@ -314,9 +325,9 @@ public class SaController {
     @GetMapping(value = "/api/sa/csv")
     public ResponseEntity<String> downloadCsv(HttpServletRequest request) throws KmcException {
         LOG.info("{} downloading SAs as CSV", request.getRemoteAddr());
-        SaCsvOutput              out = new SaCsvOutput(true);
-        List<? extends ISecAssn> sas = dao.getSas(FrameType.TC);
-        StringWriter             w   = new StringWriter();
+        SaCsvOutput    out = new SaCsvOutput(true);
+        List<ISecAssn> sas = dao.getSas(FrameType.TC);
+        StringWriter   w   = new StringWriter();
         try (PrintWriter pw = new PrintWriter(w)) {
             out.print(pw, sas);
         }
@@ -339,20 +350,20 @@ public class SaController {
                             byte[] newIv = new byte[idIv.ivLen];
                             System.arraycopy(idIv.iv, 0, newIv, diff, idIv.iv.length);
                             idIv.iv = newIv;
-                            respBody.withArray("messages").add("Array left padded with " + diff + " bytes");
+                            respBody.withArray(MESSAGES_KEY).add("Array left padded with " + diff + " bytes");
                         } else if (idIv.iv.length > idIv.ivLen) {
-                            respBody.put("status", "error");
-                            respBody.withArray("messages").add("IV is larger than IV length in bytes");
+                            respBody.put(STATUS_KEY, ERROR_STATUS);
+                            respBody.withArray(MESSAGES_KEY).add("IV is larger than IV length in bytes");
                             return ResponseEntity.badRequest().body(respBody);
                         }
                         sa.setIv(idIv.iv);
                         sa.setIvLen(idIv.ivLen);
                         dao.updateSa(dbSession, sa);
-                        respBody.put("status", "success");
+                        respBody.put(STATUS_KEY, SUCCESS_STATUS);
                         return ResponseEntity.ok().body(respBody);
                     } catch (IllegalArgumentException e) {
-                        respBody.put("status", "error");
-                        respBody.withArray("messages").add("IV input not a valid Base64 string");
+                        respBody.put(STATUS_KEY, ERROR_STATUS);
+                        respBody.withArray(MESSAGES_KEY).add("IV input not a valid Base64 string");
                     }
                 }
             } finally {
@@ -362,8 +373,8 @@ public class SaController {
             handleException(e);
         }
 
-        respBody.put("status", "error");
-        respBody.withArray("messages").add("An unknown error occurred");
+        respBody.put(STATUS_KEY, ERROR_STATUS);
+        respBody.withArray(MESSAGES_KEY).add("An unknown error occurred");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respBody);
     }
 
@@ -390,14 +401,14 @@ public class SaController {
             handleException(e);
         }
 
-        return ResponseEntity.ok().body(mapper.createObjectNode().put("status", "success"));
+        return ResponseEntity.ok().body(mapper.createObjectNode().put(STATUS_KEY, SUCCESS_STATUS));
     }
 
     @GetMapping(value = "/api/status")
-    public ResponseEntity<JsonNode> status() throws KmcException {
+    public ResponseEntity<JsonNode> status() {
         boolean    status = dao.status();
         ObjectNode node   = mapper.createObjectNode();
-        node.put("status", status ? "ok" : "database down");
+        node.put(STATUS_KEY, status ? "ok" : "database down");
         return new ResponseEntity<>(node, status ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -411,8 +422,8 @@ public class SaController {
     public ResponseEntity<Object> handleException(Exception e) {
         LOG.error("An exception occurred", e);
         ObjectNode node = mapper.createObjectNode();
-        node.put("status", "error");
-        node.withArray("messages").add(e.getMessage());
+        node.put(STATUS_KEY, ERROR_STATUS);
+        node.withArray(MESSAGES_KEY).add(e.getMessage());
         return new ResponseEntity<>(node, HttpStatus.BAD_REQUEST);
     }
 }

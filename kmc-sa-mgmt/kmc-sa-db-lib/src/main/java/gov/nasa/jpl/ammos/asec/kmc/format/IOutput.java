@@ -7,7 +7,6 @@ import java.util.List;
 
 /**
  * Security Association output interface
- *
  */
 public interface IOutput {
 
@@ -17,5 +16,5 @@ public interface IOutput {
      * @param writer output
      * @param saList list of security associations
      */
-    void print(PrintWriter writer, List<? extends ISecAssn> saList);
+    void print(PrintWriter writer, List<ISecAssn> saList);
 }

@@ -35,7 +35,7 @@ public class SaCsvOutput implements IOutput {
     }
 
     @Override
-    public void print(PrintWriter writer, List<? extends ISecAssn> sas) {
+    public void print(PrintWriter writer, List<ISecAssn> sas) {
         VelocityEngine engine = new VelocityEngine();
         engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());

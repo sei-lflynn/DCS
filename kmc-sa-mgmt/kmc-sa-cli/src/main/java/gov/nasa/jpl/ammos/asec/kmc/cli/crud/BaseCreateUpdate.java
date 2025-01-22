@@ -18,9 +18,6 @@ import java.io.IOException;
  */
 @CommandLine.Command
 public abstract class BaseCreateUpdate extends BaseCliApp {
-    @CommandLine.Spec
-    CommandLine.Model.CommandSpec spec;
-
     /**
      * SPI
      */

@@ -32,7 +32,7 @@ public class KmcDao implements IKmcDao {
     /**
      * Logger
      */
-    private static final Logger LOG                           = LoggerFactory.getLogger(IKmcDao.class);
+    private static final Logger LOG                           = LoggerFactory.getLogger(KmcDao.class);
     /**
      * SA Unkeyed constant
      */
@@ -65,6 +65,7 @@ public class KmcDao implements IKmcDao {
      * Hibernate connection URL key
      */
     public static final  String HIBERNATE_CONNECTION_URL      = "hibernate.connection.url";
+    public static final  String SQL_FROM                      = "FROM";
 
     private final Properties    properties = new Properties();
     private       Configuration config     = new Configuration();
@@ -184,7 +185,8 @@ public class KmcDao implements IKmcDao {
         int spi;
         try (Session session = factory.openSession()) {
             Integer maxSpi = session
-                    .createQuery("SELECT max(sa.id.spi) FROM " + type.toString() + " sa WHERE sa.id.scid = :scid",
+                    .createQuery("SELECT max(sa.id.spi) " + SQL_FROM + " " + type.toString() + " sa WHERE sa.id.scid " +
+                                    "= :scid",
                             Integer.class)
                     .setParameter("scid", scid)
                     .getSingleResult();
@@ -209,10 +211,10 @@ public class KmcDao implements IKmcDao {
             createSa(session, sa);
             session.commit();
         } catch (HibernateException e) {
-            LOG.error("Encountered Hibernate error while creating SA {}: {}", sa.toString(), e.getMessage());
+            LOG.error("Encountered Hibernate error while creating SA {}: {}", sa, e.getMessage());
             throw new KmcException("Unable to create SA due to Hibernate error: ", e);
         } catch (Exception e) {
-            LOG.error("Encountered unexpected error while creating SA {}: {}", sa.toString(), e.getMessage());
+            LOG.error("Encountered unexpected error while creating SA {}: {}", sa, e.getMessage());
             throw new KmcException("Unable to create SA due to unexpected error: ", e);
         }
         return getSa(sa.getId(), sa.getType());
@@ -340,17 +342,18 @@ public class KmcDao implements IKmcDao {
         } else if (sa.getSaState() == SA_OPERATIONAL) {
             throw new KmcStartException(String.format("SA %d/%d is already operational", id.getSpi(), id.getScid()));
         } else {
-            Query<? extends ISecAssn> q = ((DbSession) session).getSession().createQuery("FROM " + type.toString() +
-                    " AS sa WHERE sa" +
-                    ".id.scid = :scid" +
-                    " AND " +
-                    "sa.tfvn = :tfvn" +
-                    " AND " +
-                    "sa.vcid = :vcid" +
-                    " AND " +
-                    "sa.mapid = :mapid" +
-                    " AND " +
-                    "sa.id.spi != :subjectSpi", SecAssn.class);
+            Query<? extends ISecAssn> q =
+                    ((DbSession) session).getSession().createQuery(SQL_FROM + " " + type.toString() +
+                            " AS sa WHERE sa" +
+                            ".id.scid = :scid" +
+                            " AND " +
+                            "sa.tfvn = :tfvn" +
+                            " AND " +
+                            "sa.vcid = :vcid" +
+                            " AND " +
+                            "sa.mapid = :mapid" +
+                            " AND " +
+                            "sa.id.spi != :subjectSpi", SecAssn.class);
             q.setParameter("scid", sa.getId().getScid());
             q.setParameter("tfvn", sa.getTfvn());
             q.setParameter("vcid", sa.getVcid());
@@ -382,10 +385,9 @@ public class KmcDao implements IKmcDao {
             session.beginTransaction();
             startSa(session, id, force, type);
             session.commit();
+        } catch (KmcStartException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof KmcStartException) {
-                throw (KmcStartException) e;
-            }
             throw new KmcException(e);
         }
         return getSa(id, type);
@@ -415,10 +417,9 @@ public class KmcDao implements IKmcDao {
             session.beginTransaction();
             stopSa(session, id, type);
             session.commit();
+        } catch (KmcStopException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof KmcStopException) {
-                throw (KmcStopException) e;
-            }
             throw new KmcException(e);
         }
         return getSa(id, type);
@@ -468,22 +469,22 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public List<? extends ISecAssn> getSas(IDbSession session, FrameType type) throws KmcException {
+    public List<ISecAssn> getSas(IDbSession session, FrameType type) throws KmcException {
         isReady();
         return ((DbSession) session).getSession()
-                .createQuery("FROM " + type.toString(), type.getClazz())
-                .list();
+                .createQuery(SQL_FROM + " " + type.toString(), type.getClazz())
+                .list().stream().map(o -> (ISecAssn) o).toList();
     }
 
     @Override
-    public List<? extends ISecAssn> getSas(FrameType type) throws KmcException {
+    public List<ISecAssn> getSas(FrameType type) throws KmcException {
         try (IDbSession session = newSession()) {
             if (type == FrameType.ALL) {
                 List<ISecAssn> sas = new ArrayList<>();
                 sas.addAll(getSas(session, FrameType.TC));
                 sas.addAll(getSas(session, FrameType.TM));
                 sas.addAll(getSas(session, FrameType.AOS));
-                return sas;
+                return sas.stream().toList();
             } else {
                 return getSas(session, type);
             }
@@ -501,13 +502,14 @@ public class KmcDao implements IKmcDao {
      * @return active SAs
      * @throws KmcException exception
      */
-    public List<? extends ISecAssn> getActiveSas(FrameType type) throws KmcException {
+    public List<ISecAssn> getActiveSas(FrameType type) throws KmcException {
         isReady();
         try (IDbSession session = newSession()) {
             Query<? extends ISecAssn> query = ((DbSession) session).getSession()
-                    .createQuery("FROM " + type.toString() + " as sa WHERE sa.saState = :state", type.getClazz());
+                    .createQuery(SQL_FROM + " " + type.toString() + " as sa WHERE sa.saState = :state",
+                            type.getClazz());
             query.setParameter("state", SA_OPERATIONAL);
-            return query.list();
+            return query.stream().map(o -> (ISecAssn) o).toList();
         } catch (Exception e) {
             throw new KmcException(e);
         }

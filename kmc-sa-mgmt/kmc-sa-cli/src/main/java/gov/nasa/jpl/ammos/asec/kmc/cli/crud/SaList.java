@@ -48,7 +48,7 @@ public class SaList extends BaseCliApp {
     @Override
     public Integer call() throws Exception {
         try (IKmcDao dao = getDao()) {
-            List<? extends ISecAssn> sas = null;
+            List<ISecAssn> sas = null;
             if (filter != null) {
                 if (filter.activeOnly) {
                     sas = dao.getSas(frameType).stream().filter(secAssn -> secAssn.getSaState() == 3).collect(Collectors.toList());
@@ -58,30 +58,31 @@ public class SaList extends BaseCliApp {
             } else {
                 sas = dao.getSas(frameType);
             }
-            if (spi != null) {
-                sas = sas.stream().filter(secAssn -> secAssn.getSpi().equals(spi)).collect(Collectors.toList());
+            if (spi != null && sas != null) {
+                sas = sas.stream().filter(secAssn -> secAssn.getSpi().equals(spi)).toList();
             }
-            if (scid != null) {
-                sas = sas.stream().filter(secAssn -> secAssn.getScid().equals(scid)).collect(Collectors.toList());
-            }
-
-            IOutput out = null;
-            if (output != null) {
-                if (output.extended) {
-                    out = new SaCsvOutput(true);
-                } else if (output.json) {
-                    out = new SaJsonOutput();
-                } else if (output.mysql) {
-                    out = new SaMysqlOutput();
-                }
-            } else {
-                out = new SaCsvOutput(false);
+            if (scid != null && sas != null) {
+                sas = sas.stream().filter(secAssn -> secAssn.getScid().equals(scid)).toList();
             }
 
+            IOutput out = getOutput();
             out.print(spec.commandLine().getOut(), sas);
         }
 
         return 0;
+    }
+
+    private IOutput getOutput() {
+        if (output != null) {
+            if (output.extended) {
+                return new SaCsvOutput(true);
+            } else if (output.json) {
+                return new SaJsonOutput();
+            } else if (output.mysql) {
+                return new SaMysqlOutput();
+            }
+        }
+        return new SaCsvOutput(false);
     }
 
     /**

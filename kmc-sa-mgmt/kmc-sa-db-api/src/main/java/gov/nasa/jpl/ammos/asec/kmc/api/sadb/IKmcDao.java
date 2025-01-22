@@ -227,7 +227,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return a list of SAs
      * @throws KmcException exception
      */
-    List<? extends ISecAssn> getSas(IDbSession session, FrameType type) throws KmcException;
+    List<ISecAssn> getSas(IDbSession session, FrameType type) throws KmcException;
 
     /**
      * Get all SAs
@@ -236,7 +236,7 @@ public interface IKmcDao extends AutoCloseable {
      * @return a list of SAs
      * @throws KmcException exception
      */
-    List<? extends ISecAssn> getSas(FrameType type) throws KmcException;
+    List<ISecAssn> getSas(FrameType type) throws KmcException;
 
     /**
      * Update an SA with the provided database session

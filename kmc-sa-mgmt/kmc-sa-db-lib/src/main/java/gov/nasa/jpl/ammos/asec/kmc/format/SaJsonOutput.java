@@ -22,7 +22,7 @@ public class SaJsonOutput implements IOutput {
     }
 
     @Override
-    public void print(PrintWriter writer, List<? extends ISecAssn> saList) {
+    public void print(PrintWriter writer, List<ISecAssn> saList) {
         VelocityEngine engine = new VelocityEngine();
         engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());

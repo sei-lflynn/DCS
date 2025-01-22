@@ -9,6 +9,7 @@ import org.junit.Test;
 import picocli.CommandLine;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     }
 
     public void testUpdateBulkNotExist(FrameType type) throws KmcException {
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
         CommandLine cli = getCmd(new SaUpdate(), true);
         int exit = cli.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
@@ -58,7 +59,7 @@ public class SaUpdateTest extends BaseCommandLineTest {
     }
 
     public void testUpdateBulkNotExistType(FrameType type, int expect) throws KmcException {
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(type.name(), expect, sas.size());
         CommandLine cli = getCmd(new SaUpdate(), true);
         int exit = cli.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
@@ -76,14 +77,14 @@ public class SaUpdateTest extends BaseCommandLineTest {
     }
 
     public void testUpdateBulk(FrameType type) throws KmcException {
-        List<? extends ISecAssn> sas = dao.getSas(type);
+        List<ISecAssn> sas = dao.getSas(type);
         assertEquals(5, sas.size());
         assertEquals(1, (int) sas.get(0).getSpi());
         CommandLine cli = getCmd(new SaUpdate(), true);
         int exit = cli.execute(String.format("--file=%s", getClass().getClassLoader().getResource(
                 H2_SA_UPDATES).getFile()), String.format("--type=%s", type.name()));
         assertEquals(0, exit);
-        sas = dao.getSas(type);
+        sas = new ArrayList<>(dao.getSas(type));
         assertEquals(5, sas.size());
         sas.sort(Comparator.comparing(ISecAssn::getSpi));
         assertEquals(ServiceType.ENCRYPTION, sas.get(0).getServiceType());
