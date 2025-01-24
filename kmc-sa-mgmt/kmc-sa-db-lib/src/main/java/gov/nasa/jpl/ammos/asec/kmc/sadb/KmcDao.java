@@ -353,7 +353,7 @@ public class KmcDao implements IKmcDao {
                             " AND " +
                             "sa.mapid = :mapid" +
                             " AND " +
-                            "sa.id.spi != :subjectSpi", SecAssn.class);
+                            "sa.id.spi != :subjectSpi", ISecAssn.class);
             q.setParameter("scid", sa.getId().getScid());
             q.setParameter("tfvn", sa.getTfvn());
             q.setParameter("vcid", sa.getVcid());

@@ -63,7 +63,7 @@ public enum FrameType {
         if (input == null) {
             return UNKNOWN;
         }
-        return switch (input) {
+        return switch (input.toUpperCase()) {
             case "TC" -> TC;
             case "TM" -> TM;
             case "AOS" -> AOS;
