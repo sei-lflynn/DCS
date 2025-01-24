@@ -65,6 +65,9 @@ public class KmcDao implements IKmcDao {
      * Hibernate connection URL key
      */
     public static final  String HIBERNATE_CONNECTION_URL      = "hibernate.connection.url";
+    /**
+     * SQL FROM keyword
+     */
     public static final  String SQL_FROM                      = "FROM";
 
     private final Properties    properties = new Properties();

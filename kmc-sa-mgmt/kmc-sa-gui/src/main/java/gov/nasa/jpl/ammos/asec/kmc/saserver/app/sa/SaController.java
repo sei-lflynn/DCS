@@ -200,6 +200,7 @@ public class SaController {
         if (spi != null) {
             sas = sas.stream().filter(sa -> sa.getSpi().equals(spi)).toList();
         }
+        LOG.info("{} sent {} {} SAs", request.getRemoteAddr(), sas.size(), frameType.name());
         return sas;
     }
 

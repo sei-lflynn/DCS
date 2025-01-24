@@ -54,19 +54,10 @@ export default function SaTable(props) {
     const {enqueueSnackbar} = useSnackbar()
 
     /**
-     * Table data
-     */
-    const [data, setData] = useState([])
-
-    useEffect(() => {
-        (refreshTable)()
-    }, [])
-
-    /**
      * Refresh table data
      */
     const refreshTable = () => {
-        listSa((result) => {
+        listSa(props.type, (result) => {
             const data = result.data
             setData(data)
         }, (err) => {
@@ -77,6 +68,15 @@ export default function SaTable(props) {
             console.log(err)
         })
     }
+
+    /**
+     * Table data
+     */
+    const [data, setData] = useState([])
+
+    useEffect(() => {
+        (refreshTable)()
+    }, [])
 
     /**
      * Default table column for react-table
@@ -293,7 +293,8 @@ export default function SaTable(props) {
 
     return (<div>
         {rowOpen ? (
-            <SaModalForm rowOpen={rowOpen} onClose={handleRowClose} data={data[index]} refresh={refreshTable}
+            <SaModalForm type={props.type} rowOpen={rowOpen} onClose={handleRowClose} data={data[index]}
+                         refresh={refreshTable}
                          isUpdate={isUpdate}/>
         ) : (
             <div/>

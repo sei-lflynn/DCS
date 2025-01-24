@@ -65,13 +65,13 @@ export default function BasicTabs() {
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
-                <SaTable/>
+                <SaTable type={"TC"}/>
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                <SaTable/>
+                <SaTable type={"TM"}/>
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-                <SaTable/>
+                <SaTable type={"AOS"}/>
             </CustomTabPanel>
         </Box>
     );
