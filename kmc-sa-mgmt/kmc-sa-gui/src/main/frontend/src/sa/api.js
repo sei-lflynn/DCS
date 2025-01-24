@@ -36,9 +36,10 @@ export const listSa = async (type, respCallback, errCallback) => {
  */
 export const createSa = (type, values, respCallback, errCallback) => {
     console.log('creating spi/scid: ' + values.spi + '/' + values.scid)
+    values.type = type
     axios({
         method: 'put',
-        url: "api/sa/" + type,
+        url: "api/sa",
         data: values
     }).then(response => {
         respCallback(response)
