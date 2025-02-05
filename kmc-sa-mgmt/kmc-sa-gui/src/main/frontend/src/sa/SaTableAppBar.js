@@ -17,12 +17,15 @@
 import {
     AppBar,
     Box,
-    Button, Checkbox,
+    Button,
+    Checkbox,
     Container,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle, FormControlLabel,
+    DialogTitle,
+    FormControlLabel,
+    FormGroup,
     Input,
     LinearProgress,
     List,
@@ -48,7 +51,8 @@ export default function SaTableAppBar({
                                           selectedFlatRows,
                                           refreshTable,
                                           enqueueSnackbar,
-                                          handleRowOpen
+                                          handleRowOpen,
+                                          type
                                       }) {
 
     /**
@@ -88,7 +92,7 @@ export default function SaTableAppBar({
      */
     const bulkDelete = () => {
         let ids = selectedFlatRows.map(d => d.original.id)
-        deleteSas(ids,
+        deleteSas(type, ids,
             createResponseCallback(`Deleted ${ids.length} SAs`, setDeleteOpen, refreshTable, enqueueSnackbar),
             createErrorCallback(enqueueSnackbar))
     }
@@ -135,17 +139,32 @@ export default function SaTableAppBar({
         refreshTable()
     }
 
+    let tmChecked = true
+    let tcChecked = true
+    let aosChecked = true
+
     /**
      * Upload CSV file
      */
     const uploadCsv = () => {
+        type = []
+        if (tmChecked) {
+            type.push('TM')
+        }
+        if (tcChecked) {
+            type.push('TC')
+        }
+        if (aosChecked) {
+            type.push('AOS')
+        }
         const formData = new FormData()
         formData.append("file",
             selectedFile,
             selectedFile.name)
         formData.append("force",
             replaceExisting)
-        bulkCreate(formData,
+        bulkCreate(type,
+            formData,
             setProgress,
             uploadRespCallback,
             errCallback)
@@ -165,6 +184,32 @@ export default function SaTableAppBar({
         }, () => {
             enqueueSnackbar(`Error downloading CSV`, {variant: "error"})
         })
+    }
+
+    const handleFrameTypeCheckbox = (e) => {
+        console.log(e.target)
+        const {value, checked} = e.target
+        console.log(`value: ${value}, checked: ${checked}`)
+        switch (value) {
+            case "TM": {
+                console.log(`changing tm to ${checked}`)
+                tmChecked = checked
+                break
+            }
+            case "AOS": {
+                console.log(`changing aos to ${checked}`)
+                aosChecked = checked
+                break
+            }
+            case "TC": {
+                console.log(`changing tc to ${checked}`)
+                tcChecked = checked
+                break
+            }
+        }
+        console.log(`tc: ${tcChecked}`)
+        console.log(`tm: ${tmChecked}`)
+        console.log(`aos: ${aosChecked}`)
     }
 
     return (
@@ -274,14 +319,27 @@ export default function SaTableAppBar({
                                                type={"file"}
                                                onChange={uploadFileChange}/>
                                         <Button variant={"contained"}
-                                                onClick={uploadCsv}
+                                                onClick={() => uploadCsv()}
                                                 disabled={selectedFile == null}
                                         >Continue</Button>
                                     </label>
                                 </Container>
                                 <Container>
-                                    <FormControlLabel control={<Checkbox checked={replaceExisting} onChange={(event, checked) => setReplaceExisting(checked)}/>}
+                                    <FormControlLabel control={<Checkbox checked={replaceExisting}
+                                                                         onChange={(event, checked) => setReplaceExisting(checked)}/>}
                                                       label={"Replace existing"}></FormControlLabel>
+                                </Container>
+                                <Container>
+                                    <Typography variant={'h6'} sx={{textAlign: 'center'}}>Frame Types</Typography>
+                                    <FormGroup sx={{position: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                                        <FormControlLabel control={<Checkbox defaultChecked/>} value={"TC"} label={"TC"}
+                                                          onChange={handleFrameTypeCheckbox}/>
+                                        <FormControlLabel control={<Checkbox defaultChecked/>} value={"TM"} label={"TM"}
+                                                          onChange={handleFrameTypeCheckbox}/>
+                                        <FormControlLabel control={<Checkbox defaultChecked/>} value={"AOS"}
+                                                          label={"AOS"}
+                                                          onChange={handleFrameTypeCheckbox}/>
+                                    </FormGroup>
                                 </Container>
                             </Stack>
                         </DialogActions>
@@ -293,5 +351,5 @@ export default function SaTableAppBar({
                 </Stack>
             </Toolbar>
         </AppBar>
-    )
+    );
 }

@@ -10,6 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.MappedSuperclass;
 
+import java.util.Objects;
+
 /**
  * Abstract Security Association
  */
@@ -67,7 +69,7 @@ abstract class ASecAssn implements ISecAssn {
     // initialization vector
     @JsonSerialize(using = ByteArraySerializer.class)
     @JsonDeserialize(using = ByteArrayDeserializer.class)
-    private              byte[]       iv        = null;
+    private              byte[]       iv        = new byte[]{};
     //before AKMC-239, IV would default to: new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     // 0x00, 0x00};
     // authentication cipher suite len
@@ -347,7 +349,9 @@ abstract class ASecAssn implements ISecAssn {
 
     @Override
     public void setIv(byte[] iv) {
-        this.iv = iv;
+        if (iv != null) {
+            this.iv = iv;
+        }
     }
 
     @Override
@@ -407,7 +411,9 @@ abstract class ASecAssn implements ISecAssn {
 
     @Override
     public void setArsn(byte[] arsn) {
-        this.arsn = arsn;
+        if (arsn != null) {
+            this.arsn = arsn;
+        }
     }
 
     @Override
@@ -429,5 +435,26 @@ abstract class ASecAssn implements ISecAssn {
     public void setServiceType(ServiceType serviceType) {
         this.setEst(serviceType.getEncryptionType());
         this.setAst(serviceType.getAuthenticationType());
+    }
+
+    @Override
+    public void setIv(Short length, byte[] iv) {
+        byte[] updateIv = Objects.requireNonNullElseGet(iv, () -> new byte[length]);
+        setIvLen(length);
+        setIv(updateIv);
+    }
+
+    @Override
+    public void setAcs(Short length, byte[] acs) {
+        byte[] updateAcs = Objects.requireNonNullElseGet(acs, () -> new byte[length]);
+        setAcsLen(length);
+        setAcs(updateAcs);
+    }
+
+    @Override
+    public void setEcs(Short length, byte[] ecs) {
+        byte[] updateEcs = Objects.requireNonNullElseGet(ecs, () -> new byte[length]);
+        setEcsLen(length);
+        setEcs(updateEcs);
     }
 }

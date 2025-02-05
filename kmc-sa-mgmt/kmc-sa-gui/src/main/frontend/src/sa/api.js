@@ -193,19 +193,20 @@ export const resetArsn = (type, id, arsn, respCallback, errCallback) => {
 
 /**
  * Create SAs via CSV upload
+ * @param type CSV of frame types (eg, "TC,TM,AOS")
  * @param data form data
  * @param setProgress progress function
  * @param respCallback response callback
  * @param errCallback error callback
  */
-export const bulkCreate = (data, setProgress, respCallback, errCallback) => {
+export const bulkCreate = (type, data, setProgress, respCallback, errCallback) => {
     console.log(`creating multiple SAs via CSV upload`)
     axios({
         method: 'post',
         headers: {
             'Content-Type': 'multipart/form-data'
         },
-        url: 'api/sa/create',
+        url: `api/sa/create/${type}`,
         data: data,
         onUploadProgress: (progressEvent) => {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)

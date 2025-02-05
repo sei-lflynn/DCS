@@ -308,6 +308,7 @@ export default function SaTable(props) {
                 refreshTable={refreshTable}
                 enqueueSnackbar={enqueueSnackbar}
                 handleRowOpen={handleRowOpen}
+                type={props.type}
             />
             <TableContainer sx={{maxHeight: 1024}}>
                 <Table {...getTableProps()} stickyHeader sx={{minWidth: 650, ...getTableProps()}}

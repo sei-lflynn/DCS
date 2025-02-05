@@ -401,4 +401,28 @@ public interface ISecAssn {
      * @return frame type
      */
     FrameType getType();
+
+    /**
+     * Convenience method for setting the IV and IV Length
+     *
+     * @param length IV length
+     * @param iv     IV
+     */
+    void setIv(Short length, byte[] iv);
+
+    /**
+     * Convenience method for setting the ACS and ACS length
+     *
+     * @param length ACS length
+     * @param acs    ACS
+     */
+    void setAcs(Short length, byte[] acs);
+
+    /**
+     * Convenience method for setting the ECS and ECS length
+     *
+     * @param length ECS length
+     * @param ecs    ECS
+     */
+    void setEcs(Short length, byte[] ecs);
 }

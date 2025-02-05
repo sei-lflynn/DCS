@@ -39,8 +39,10 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao.*;
 
@@ -68,13 +70,12 @@ public class SaController {
      * Convenience class for reset ARSN operation
      */
     public static class IdArsn implements Serializable {
-        private SpiScid   id;
+        private SpiScid id;
         @JsonSerialize(using = ByteArraySerializer.class)
         @JsonDeserialize(using = ByteArrayDeserializer.class)
-        private byte[]    arsn;
-        private Short     arsnLen;
-        private Short     arsnw;
-        private FrameType type;
+        private byte[]  arsn;
+        private Short   arsnLen;
+        private Short   arsnw;
 
         public SpiScid getId() {
             return id;
@@ -360,19 +361,28 @@ public class SaController {
     }
 
     @PostMapping(value = {"/sa/create/{type}", "/sa/create"})
-    public ResponseEntity<ObjectNode> bulkCreate(@PathVariable(name = "type", required = false) String type,
-                                                 @RequestParam("file") MultipartFile file, @RequestParam(name =
-            "force", defaultValue = "false") boolean force, HttpServletRequest request) throws IOException,
-                                                                                               KmcException {
-        FrameType frameType = StringUtils.hasText(type) ? FrameType.fromString(type) : FrameType.TC;
-        LOG.info("{} creating {} SAs from file", request.getRemoteAddr(), frameType.name());
+    public ResponseEntity<ObjectNode> bulkCreate(@PathVariable(name = "type", required = false) List<String> types,
+                                                 @RequestParam("file") MultipartFile file,
+                                                 @RequestParam(name = "force", defaultValue = "false") boolean force,
+                                                 HttpServletRequest request) throws IOException,
+                                                                                    KmcException {
+        Set<FrameType> frameTypes = new HashSet<>();
+        for (String type : types) {
+            FrameType frameType = FrameType.fromString(type);
+            if (frameType != FrameType.UNKNOWN) {
+                frameTypes.add(frameType);
+            }
+        }
+
+        LOG.info("{} creating SAs from file", request.getRemoteAddr());
         ObjectNode resp   = mapper.createObjectNode();
         boolean    errors = false;
         SaCsvInput input  = new SaCsvInput();
         int        count  = 0;
         int        errs   = 0;
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            List<ISecAssn> sas = input.parseCsv(reader, frameType);
+            List<ISecAssn> sas = input.parseCsv(reader, FrameType.ALL);
+            sas = sas.stream().filter(sa -> frameTypes.contains(sa.getType())).toList();
             try (IDbSession session = dao.newSession()) {
                 for (ISecAssn sa : sas) {
                     session.beginTransaction();
@@ -403,12 +413,11 @@ public class SaController {
         HttpStatus status = HttpStatus.CREATED;
         if (!errors) {
             resp.put(STATUS_KEY, SUCCESS_STATUS);
-            LOG.info("{} created {} {} SAs from file", request.getRemoteAddr(), count, frameType.name());
+            LOG.info("{} created {} SAs from file", request.getRemoteAddr(), count);
         } else {
             status = HttpStatus.BAD_REQUEST;
             resp.put(STATUS_KEY, ERROR_STATUS);
-            LOG.info("{} failed to create {} SAs from file with {} errors", request.getRemoteAddr(), frameType.name()
-                    , errs);
+            LOG.info("{} failed to create SAs from file with {} errors", request.getRemoteAddr(), errs);
         }
         return new ResponseEntity<>(resp, status);
     }
