@@ -367,11 +367,15 @@ public class SaController {
                                                  HttpServletRequest request) throws IOException,
                                                                                     KmcException {
         Set<FrameType> frameTypes = new HashSet<>();
-        for (String type : types) {
-            FrameType frameType = FrameType.fromString(type);
-            if (frameType != FrameType.UNKNOWN) {
-                frameTypes.add(frameType);
+        if (types != null) {
+            for (String type : types) {
+                FrameType frameType = FrameType.fromString(type);
+                if (frameType != FrameType.UNKNOWN) {
+                    frameTypes.add(frameType);
+                }
             }
+        } else {
+            frameTypes.add(FrameType.TC);
         }
 
         LOG.info("{} creating SAs from file", request.getRemoteAddr());

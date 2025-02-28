@@ -25,15 +25,24 @@ public class BaseH2Test {
 
     /**
      * Before each test, populate the sample DB
-     *
-     * @throws SQLException
-     * @throws IOException
      */
     @Before
-    public void beforeTest() throws SQLException {
-        setupTable("/create_sadb_jpl_unit_test_security_associations.sql");
-        setupTable("/create_sadb_jpl_unit_test_security_associations_aos.sql");
+    public void beforeTest() {
+        setupTc();
+        setupAos();
+        setupTm();
+    }
+
+    public void setupTm() {
         setupTable("/create_sadb_jpl_unit_test_security_associations_tm.sql");
+    }
+
+    public void setupAos() {
+        setupTable("/create_sadb_jpl_unit_test_security_associations_aos.sql");
+    }
+
+    public void setupTc() {
+        setupTable("/create_sadb_jpl_unit_test_security_associations.sql");
     }
 
     private void setupTable(String sqlFile) {
@@ -49,6 +58,42 @@ public class BaseH2Test {
         }
     }
 
+    public static void truncateTc() throws SQLException {
+        truncateTable("security_associations");
+    }
+
+    public static void truncateTm() throws SQLException {
+        truncateTable("security_associations_tm");
+    }
+
+    public static void truncateAos() throws SQLException {
+        truncateTable("security_associations_aos");
+    }
+
+    private static void truncateTable(String tableName) throws SQLException {
+        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test")) {
+            conn.createStatement().execute("TRUNCATE TABLE sadb.%s".formatted(tableName));
+        }
+    }
+
+    public static void dropTc() throws SQLException {
+        dropTable("security_associations");
+    }
+
+    public static void dropTm() throws SQLException {
+        dropTable("security_associations_tm");
+    }
+
+    public static void dropAos() throws SQLException {
+        dropTable("security_associations_aos");
+    }
+
+    private static void dropTable(String tableName) throws SQLException {
+        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test")) {
+            conn.createStatement().execute("DROP TABLE sadb.%s".formatted(tableName));
+        }
+    }
+
     /**
      * After each test, truncate the sample DB
      *
@@ -56,11 +101,8 @@ public class BaseH2Test {
      */
     @After
     public void afterTest() throws SQLException {
-        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sadb_user", "sadb_test")) {
-            conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations");
-            conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations_aos");
-            conn.createStatement().execute("TRUNCATE TABLE sadb.security_associations_tm");
-        }
-
+        truncateTc();
+        truncateTm();
+        truncateAos();
     }
 }
