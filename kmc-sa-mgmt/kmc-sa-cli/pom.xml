@@ -216,7 +216,7 @@
                 <executions>
                     <execution>
                         <id>unpack</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>

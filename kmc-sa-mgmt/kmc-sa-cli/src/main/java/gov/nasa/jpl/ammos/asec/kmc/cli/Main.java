@@ -9,6 +9,8 @@ import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaStart;
 import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaStop;
 import gov.nasa.jpl.ammos.asec.kmc.cli.crud.SaUpdate;
 import gov.nasa.jpl.ammos.asec.kmc.cli.misc.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 /**
@@ -24,6 +26,9 @@ import picocli.CommandLine;
         SaExpire.class}, description = "KMC Security Association Management CLI", mixinStandardHelpOptions = true,
         versionProvider = Version.class)
 public class Main {
+
+    private static Logger LOG = LoggerFactory.getLogger(Main.class);
+
     /**
      * Main
      *
@@ -40,13 +45,12 @@ public class Main {
  * Exception handler
  */
 class PrintExceptionMessageHandler implements CommandLine.IExecutionExceptionHandler {
+    private static Logger LOG = LoggerFactory.getLogger(Main.class);
+
     @Override
     public int handleExecutionException(Exception ex, CommandLine commandLine, CommandLine.ParseResult parseResult) throws Exception {
         commandLine.getErr().println(commandLine.getColorScheme().errorText(ex.getMessage()));
-        throw ex;
-        /*return commandLine.getExitCodeExceptionMapper() != null ?
-                commandLine.getExitCodeExceptionMapper().getExitCode(ex) :
-                commandLine.getCommandSpec().exitCodeOnExecutionException();
-                */
+        LOG.error(ex.getMessage(), ex);
+        return 1;
     }
 }

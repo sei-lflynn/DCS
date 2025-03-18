@@ -20,6 +20,7 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,9 @@ public class KmcDao implements IKmcDao {
 
     private SessionFactory factory;
 
+    private boolean hasAos;
+    private boolean hasTm;
+
     /**
      * Constructor
      */
@@ -129,6 +133,37 @@ public class KmcDao implements IKmcDao {
     @Override
     public void init() throws KmcException {
         try {
+            final List<String> tables = new ArrayList<>();
+            factory = config.buildSessionFactory();
+            try (Session s = factory.openSession()) {
+
+                s.doWork(session -> {
+                    try (ResultSet rs = session.getMetaData().getTables(null, null, "%", null)) {
+                        while (rs.next()) {
+                            tables.add(rs.getString(3));
+                        }
+                    }
+                });
+            }
+            config = new Configuration();
+            for (String table : tables) {
+                switch (table.toLowerCase()) {
+                    case "security_associations_tm":
+                        LOG.info("Initializing security associations tm");
+                        config.addAnnotatedClass(SecAssnTm.class);
+                        hasTm = true;
+                        break;
+                    case "security_associations_aos":
+                        LOG.info("Initializing security associations aos");
+                        config.addAnnotatedClass(SecAssnAos.class);
+                        hasAos = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            configure();
+            factory.close();
             factory = config.buildSessionFactory();
         } catch (HibernateException e) {
             throw new KmcException(e);
@@ -148,6 +183,7 @@ public class KmcDao implements IKmcDao {
     public void createSa(IDbSession dbSession, Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid,
                          FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         if (spi == null) {
             spi = getNextAvailableSpi(scid, type);
         }
@@ -168,14 +204,17 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public ISecAssn createSa(Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid, FrameType type) throws KmcException {
+    public ISecAssn createSa(Integer spi, Byte tvfn, Short scid, Byte vcid, Byte mapid, FrameType type) throws
+                                                                                                        KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             createSa(session, spi, tvfn, scid, vcid, mapid, type);
             session.commit();
         } catch (Exception e) {
             LOG.error("Encountered unexpected error while creating SA with the following parameters: " +
-                            "spi {}, tvfn {}, scid {}, vcid {}, mapid {}, type {} : {}", spi, tvfn, scid, vcid, mapid
+                            "spi {}, tvfn {}, scid {}, vcid {}, mapid {}, type {} : {}", spi, tvfn, scid, vcid,
+                    mapid
                     , type,
                     e.getMessage());
             throw new KmcException("Unable to create SA due to error: ", e);
@@ -185,10 +224,12 @@ public class KmcDao implements IKmcDao {
 
     private Integer getNextAvailableSpi(Short scid, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         int spi;
         try (Session session = factory.openSession()) {
             Integer maxSpi = session
-                    .createQuery("SELECT max(sa.id.spi) " + SQL_FROM + " " + type.toString() + " sa WHERE sa.id.scid " +
+                    .createQuery("SELECT max(sa.id.spi) " + SQL_FROM + " " + type.toString() + " sa WHERE sa.id" +
+                                    ".scid " +
                                     "= :scid",
                             Integer.class)
                     .setParameter("scid", scid)
@@ -198,10 +239,12 @@ public class KmcDao implements IKmcDao {
             }
             spi = maxSpi + 1;
         } catch (HibernateException e) {
-            LOG.error("Encountered Hibernate error while querying for max SPI for SCID {}: {}", scid, e.getMessage());
+            LOG.error("Encountered Hibernate error while querying for max SPI for SCID {}: {}", scid,
+                    e.getMessage());
             throw new KmcException("Unable to get next available SPI due to Hibernate error: ", e);
         } catch (Exception e) {
-            LOG.error("Encountered unexpected error while querying for max SPI for SCID {}: {}", scid, e.getMessage());
+            LOG.error("Encountered unexpected error while querying for max SPI for SCID {}: {}", scid,
+                    e.getMessage());
             throw new KmcException("Unable to get next available SPI due to unexpected error: ", e);
         }
         return spi;
@@ -209,6 +252,7 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public ISecAssn createSa(ISecAssn sa) throws KmcException {
+        checkFrameType(sa.getType());
         try (DbSession session = new DbSession(factory.openSession())) {
             session.beginTransaction();
             createSa(session, sa);
@@ -226,6 +270,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void createSa(IDbSession dbSession, ISecAssn sa) throws KmcException {
         isReady();
+        checkFrameType(sa.getType());
         try {
             SecAssnValidator.validate(sa);
         } catch (KmcException e) {
@@ -236,7 +281,8 @@ public class KmcDao implements IKmcDao {
         } else {
             ISecAssn exists = getSa(dbSession, sa.getId(), sa.getType());
             if (exists != null) {
-                throw new KmcException(String.format("SA create failed: an SA with the SPI/SCID combination %d/%d " + "already exists", sa.getSpi(), sa.getScid()));
+                throw new KmcException(String.format("SA create failed: an SA with the SPI/SCID combination %d/%d" +
+                        " " + "already exists", sa.getSpi(), sa.getScid()));
             }
         }
         // validate more
@@ -250,8 +296,10 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public void rekeySaEnc(IDbSession session, SpiScid id, String ekid, byte[] ecs, Short ecsLen, FrameType type) throws KmcException {
+    public void rekeySaEnc(IDbSession session, SpiScid id, String ekid, byte[] ecs, Short ecsLen, FrameType type) throws
+                                                                                                                  KmcException {
         isReady();
+        checkFrameType(type);
         ISecAssn sa = getSa(session, id, type);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot rekey for encryption", id));
@@ -266,7 +314,9 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public ISecAssn rekeySaEnc(SpiScid id, String ekid, byte[] ecs, Short ecsLen, FrameType type) throws KmcException {
+    public ISecAssn rekeySaEnc(SpiScid id, String ekid, byte[] ecs, Short ecsLen, FrameType type) throws
+                                                                                                  KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             rekeySaEnc(session, id, ekid, ecs, ecsLen, type);
@@ -278,8 +328,10 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public void rekeySaAuth(IDbSession session, SpiScid id, String akid, byte[] acs, Short acsLen, FrameType type) throws KmcException {
+    public void rekeySaAuth(IDbSession session, SpiScid id, String akid, byte[] acs, Short acsLen, FrameType type) throws
+                                                                                                                   KmcException {
         isReady();
+        checkFrameType(type);
         ISecAssn sa = getSa(session, id, type);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot rekey for authentication", id));
@@ -295,7 +347,9 @@ public class KmcDao implements IKmcDao {
     }
 
     @Override
-    public ISecAssn rekeySaAuth(SpiScid id, String akid, byte[] acs, Short acsLen, FrameType type) throws KmcException {
+    public ISecAssn rekeySaAuth(SpiScid id, String akid, byte[] acs, Short acsLen, FrameType type) throws
+                                                                                                   KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             rekeySaAuth(session, id, akid, acs, acsLen, type);
@@ -310,6 +364,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void expireSa(IDbSession session, SpiScid id, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         ISecAssn sa = getSa(id, type);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot expire", id));
@@ -325,6 +380,7 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public ISecAssn expireSa(SpiScid id, FrameType type) throws KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             expireSa(session, id, type);
@@ -338,12 +394,14 @@ public class KmcDao implements IKmcDao {
     @Override
     public void startSa(IDbSession session, SpiScid id, boolean force, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         ISecAssn sa = getSa(id, type);
         if (sa == null) {
             throw new KmcStartException(String.format("SA %d/%d does not exist, cannot start", id.getSpi(),
                     id.getScid()));
         } else if (sa.getSaState() == SA_OPERATIONAL) {
-            throw new KmcStartException(String.format("SA %d/%d is already operational", id.getSpi(), id.getScid()));
+            throw new KmcStartException(String.format("SA %d/%d is already operational", id.getSpi(),
+                    id.getScid()));
         } else {
             Query<? extends ISecAssn> q =
                     ((DbSession) session).getSession().createQuery(SQL_FROM + " " + type.toString() +
@@ -384,6 +442,7 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public ISecAssn startSa(SpiScid id, boolean force, FrameType type) throws KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             startSa(session, id, force, type);
@@ -399,6 +458,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void stopSa(IDbSession session, SpiScid id, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         ISecAssn sa = getSa(id, type);
         if (sa == null) {
             throw new KmcStopException(String.format("SA %d/%d does not exist, cannot stop", id.getSpi(),
@@ -416,6 +476,7 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public ISecAssn stopSa(SpiScid id, FrameType type) throws KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             stopSa(session, id, type);
@@ -431,6 +492,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void deleteSa(IDbSession session, SpiScid id, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         ISecAssn sa = getSa(id, type);
         if (sa == null) {
             throw new KmcException(String.format("SA %s does not exist, cannot delete", id));
@@ -443,6 +505,7 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public void deleteSa(SpiScid id, FrameType type) throws KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             deleteSa(session, id, type);
@@ -457,11 +520,13 @@ public class KmcDao implements IKmcDao {
     @Override
     public ISecAssn getSa(IDbSession session, SpiScid id, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         return ((DbSession) session).getSession().find(type.getClazz(), id);
     }
 
     @Override
     public ISecAssn getSa(SpiScid id, FrameType type) throws KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             return getSa(session, id, type);
         } catch (KmcException e) {
@@ -474,6 +539,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public List<ISecAssn> getSas(IDbSession session, FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         return ((DbSession) session).getSession()
                 .createQuery(SQL_FROM + " " + type.toString(), type.getClazz())
                 .list().stream().map(o -> (ISecAssn) o).toList();
@@ -481,12 +547,17 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public List<ISecAssn> getSas(FrameType type) throws KmcException {
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             if (type == FrameType.ALL) {
                 List<ISecAssn> sas = new ArrayList<>();
                 sas.addAll(getSas(session, FrameType.TC));
-                sas.addAll(getSas(session, FrameType.TM));
-                sas.addAll(getSas(session, FrameType.AOS));
+                if (hasTm) {
+                    sas.addAll(getSas(session, FrameType.TM));
+                }
+                if (hasAos) {
+                    sas.addAll(getSas(session, FrameType.AOS));
+                }
                 return sas.stream().toList();
             } else {
                 return getSas(session, type);
@@ -495,6 +566,14 @@ public class KmcDao implements IKmcDao {
             throw e;
         } catch (Exception e) {
             throw new KmcException(e);
+        }
+    }
+
+    private void checkFrameType(FrameType type) throws KmcException {
+        if (type == FrameType.TM && !hasTm) {
+            throw new KmcException("TM frame type not supported");
+        } else if (type == FrameType.AOS && !hasAos) {
+            throw new KmcException("AOS frame type not supported");
         }
     }
 
@@ -507,6 +586,7 @@ public class KmcDao implements IKmcDao {
      */
     public List<ISecAssn> getActiveSas(FrameType type) throws KmcException {
         isReady();
+        checkFrameType(type);
         try (IDbSession session = newSession()) {
             Query<? extends ISecAssn> query = ((DbSession) session).getSession()
                     .createQuery(SQL_FROM + " " + type.toString() + " as sa WHERE sa.saState = :state",
@@ -521,6 +601,7 @@ public class KmcDao implements IKmcDao {
     @Override
     public void updateSa(IDbSession session, ISecAssn sa) throws KmcException {
         isReady();
+        checkFrameType(sa.getType());
         LOG.info("Updating SA {}/{}", sa.getId().getSpi(), sa.getId().getScid());
         session.merge(sa);
         LOG.info("Updated SA {}/{}", sa.getId().getSpi(), sa.getId().getScid());
@@ -528,6 +609,7 @@ public class KmcDao implements IKmcDao {
 
     @Override
     public ISecAssn updateSa(ISecAssn sa) throws KmcException {
+        checkFrameType(sa.getType());
         try (IDbSession session = newSession()) {
             session.beginTransaction();
             updateSa(session, sa);
