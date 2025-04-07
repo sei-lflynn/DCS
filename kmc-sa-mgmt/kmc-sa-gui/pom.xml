@@ -33,8 +33,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
-        <node.version>v18.3.0</node.version>
-        <yarn.version>v1.22.19</yarn.version>
+        <node.version>v23.1.0</node.version>
+        <yarn.version>v1.22.22</yarn.version>
         <!-- yarn-registry-url is the default Yarn regestry URL used for retreving packages.  -->
         <!-- Allows for use of a local repo to force cacheing, preservation of dependenices, or use of alterntate dependencies.  -->
         <!-- Consider setting the property yarn-registry-url in an active profile your maven settings.xml if you would rather not modify this file. -->
@@ -148,7 +148,7 @@
                     <goal>clean</goal>
                     <filesets>
                         <fileset>
-                            <directory>${project.basedir}/src/main/frontend/build</directory>
+                            <directory>${project.basedir}/src/main/frontend/dist</directory>
                         </fileset>
                     </filesets>
                 </configuration>
@@ -184,8 +184,8 @@
                 <configuration>
                     <nodeVersion>${node.version}</nodeVersion>
                     <yarnVersion>${yarn.version}</yarnVersion>
-                    <workingDirectory>${frontend-src-dir}</workingDirectory>
-                    <srcdir>${frontend-src-dir}</srcdir>
+                    <workingDirectory>src/main/frontend</workingDirectory>
+                    <srcdir>src/main/frontend</srcdir>
                     <installDirectory>target</installDirectory>
                     <environmentVariables>
                         <YARN_REGISTRY>${yarn-registry-url}
@@ -234,7 +234,7 @@
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/main/frontend/build</directory>
+                                    <directory>${project.basedir}/src/main/frontend/dist</directory>
                                 </resource>
                             </resources>
                             <delimiters>
@@ -337,6 +337,14 @@
             <groupId>gov.nasa.jpl.ammos.kmc</groupId>
             <artifactId>kmc-sa-db-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bctls-fips</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bc-fips</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
