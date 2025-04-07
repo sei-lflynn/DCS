@@ -6,10 +6,6 @@ import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.DaoFactory;
 import gov.nasa.jpl.ammos.asec.kmc.sadb.config.Config;
 import gov.nasa.jpl.ammos.asec.kmc.saserver.app.sa.SecAssnDeserializer;
-import jakarta.annotation.PreDestroy;
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.filters.HttpHeaderSecurityFilter;
@@ -33,6 +29,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
+import javax.annotation.PreDestroy;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Security;
 
