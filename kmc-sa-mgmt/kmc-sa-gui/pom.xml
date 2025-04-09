@@ -168,6 +168,7 @@
                     <profiles>${app.profiles}</profiles>
                     <mainClass>gov.nasa.jpl.ammos.asec.kmc.saserver.app.KmcSaMgmt</mainClass>
                     <layout>ZIP</layout>
+                    <loaderImplementation>CLASSIC</loaderImplementation>
                 </configuration>
                 <executions>
                     <execution>
@@ -337,14 +338,6 @@
             <groupId>gov.nasa.jpl.ammos.kmc</groupId>
             <artifactId>kmc-sa-db-api</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bctls-fips</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bc-fips</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
