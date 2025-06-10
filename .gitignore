@@ -1,0 +1,81 @@
+# old Java files #
+*.java.*
+
+# Maven target directory #
+.classpath
+.project
+.settings/
+target/
+
+# Class Files #
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs
+hs_err_pid*
+
+# AMMOS-cryptolib files #
+#   CMAKE and related files #
+**/cmake-build-debug
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/install_manifest.txt
+**/CMakeFiles/
+**/CTestTestfile.cmake
+**/Makefile
+**/*.cbp
+**/make.out
+**/DartConfiguration.tcl
+#   Build artifacts
+ammos-cryptolib/build
+ammos-cryptolib/install
+kmc-sdls-service/log.txt
+kmc-sdls-service/sa_save_file.bin
+
+#   Generated artifacts
+**/*.cmake
+**/*.so
+**/CMakeFiles
+**/Makefile
+!ammos-cryptolib/unit_test/Makefile
+!ammos-cryptolib/unit_test/ciphers/Makefile
+!ammos-cryptolib/CryptoLib/Makefile
+ammos-cryptolib/CryptoLib/bin
+ammos-cryptolib/CryptoLib/lib
+ammos-cryptolib/CryptoLib/Testing
+ammos-cryptolib/Cryptolib/DartConfiguration.tcl
+ammos-cryptolib/kmc_sdls/kmc_perf_test/performance_test
+ammos-cryptolib/kmc_sdls/kmc_sdls_java/gov/nasa/jpl/ammos/asec/kmc/*.java
+ammos-cryptolib/kmc_sdls/kmc_sdls_java/gov/nasa/jpl/ammos/asec/kmc/*.c
+!ammos-cryptolib/kmc_sdls/kmc_sdls_java/gov/nasa/jpl/ammos/asec/kmc/KmcSdlsEngine.java
+!ammos-cryptolib/kmc_sdls/kmc_sdls_java/gov/nasa/jpl/ammos/asec/kmc/SDLS_TC_TransferFrame.java
+
+
+# IDE / Editor files
+#   Intellij IDEA files #
+*.iml
+.idea
+venv
+#   VScode files #
+.vscode/settings.json
+#   VIM temp files #
+*.swp
+*.swo
+# Packaging directories
+kmc-resources/packaging/rpm/BUILD/*
+kmc-resources/packaging/rpm/BUILDROOT/*
+kmc-resources/packaging/rpm/RPMS/*
+kmc-resources/packaging/rpm/SRPMS/*
+!kmc-resources/packaging/rpm/BUILD
+!kmc-resources/packaging/rpm/BUILDROOT
+!kmc-resources/packaging/rpm/RPMS
+!kmc-resources/packaging/rpm/SRPMS
+kmc-resources/packaging/container/kmcroot/*
+!kmc-resources/packaging/container/kmcroot
+
+# OS specific non-project files #
+**/.DS_Store

@@ -1,0 +1,3 @@
+[submodule "ammos-cryptolib/CryptoLib"]
+	path = ammos-cryptolib/CryptoLib
+	url = https://github.com/nasa/CryptoLib

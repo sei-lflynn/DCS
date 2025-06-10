@@ -1,0 +1,24 @@
+package gov.nasa.jpl.ammos.asec.kmc.saserver.app.sa;
+
+import gov.nasa.jpl.ammos.asec.kmc.api.ex.KmcException;
+import gov.nasa.jpl.ammos.asec.kmc.api.sadb.IKmcDao;
+import gov.nasa.jpl.ammos.asec.kmc.sadb.KmcDao;
+import gov.nasa.jpl.ammos.asec.kmc.sadb.config.Config;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+public class TestingWebApp {
+    public static void main(String[] args) {
+        SpringApplication.run(TestingWebApp.class, args);
+    }
+
+    @Bean
+    public IKmcDao getDao() throws KmcException {
+        Config config = new Config("/", "kmc-sa-mgmt-service.properties");
+        KmcDao dao    = new KmcDao("sadb_user", "sadb_test");
+        dao.init();
+        return dao;
+    }
+}
