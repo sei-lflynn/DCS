@@ -28,7 +28,7 @@ import {
 import {Close, DeleteForever, Key, PlayArrow, Restore, Stop} from "@mui/icons-material";
 import {useState} from "react";
 import {useFormik} from "formik";
-import {hexString, SaTextField} from "./SaModalForm";
+import {hexString, SaTextField} from "./SaModalForm.jsx";
 import * as yup from "yup";
 import {useSnackbar} from "notistack";
 import {modifyArsn, modifyIv, rekeySa} from "./api";
@@ -244,7 +244,7 @@ export default function EditControlStack({
                     SA {id["spi"]}/{id["scid"]}, setting it to
                     OPERATIONAL state. This will replace any currently operational
                     SA on
-                    this GVCID. Do you wish to continue?`}</DialogContent>
+                    this GVCID. Do you wish to continue?</DialogContent>
                 <DialogActions>
                     <Button variant={"contained"}
                             color={"warning"}

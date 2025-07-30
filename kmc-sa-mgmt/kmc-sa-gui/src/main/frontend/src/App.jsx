@@ -1,30 +1,15 @@
-/*
- * Copyright 2022, by the California Institute of Technology.
- * ALL RIGHTS RESERVED. United States Government Sponsorship acknowledged.
- * Any commercial use must be negotiated with the Office of Technology
- * Transfer at the California Institute of Technology.
- *
- * This software may be subject to U.S. export control laws. By accepting
- * this software, the user agrees to comply with all applicable U.S.
- * export laws and regulations. User has the responsibility to obtain
- * export licenses, or other export authority as may be required before
- * exporting such information to foreign countries or providing access to
- * foreign persons.
- */
-/**
- * @author panjames
- */
-import React, {useEffect, useState} from "react";
-import SaTable from "./sa/SaTable";
+import {Fragment, useEffect, useState} from 'react'
+import './App.css'
+import {useLocalStorageBool} from "./sa/useLocalStorage.js";
 import {
     AppBar,
     Box,
     Container,
     createTheme,
-    CssBaseline,
-    IconButton,
+    CssBaseline, IconButton,
     ThemeProvider,
-    Toolbar, Tooltip,
+    Toolbar,
+    Tooltip,
     Typography
 } from "@mui/material";
 import '@fontsource/roboto/300.css'
@@ -35,14 +20,13 @@ import '@fontsource/roboto-mono/300.css'
 import '@fontsource/roboto-mono/400.css'
 import '@fontsource/roboto-mono/500.css'
 import '@fontsource/roboto-mono/700.css'
-import {SnackbarProvider} from "notistack";
 import {Brightness3, Brightness7, Circle} from "@mui/icons-material";
-import {useLocalStorageBool} from "./sa/useLocalStorage";
-import ErrorBoundary from "./sa/ErrorBoundary";
+import {SnackbarProvider} from "notistack";
+import ErrorBoundary from "./sa/ErrorBoundary.jsx";
 import {status} from "./sa/api";
+import BasicTabs from "./sa/SaTabs.jsx";
 
 function App() {
-
     const dark = {
         palette: {
             mode: 'dark',
@@ -74,7 +58,7 @@ function App() {
         return () => clearInterval(interval)
     }, [])
 
-    return (<React.Fragment>
+    return (<Fragment>
         <ThemeProvider theme={appliedTheme}>
             <SnackbarProvider maxSnack={5}>
                 <CssBaseline/>
@@ -98,14 +82,15 @@ function App() {
                             marginY: 2,
                         }}>
                             <ErrorBoundary>
-                                <SaTable/>
+                                <BasicTabs/>
+                                {/*<SaTable/>*/}
                             </ErrorBoundary>
                         </Box>
                     </Container>
                 </div>
             </SnackbarProvider>
         </ThemeProvider>
-    </React.Fragment>);
+    </Fragment>);
 }
 
-export default App;
+export default App

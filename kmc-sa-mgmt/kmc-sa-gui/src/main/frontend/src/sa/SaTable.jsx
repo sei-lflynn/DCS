@@ -34,10 +34,10 @@ import {
 } from "@mui/material";
 import {hexAuthLookup, hexEncLookup, hexToInt, serviceTypeLookupStr, stateLookupInt} from "./utilities";
 import {Cancel, FilterAltOutlined} from "@mui/icons-material";
-import SaModalForm from "./SaModalForm";
+import SaModalForm from "./SaModalForm.jsx";
 import {useSnackbar} from "notistack";
 import {useLocalStorageJson} from "./useLocalStorage";
-import SaTableAppBar from "./SaTableAppBar";
+import SaTableAppBar from "./SaTableAppBar.jsx";
 import {listSa} from "./api";
 
 /**
@@ -54,6 +54,26 @@ export default function SaTable(props) {
     const {enqueueSnackbar} = useSnackbar()
 
     /**
+     * Refresh table data
+     */
+    const refreshTable = () => {
+        listSa(props.type, (result) => {
+            const data = result.data
+            setData(data)
+        }, (err) => {
+            let msg
+            if (err.response) {
+                msg = err.response.data.messages
+            }
+            enqueueSnackbar('Error retrieving from the SADB: ' + msg, {
+                variant: 'error',
+                preventDuplicate: true
+            })
+            console.log(err)
+        })
+    }
+
+    /**
      * Table data
      */
     const [data, setData] = useState([])
@@ -61,22 +81,6 @@ export default function SaTable(props) {
     useEffect(() => {
         (refreshTable)()
     }, [])
-
-    /**
-     * Refresh table data
-     */
-    const refreshTable = () => {
-        listSa((result) => {
-            const data = result.data
-            setData(data)
-        }, (err) => {
-            enqueueSnackbar('Error retrieving from the SADB, check console for errors', {
-                variant: 'error',
-                preventDuplicate: true
-            })
-            console.log(err)
-        })
-    }
 
     /**
      * Default table column for react-table
@@ -293,7 +297,8 @@ export default function SaTable(props) {
 
     return (<div>
         {rowOpen ? (
-            <SaModalForm rowOpen={rowOpen} onClose={handleRowClose} data={data[index]} refresh={refreshTable}
+            <SaModalForm type={props.type} rowOpen={rowOpen} onClose={handleRowClose} data={data[index]}
+                         refresh={refreshTable}
                          isUpdate={isUpdate}/>
         ) : (
             <div/>
@@ -307,6 +312,7 @@ export default function SaTable(props) {
                 refreshTable={refreshTable}
                 enqueueSnackbar={enqueueSnackbar}
                 handleRowOpen={handleRowOpen}
+                type={props.type}
             />
             <TableContainer sx={{maxHeight: 1024}}>
                 <Table {...getTableProps()} stickyHeader sx={{minWidth: 650, ...getTableProps()}}

@@ -49,8 +49,8 @@ import {
 import {useMemo} from "react";
 import {useSnackbar} from "notistack";
 import {createErrorCallback, createSa, deleteSa, expireSa, startSa, stopSa, updateSa} from "./api";
-import EditControlStack from "./EditControlStack";
-import ErrorBoundary from "./ErrorBoundary";
+import EditControlStack from "./EditControlStack.jsx";
+import ErrorBoundary from "./ErrorBoundary.jsx";
 
 export const hexString = yup.string().matches(/^([\da-fA-F]{2})*$/, 'Must be a hex string that contains an even number of hex digits')
 
@@ -63,9 +63,9 @@ const validationSchema = yup.object({
     saState: yup.number().integer('must be an integer').min(0).max(3).required('state is required'),
     ekid: yup.string()
         .when(['serviceType', 'saState'], {
-           is: (serviceType, saState) => saState === stateLookupStr(UNKEYED_EXPIRED) || serviceType === PLAINTEXT || serviceType === AUTHENTICATION,
-           then: schema => schema.nullable(),
-           otherwise: schema => schema.required("EKID is required when Service Type is ENCRYPTION or AUTHENTICATED_ENCRYPTION")
+            is: (serviceType, saState) => saState === stateLookupStr(UNKEYED_EXPIRED) || serviceType === PLAINTEXT || serviceType === AUTHENTICATION,
+            then: schema => schema.nullable(),
+            otherwise: schema => schema.required("EKID is required when Service Type is ENCRYPTION or AUTHENTICATED_ENCRYPTION")
         }),
     akid: yup.string()
         .when(['serviceType', 'saState'], {
@@ -99,6 +99,7 @@ const validationSchema = yup.object({
 })
 
 export default function SaModalForm({
+                                        type,
                                         data,
                                         refresh,
                                         isUpdate,
@@ -120,27 +121,27 @@ export default function SaModalForm({
     const errorCallback = createErrorCallback(enqueueSnackbar)
 
     const createAction = (values) => {
-        createSa(values, createResponseCallback(`SADB ${values.spi}/${values.scid} has been created`), errorCallback)
+        createSa(type, values, createResponseCallback(`SADB ${values.spi}/${values.scid} has been created`), errorCallback)
     }
 
     const startAction = () => {
-        startSa(data.id, createResponseCallback(`Started SA ${data.id.spi}/${data.id.scid}`), errorCallback)
+        startSa(type, data.id, createResponseCallback(`Started SA ${data.id.spi}/${data.id.scid}`), errorCallback)
     }
 
     const stopAction = (id) => {
-        stopSa(id, createResponseCallback(`Stopped SA ${id.spi}/${id.scid}`), errorCallback)
+        stopSa(type, id, createResponseCallback(`Stopped SA ${id.spi}/${id.scid}`), errorCallback)
     }
 
     const updateAction = (values) => {
-        updateSa(values, createResponseCallback(`Updated SA ${values.spi}/${values.scid}`), errorCallback)
+        updateSa(type, values, createResponseCallback(`Updated SA ${values.spi}/${values.scid}`), errorCallback)
     }
 
     function deleteAction(id) {
-        deleteSa(id, createResponseCallback(`SADB ${id.spi}/${id.scid} has been deleted`), errorCallback)
+        deleteSa(type, id, createResponseCallback(`SADB ${id.spi}/${id.scid} has been deleted`), errorCallback)
     }
 
     function expireAction(id) {
-        expireSa(id, createResponseCallback(`Expired SA ${id.spi}/${id.scid}`), errorCallback)
+        expireSa(type, id, createResponseCallback(`Expired SA ${id.spi}/${id.scid}`), errorCallback)
     }
 
     const defaultValues = useMemo(() => {
