@@ -96,7 +96,7 @@ CONTAINER_EXEC="/bin/podman"
 
 # Do not edit settings below -- needed for build steps
 pushd $(dirname "$0") >/dev/null 2>&1
-if [ -r /bin/git ]; then
+if [ -x /usr/bin/git ]; then
   ROOT=$(git rev-parse --show-toplevel)
   DIST=$ROOT
   BUILD_DIR=$DIST/build$BUILD/build

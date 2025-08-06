@@ -23,6 +23,7 @@ echo "----------------------------------------"
 echo "----------------------------------------"
 echo "AMMOS CryptoLib"
 echo "----------------------------------------"
+if [ -x /usr/bin/cmake ]; then
 cd $SRC_CRYPTO_LIB
 if [ -f CMakeCache.txt ]; then
   make clean
@@ -40,6 +41,9 @@ if [ $? != 0 ]; then
   exit 1
 fi
 make install >> make.out
+else
+  echo "Skip building CryptoLib as cmake not found"
+fi
 echo "----------------------------------------"
 
 cd $SRC_KMC; mvn -q clean
