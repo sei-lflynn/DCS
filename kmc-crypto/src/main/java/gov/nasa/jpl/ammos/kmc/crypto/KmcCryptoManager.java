@@ -115,40 +115,20 @@ public class KmcCryptoManager {
     public static final String ENCRYPTER_LIBRARY_CLASS =
             "gov.nasa.jpl.ammos.kmc.crypto.library.EncrypterLibrary";
     /**
-     * Default class name of the {@link Encrypter} implementation for crypto service.
-     */
-    public static final String ENCRYPTER_SERVICE_CLASS =
-            "gov.nasa.jpl.ammos.kmc.crypto.client.EncrypterClient";
-    /**
      * Default class name of the {@link Decrypter} implementation for local library.
      */
     public static final String DECRYPTER_LIBRARY_CLASS =
             "gov.nasa.jpl.ammos.kmc.crypto.library.DecrypterLibrary";
-    /**
-     * Default class name of the {@link Decrypter} implementation for crypto service.
-     */
-    public static final String DECRYPTER_SERVICE_CLASS =
-            "gov.nasa.jpl.ammos.kmc.crypto.client.DecrypterClient";
     /**
      * Default class name of the {@link IcvCreator} implementation for local library.
      */
     public static final String ICV_CREATOR_LIBRARY_CLASS =
             "gov.nasa.jpl.ammos.kmc.crypto.library.IcvCreatorLibrary";
     /**
-     * Default class name of the {@link IcvCreator} implementation for crypto service.
-     */
-    public static final String ICV_CREATOR_SERVICE_CLASS =
-            "gov.nasa.jpl.ammos.kmc.crypto.client.IcvCreatorClient";
-    /**
      * Default class name of the {@link IcvVerifier} implementation for local library.
      */
     public static final String ICV_VERIFIER_LIBRARY_CLASS =
             "gov.nasa.jpl.ammos.kmc.crypto.library.IcvVerifierLibrary";
-    /**
-     * Default class name of the {@link IcvVerifier} implementation for crypto service.
-     */
-    public static final String ICV_VERIFIER_SERVICE_CLASS =
-            "gov.nasa.jpl.ammos.kmc.crypto.client.IcvVerifierClient";
     /**
      * Default algorithm used for random number generator.
      */
@@ -914,20 +894,7 @@ public class KmcCryptoManager {
      * @throws KmcCryptoManagerException if error in retrieving the key.
      */
     public final Encrypter createEncrypter(final String keyRef) throws KmcCryptoManagerException {
-        String className;
-        String value = getUseCryptoService();
-        if (value != null && "true".equalsIgnoreCase(value)) {
-            className = ENCRYPTER_SERVICE_CLASS;
-            return createCryptoObject(className, keyRef);
-        } else if (value != null && "false".equalsIgnoreCase(value)) {
-            className = ENCRYPTER_LIBRARY_CLASS;
-            return createCryptoObject(className, keyRef);
-        } else {
-            String errorMsg = "Invalid " + CFG_USE_CRYPTO_SERVICE + " value: " + value;
-            logger.error(errorMsg);
-            throw new KmcCryptoManagerException(
-                    KmcCryptoManagerErrorCode.CONFIG_PARAMETER_VALUE_INVALID, errorMsg, null);
-        }
+        return createCryptoObject(ENCRYPTER_LIBRARY_CLASS, keyRef);
     }
 
     /**
@@ -951,8 +918,7 @@ public class KmcCryptoManager {
     public final Encrypter createEncrypter(final String keystoreLocation, final String keystorePass,
             final String keystoreType, final String keyRef, final String keyPass)
                     throws KmcCryptoManagerException {
-        String className = ENCRYPTER_LIBRARY_CLASS;
-        return createCryptoObject(className,
+        return createCryptoObject(ENCRYPTER_LIBRARY_CLASS,
                 keystoreLocation, keystorePass, keystoreType, keyRef, keyPass);
     }
 
@@ -964,20 +930,7 @@ public class KmcCryptoManager {
      * @throws KmcCryptoManagerException if error occurred in connecting to KMS.
      */
     public final Decrypter createDecrypter() throws KmcCryptoManagerException {
-        String className;
-        String value = getUseCryptoService();
-        if (value != null && "true".equalsIgnoreCase(value)) {
-            className = DECRYPTER_SERVICE_CLASS;
-            return createCryptoObject(className);
-        } else if (value != null && "false".equalsIgnoreCase(value)) {
-            className = DECRYPTER_LIBRARY_CLASS;
-            return createCryptoObject(className);
-        } else {
-            String errorMsg = "Invalid " + CFG_USE_CRYPTO_SERVICE + " value: " + value;
-            logger.error(errorMsg);
-            throw new KmcCryptoManagerException(
-                    KmcCryptoManagerErrorCode.CONFIG_PARAMETER_VALUE_INVALID, errorMsg, null);
-        }
+        return createCryptoObject(DECRYPTER_LIBRARY_CLASS);
     }
 
     /**
@@ -993,8 +946,7 @@ public class KmcCryptoManager {
      */
     public final Decrypter createDecrypter(final String keystoreLocation, final String keystorePass,
             final String keystoreType, final String keyPass) throws KmcCryptoManagerException {
-        String className = DECRYPTER_LIBRARY_CLASS;
-        return createCryptoObject(className,
+        return createCryptoObject(DECRYPTER_LIBRARY_CLASS,
                 keystoreLocation, keystorePass, keystoreType, null, keyPass);
     }
 
@@ -1007,19 +959,7 @@ public class KmcCryptoManager {
      * @throws KmcCryptoManagerException if the Message Digest algorithm is invalid.
      */
     public final IcvCreator createIcvCreator() throws KmcCryptoManagerException {
-        String className;
-        String value = getUseCryptoService();
-        if (value != null && "true".equalsIgnoreCase(value)) {
-            className = ICV_CREATOR_SERVICE_CLASS;
-        } else if (value != null && "false".equalsIgnoreCase(value)) {
-            className = ICV_CREATOR_LIBRARY_CLASS;
-        } else {
-            String errorMsg = "Invalid " + CFG_USE_CRYPTO_SERVICE + " value: " + getUseCryptoService();
-            logger.error(errorMsg);
-            throw new KmcCryptoManagerException(
-                    KmcCryptoManagerErrorCode.CONFIG_PARAMETER_VALUE_INVALID, errorMsg, null);
-        }
-        return createCryptoObject(className);
+        return createCryptoObject(ICV_CREATOR_LIBRARY_CLASS);
     }
 
     /**
@@ -1032,30 +972,7 @@ public class KmcCryptoManager {
      * @throws KmcCryptoManagerException if error in retrieving the key.
      */
     public final IcvCreator createIcvCreator(final String keyRef) throws KmcCryptoManagerException {
-        String className;
-        String value = getUseCryptoService();
-        if (value != null && "true".equalsIgnoreCase(value)) {
-            className = ICV_CREATOR_SERVICE_CLASS;
-        } else if (value != null && "false".equalsIgnoreCase(value)) {
-            className = ICV_CREATOR_LIBRARY_CLASS;
-        } else {
-            String errorMsg = "Invalid " + CFG_USE_CRYPTO_SERVICE + " value: " + getUseCryptoService();
-            logger.error(errorMsg);
-            throw new KmcCryptoManagerException(
-                    KmcCryptoManagerErrorCode.CONFIG_PARAMETER_VALUE_INVALID, errorMsg, null);
-        }
-        if (value != null && "true".equalsIgnoreCase(value)) {
-            className = ICV_CREATOR_SERVICE_CLASS;
-            return createCryptoObject(className, keyRef);
-        } else if (value != null && "false".equalsIgnoreCase(value)) {
-            className = ICV_CREATOR_LIBRARY_CLASS;
-            return createCryptoObject(className, keyRef);
-        } else {
-            String errorMsg = "Invalid " + CFG_USE_CRYPTO_SERVICE + " value: " + value;
-            logger.error(errorMsg);
-            throw new KmcCryptoManagerException(
-                    KmcCryptoManagerErrorCode.CONFIG_PARAMETER_VALUE_INVALID, errorMsg, null);
-        }
+        return createCryptoObject(ICV_CREATOR_LIBRARY_CLASS, keyRef);
     }
 
     /**
@@ -1078,8 +995,7 @@ public class KmcCryptoManager {
      */
     public final IcvCreator createIcvCreator(final String keystoreLocation, final String keystorePass,
             final String keystoreType, final String keyRef, final String keyPass) throws KmcCryptoManagerException {
-        String className = ICV_CREATOR_LIBRARY_CLASS;
-        return createCryptoObject(className,
+        return createCryptoObject(ICV_CREATOR_LIBRARY_CLASS,
                 keystoreLocation, keystorePass, keystoreType, keyRef, keyPass);
     }
 
@@ -1094,20 +1010,7 @@ public class KmcCryptoManager {
      * @throws KmcCryptoManagerException if error in retrieving the key.
      */
     public final IcvVerifier createIcvVerifier() throws KmcCryptoManagerException {
-        String className;
-        String value = getUseCryptoService();
-        if (value != null && "true".equalsIgnoreCase(value)) {
-            className = ICV_VERIFIER_SERVICE_CLASS;
-            return createCryptoObject(className);
-        } else if (value != null && "false".equalsIgnoreCase(value)) {
-            className = ICV_VERIFIER_LIBRARY_CLASS;
-            return createCryptoObject(className);
-        } else {
-            String errorMsg = "Invalid " + CFG_USE_CRYPTO_SERVICE + " value: " + value;
-            logger.error(errorMsg);
-            throw new KmcCryptoManagerException(
-                    KmcCryptoManagerErrorCode.CONFIG_PARAMETER_VALUE_INVALID, errorMsg, null);
-        }
+        return createCryptoObject(ICV_VERIFIER_LIBRARY_CLASS);
     }
 
     /**
@@ -1123,8 +1026,7 @@ public class KmcCryptoManager {
      */
     public final IcvVerifier createIcvVerifier(final String keystoreLocation, final String keystorePass,
             final String keystoreType, final String keyPass) throws KmcCryptoManagerException {
-        String className = ICV_VERIFIER_LIBRARY_CLASS;
-        return createCryptoObject(className,
+        return createCryptoObject(ICV_VERIFIER_LIBRARY_CLASS,
                 keystoreLocation, keystorePass, keystoreType, null, keyPass);
     }
 
