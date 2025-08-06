@@ -584,10 +584,6 @@ echo "${INST_LIBPATH}/kmip-client.jar" >> "${INST_CFGPATH}/install_manifest.txt"
 echo "${INST_LIBPATH}/kmc-crypto.jar" >> "${INST_CFGPATH}/install_manifest.txt"
 echo "${INST_LIBPATH}/kmc-crypto-library.jar" >> "${INST_CFGPATH}/install_manifest.txt"
 
-# Deploy KMC Crypto Client
-/bin/install -m 0644 -g "${INST_ROOTGRP}" -o "${INST_ROOTUSR}" "${DIST}/kmc-crypto-client/target/kmc-crypto-client-${VERSION}.jar" "${INST_LIBPATH}/kmc-crypto-client.jar"
-echo "${INST_LIBPATH}/kmc-crypto-client.jar" >> "${INST_CFGPATH}/install_manifest.txt"
-
 # Deploy KMC SA Mgmt CLI
 /bin/install -m 0755 -g "${INST_ROOTGRP}" -o "${INST_ROOTUSR}" "${DIST}/kmc-sa-mgmt/kmc-sa-cli/target/appassembler/bin/kmc-sa-mgmt" "${INST_BINPATH}/"
 echo "${INST_BINPATH}/kmc-sa-mgmt" >> "${INST_CFGPATH}/install_manifest.txt"
@@ -598,9 +594,6 @@ done
 /bin/install -m 0644 -g "${INST_USERSGRP_GID}" -o "${INST_CFGUSR_UID}" "${DIST}"/kmc-sa-mgmt/kmc-sa-cli/target/appassembler/etc/kmc-sa-mgmt-log4j2.xml "${DIST}"/kmc-sa-mgmt/kmc-sa-cli/target/appassembler/etc/kmc-sa-mgmt.properties "${INST_CFGPATH}/"
 echo "${INST_CFGPATH}/kmc-sa-mgmt-log4j2.xml" >> "${INST_CFGPATH}/install_manifest.txt"
 echo "${INST_CFGPATH}/kmc-sa-mgmt.properties" >> "${INST_CFGPATH}/install_manifest.txt"
-
-# Deploy Client Support Files
-BCFIPS_VER=$(/bin/grep -A1 bc-fips "${DIST}/kmc-crypto-client/pom.xml" | /bin/grep version | /bin/cut -f2 -d'>' | /bin/cut -f1 -d'<')
 
 /bin/install -m 0755 -g "${INST_USERSGRP_GID}" -o "${INST_ROOTUSR}" "${DIST}/kmc-resources/crypto-client/bin/create-crypto-keystore.sh" "${INST_BINPATH}/"
 /bin/sed -i -e "s|__LIBPATH__|${LIBPATH}|g" -e "s|__BCFIPS_VER__|${BCFIPS_VER}|g" "${INST_BINPATH}/create-crypto-keystore.sh"
