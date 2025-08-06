@@ -1,4 +1,4 @@
-VERSION=3.7.0
+VERSION=4.0.0
 
 # Deployment Settings
 CRYPTO_SERVICE_FQDN="crypto.example.com"
