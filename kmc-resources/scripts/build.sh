@@ -146,16 +146,33 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ "$1" == "skip-test" ]; then
-  cd $SRC_KMC/kmc-crypto-library ; mvn jar:test-jar
-elif [ $BUILD_FLAG -eq 0 ]; then # only run tests if no build failures
-  echo "----------------------------------------"
-  echo "DCS Crypto Library Tests"
-  echo "----------------------------------------"
-  cd $SRC_KMC/kmc-crypto-library ; mvn test ; mvn jar:test-jar
+  echo "Skipping tests..."
+  cd $SRC_KMC/kmc-crypto-library
+  mvn jar:test-jar
   if [ $? -ne 0 ]; then
-    echo "ERROR: Failed tests for DCS Crypto Library"
-    BUILD_FAILURES+=("DCS Crypto Library Tests")
+    echo "ERROR: Failed to create test jar for DCS Crypto Library"
+    BUILD_FAILURES+=("DCS Crypto Library jar:test-jar")
     BUILD_FLAG=1
+  fi
+else
+  if [ $BUILD_FLAG -eq 0 ]; then # only run tests if no build failures
+    echo "----------------------------------------"
+    echo "DCS Crypto Library Tests"
+    echo "----------------------------------------"
+    cd $SRC_KMC/kmc-crypto-library
+    mvn test
+    if [ $? -ne 0 ]; then
+      echo "ERROR: Failed tests for DCS Crypto Library"
+      BUILD_FAILURES+=("DCS Crypto Library Tests")
+      BUILD_FLAG=1
+    else
+      mvn jar:test-jar
+      if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to create test jar for DCS Crypto Library"
+        BUILD_FAILURES+=("DCS Crypto Library jar:test-jar")
+        BUILD_FLAG=1
+      fi
+    fi
   fi
 fi
 
