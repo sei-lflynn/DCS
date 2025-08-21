@@ -156,6 +156,7 @@
             --add-exports=java.base/sun.security.provider=ALL-UNNAMED
             --add-exports=java.base/sun.security.rsa=ALL-UNNAMED
             --add-exports=java.base/com.sun.crypto.provider=ALL-UNNAMED
+            -Djava.io.tmpdir=${project.build.testOutputDirectory}
           </argLine>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
         </configuration>
