@@ -39,13 +39,13 @@ if [ -x /usr/bin/cmake ]; then
     BUILD_FAILURES+=("AMMOS CryptoLib cmake")
     BUILD_FLAG=1
   else
-    make >> make.out 2>&1
+    make invalid_target >> make.out 2>&1
     if [ $? -ne 0 ]; then
       echo "ERROR: Failed to build $SRC_CRYPTO_LIB"
       BUILD_FAILURES+=("AMMOS CryptoLib make")
       BUILD_FLAG=1
     else
-      make install >> make.out 2>&1
+      make invalid >> make.out 2>&1
       if [ $? -ne 0 ]; then
         echo "ERROR: Failed to install $SRC_CRYPTO_LIB"
         BUILD_FAILURES+=("AMMOS CryptoLib make install")
@@ -59,17 +59,17 @@ fi
 echo "----------------------------------------"
 
 cd $SRC_KMC; mvn -q clean
-cd $SRC_KMC; $MVN install -N -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
+cd $SRC_KMC; $MVN invalid -N -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build $SRC_KMC"
-  BUILD_FAILURES+=("KMC")
+  BUILD_FAILURES+=("Root level 'mvn install' command failed.")
   BUILD_FLAG=1
 fi
 echo "----------------------------------------"
 echo "KMIP Client Library"
 echo "----------------------------------------"
 cd $SRC_KMIP; mvn -q clean
-cd $SRC_KMIP; $MVN install -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
+cd $SRC_KMIP; $MVN invalid -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build KMIP Client Library"
   BUILD_FAILURES+=("KMIP Client Library")
@@ -78,7 +78,7 @@ fi
 echo "----------------------------------------"
 echo "DCS Key Client Library"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-key-client ; $MVN install -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
+cd $SRC_KMC/kmc-key-client ; $MVN invalid -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS Key Client Library"
   BUILD_FAILURES+=("DCS Key Client Library")
@@ -87,7 +87,7 @@ fi
 echo "----------------------------------------"
 echo "DCS Crypto Interface"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-crypto ; $MVN install -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
+cd $SRC_KMC/kmc-crypto ; $MVN invalid -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS Crypto Interface"
   BUILD_FAILURES+=("DCS Crypto Interface")
@@ -96,7 +96,7 @@ fi
 echo "----------------------------------------"
 echo "DCS Crypto Library"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-crypto-library ; $MVN install -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
+cd $SRC_KMC/kmc-crypto-library ; $MVN invalid -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS Crypto Library"
   BUILD_FAILURES+=("DCS Crypto Library")
@@ -105,7 +105,7 @@ fi
 echo "----------------------------------------"
 echo "DCS Crypto Service"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-crypto-service ; $MVN package -DDEFAULT_PREFIX="${CRYPTOSVC_PREFIX}" -DDEFAULT_BINPATH="${CRYPTOSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${CRYTPOSVC_LIBPATH}" -DDEFAULT_CFGPATH="${CRYPTOSVC_CFGPATH}" -DDEFAULT_LOGPATH="${CRYPTOSVC_LOGPATH}"
+cd $SRC_KMC/kmc-crypto-service ; $MVN invalid -DDEFAULT_PREFIX="${CRYPTOSVC_PREFIX}" -DDEFAULT_BINPATH="${CRYPTOSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${CRYTPOSVC_LIBPATH}" -DDEFAULT_CFGPATH="${CRYPTOSVC_CFGPATH}" -DDEFAULT_LOGPATH="${CRYPTOSVC_LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS Crypto Service"
   BUILD_FAILURES+=("DCS Crypto Service")
@@ -128,7 +128,7 @@ if [ $? -ne 0 ]; then
   BUILD_FLAG=1
 fi
 mvn eclipse:eclipse
-mvn -q package -DDEFAULT_PREFIX="${SDLSSVC_PREFIX}" -DDEFAULT_BINPATH="${SDLSSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SDLSSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SDLSSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SDLSSVC_LOGPATH}"
+mvn -q invalid -DDEFAULT_PREFIX="${SDLSSVC_PREFIX}" -DDEFAULT_BINPATH="${SDLSSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SDLSSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SDLSSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SDLSSVC_LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed mvn package for DCS SDLS Service"
   BUILD_FAILURES+=("DCS SDLS Service package")
@@ -138,7 +138,7 @@ fi
 echo "----------------------------------------"
 echo "DCS SA Management"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-sa-mgmt ; mvn -q package -DDEFAULT_PREFIX="${SAMGMTSVC_PREFIX}" -DDEFAULT_BINPATH="${SAMGMTSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SAMGMTSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SAMGMTSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SAMGMTSVC_LOGPATH}" # will run the tests
+cd $SRC_KMC/kmc-sa-mgmt ; mvn -q invalid -DDEFAULT_PREFIX="${SAMGMTSVC_PREFIX}" -DDEFAULT_BINPATH="${SAMGMTSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SAMGMTSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SAMGMTSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SAMGMTSVC_LOGPATH}" # will run the tests
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS SA Management"
   BUILD_FAILURES+=("DCS SA Management")
@@ -151,7 +151,7 @@ elif [ $BUILD_FLAG -eq 0 ]; then # only run tests if no build failures
   echo "----------------------------------------"
   echo "DCS Crypto Library Tests"
   echo "----------------------------------------"
-  cd $SRC_KMC/kmc-crypto-library ; mvn test ; mvn jar:test-jar
+  cd $SRC_KMC/kmc-crypto-library ; mvn invalid ; mvn jar:test-jar
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed tests for DCS Crypto Library"
     BUILD_FAILURES+=("DCS Crypto Library Tests")
@@ -162,7 +162,7 @@ fi
 # At the end, report if any build failed and exit accordingly
 echo "----------------------------------------"
 if [ $BUILD_FLAG -ne 0 ]; then
-  echo "Some components failed to build:"
+  echo "The following component(s) failed to build, please see the component specific logs above for more detail:"
   for failure in "${BUILD_FAILURES[@]}"; do
     echo " - $failure"
   done
