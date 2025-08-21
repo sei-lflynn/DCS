@@ -25,6 +25,7 @@
     <log4j.version>2.25.1</log4j.version>
     <gson.version>2.13.1</gson.version>
     <bcfips.version>2.1.1</bcfips.version>
+    <bctls-fips.version>2.1.20</bctls-fips.version>
     <junit.version>4.13.2</junit.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
