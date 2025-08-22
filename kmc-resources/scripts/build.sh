@@ -58,7 +58,7 @@ else
 fi
 echo "----------------------------------------"
 
-cd $SRC_KMC; mvn -q clean
+cd $SRC_KMC; mvn -q -B clean
 cd $SRC_KMC; $MVN install -N -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build $SRC_KMC"
@@ -68,7 +68,7 @@ fi
 echo "----------------------------------------"
 echo "KMIP Client Library"
 echo "----------------------------------------"
-cd $SRC_KMIP; mvn -q clean
+cd $SRC_KMIP; mvn -q -B clean
 cd $SRC_KMIP; $MVN install -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build KMIP Client Library"
@@ -128,7 +128,7 @@ if [ $? -ne 0 ]; then
   BUILD_FLAG=1
 fi
 mvn eclipse:eclipse
-mvn -q package -DDEFAULT_PREFIX="${SDLSSVC_PREFIX}" -DDEFAULT_BINPATH="${SDLSSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SDLSSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SDLSSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SDLSSVC_LOGPATH}"
+mvn -q -B package -DDEFAULT_PREFIX="${SDLSSVC_PREFIX}" -DDEFAULT_BINPATH="${SDLSSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SDLSSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SDLSSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SDLSSVC_LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed mvn package for DCS SDLS Service"
   BUILD_FAILURES+=("DCS SDLS Service package")
@@ -138,7 +138,7 @@ fi
 echo "----------------------------------------"
 echo "DCS SA Management"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-sa-mgmt ; mvn -q package -DDEFAULT_PREFIX="${SAMGMTSVC_PREFIX}" -DDEFAULT_BINPATH="${SAMGMTSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SAMGMTSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SAMGMTSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SAMGMTSVC_LOGPATH}" # will run the tests
+cd $SRC_KMC/kmc-sa-mgmt ; mvn -q -B package -DDEFAULT_PREFIX="${SAMGMTSVC_PREFIX}" -DDEFAULT_BINPATH="${SAMGMTSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SAMGMTSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SAMGMTSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SAMGMTSVC_LOGPATH}" # will run the tests
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS SA Management"
   BUILD_FAILURES+=("DCS SA Management")
