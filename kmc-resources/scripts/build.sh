@@ -8,7 +8,7 @@ echo "Compile and build DCS"
 source $(dirname "$0")/setenv.sh
 
 SKIP_TESTS="-Dmaven.test.skip=true"
-MVN="mvn -q ${SKIP_TESTS}"
+MVN="mvn -B -q ${SKIP_TESTS}"
 
 echo "----------------------------------------"
 echo "Java Version used in this build"
