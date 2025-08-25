@@ -8,7 +8,8 @@ echo "Compile and build DCS"
 source $(dirname "$0")/setenv.sh
 
 SKIP_TESTS="-Dmaven.test.skip=true"
-MVN="mvn -B -q -Dmaven.artifact.threads=1 ${SKIP_TESTS}"
+MVN_COMMON_ARGS="-B -ntp"
+MVN="mvn ${MVN_COMMON_ARGS} ${SKIP_TESTS}"
 
 echo "----------------------------------------"
 echo "Java Version used in this build"
@@ -58,7 +59,7 @@ else
 fi
 echo "----------------------------------------"
 
-cd $SRC_KMC; mvn -q -B -Dmaven.artifact.threads=1 clean
+cd $SRC_KMC; mvn $MVN_COMMON_ARGS clean
 cd $SRC_KMC; $MVN install -N -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build $SRC_KMC"
@@ -68,7 +69,7 @@ fi
 echo "----------------------------------------"
 echo "KMIP Client Library"
 echo "----------------------------------------"
-cd $SRC_KMIP; mvn -q -B -Dmaven.artifact.threads=1 clean
+cd $SRC_KMIP; mvn $MVN_COMMON_ARGS clean
 cd $SRC_KMIP; $MVN install -DDEFAULT_PREFIX="${PREFIX}" -DDEFAULT_BINPATH="${BINPATH}" -DDEFAULT_LIBPATH="${LIBPATH}" -DDEFAULT_CFGPATH="${CFGPATH}" -DDEFAULT_LOGPATH="${LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build KMIP Client Library"
@@ -119,7 +120,7 @@ cd $SRC_KMC/kmc-sdls-service
 export LD_LIBRARY_PATH=${SRC_CRYPTO_LIB}/build/lib
 rm -fr local-maven-repo
 rm -fr ~/.m2/repository/gov/nasa/jpl/ammos/asec/kmc/KmcSdlsJNI
-mvn deploy:deploy-file -DgroupId=gov.nasa.jpl.ammos.asec.kmc -DartifactId=KmcSdlsJNI \
+mvn $MVN_COMMON_ARGS deploy:deploy-file -DgroupId=gov.nasa.jpl.ammos.asec.kmc -DartifactId=KmcSdlsJNI \
   -Dversion=$VERSION -Durl=file:./local-maven-repo/ -DrepositoryId=local-maven-repo \
   -DupdateReleaseInfo=true -Dfile=${SRC_CRYPTO_LIB}/build/lib/KmcSdlsJNI.jar
 if [ $? -ne 0 ]; then
@@ -127,8 +128,8 @@ if [ $? -ne 0 ]; then
   BUILD_FAILURES+=("DCS SDLS Service deploy:deploy-file")
   BUILD_FLAG=1
 fi
-mvn eclipse:eclipse
-mvn -q -B -Dmaven.artifact.threads=1 package -DDEFAULT_PREFIX="${SDLSSVC_PREFIX}" -DDEFAULT_BINPATH="${SDLSSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SDLSSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SDLSSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SDLSSVC_LOGPATH}"
+mvn $MVN_COMMON_ARGS eclipse:eclipse
+mvn $MVN_COMMON_ARGS package -DDEFAULT_PREFIX="${SDLSSVC_PREFIX}" -DDEFAULT_BINPATH="${SDLSSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SDLSSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SDLSSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SDLSSVC_LOGPATH}"
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed mvn package for DCS SDLS Service"
   BUILD_FAILURES+=("DCS SDLS Service package")
@@ -138,7 +139,7 @@ fi
 echo "----------------------------------------"
 echo "DCS SA Management"
 echo "----------------------------------------"
-cd $SRC_KMC/kmc-sa-mgmt ; mvn -q -B -Dmaven.artifact.threads=1 package -DDEFAULT_PREFIX="${SAMGMTSVC_PREFIX}" -DDEFAULT_BINPATH="${SAMGMTSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SAMGMTSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SAMGMTSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SAMGMTSVC_LOGPATH}" # will run the tests
+cd $SRC_KMC/kmc-sa-mgmt ; mvn $MVN_COMMON_ARGS package -DDEFAULT_PREFIX="${SAMGMTSVC_PREFIX}" -DDEFAULT_BINPATH="${SAMGMTSVC_PREFIX}/bin" -DDEFAULT_LIBPATH="${SAMGMTSVC_LIBPATH}" -DDEFAULT_CFGPATH="${SAMGMTSVC_CFGPATH}" -DDEFAULT_LOGPATH="${SAMGMTSVC_LOGPATH}" # will run the tests
 if [ $? -ne 0 ]; then
   echo "ERROR: Failed to build DCS SA Management"
   BUILD_FAILURES+=("DCS SA Management")
@@ -148,7 +149,7 @@ fi
 if [ "$1" == "skip-test" ]; then
   echo "Skipping tests..."
   cd $SRC_KMC/kmc-crypto-library
-  mvn jar:test-jar
+  mvn $MVN_COMMON_ARGS jar:test-jar
   if [ $? -ne 0 ]; then
     echo "ERROR: Failed to create test jar for DCS Crypto Library"
     BUILD_FAILURES+=("DCS Crypto Library jar:test-jar")
@@ -160,13 +161,13 @@ else
     echo "DCS Crypto Library Tests"
     echo "----------------------------------------"
     cd $SRC_KMC/kmc-crypto-library
-    mvn test
+    mvn $MVN_COMMON_ARGS test
     if [ $? -ne 0 ]; then
       echo "ERROR: Failed tests for DCS Crypto Library"
       BUILD_FAILURES+=("DCS Crypto Library Tests")
       BUILD_FLAG=1
     else
-      mvn jar:test-jar
+      mvn $MVN_COMMON_ARGS jar:test-jar
       if [ $? -ne 0 ]; then
         echo "ERROR: Failed to create test jar for DCS Crypto Library"
         BUILD_FAILURES+=("DCS Crypto Library jar:test-jar")
