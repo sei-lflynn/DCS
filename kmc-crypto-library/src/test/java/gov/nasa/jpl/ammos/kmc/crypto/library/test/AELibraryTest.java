@@ -439,7 +439,7 @@ public class AELibraryTest {
             fail("Expected KmcCryptoException not received.");
         } catch (KmcCryptoException e) {
             assertEquals(KmcCryptoErrorCode.CRYPTO_ALGORITHM_ERROR, e.getErrorCode());
-            assertTrue(e.getMessage().contains("javax.crypto.AEADBadTagException: Error finalising cipher data: cipher text too short"));
+            assertTrue(e.getMessage().contains("javax.crypto.AEADBadTagException: Error finalising cipher data: data too short"));
         }
     }
 

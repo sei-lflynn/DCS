@@ -465,7 +465,7 @@ public class TruncatedMacTest {
             fail("Expected KmcCryptoException not received");
         } catch (KmcCryptoException e) {
             assertEquals(KmcCryptoErrorCode.INVALID_INPUT_VALUE, e.getErrorCode());
-            assertTrue(e.getMessage().contains("invalid value for MAC size"));
+            assertTrue(e.getMessage().contains("Invalid value for MAC size"));
         }
     }
 
