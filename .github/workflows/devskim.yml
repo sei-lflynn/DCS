@@ -95,7 +95,7 @@ jobs:
         with:
           directory-to-scan: .
           should-scan-archives: true
-          output-filename: devskim-results.sarif
+          #output-filename: devskim-results.sarif
           extra-options: >
             --confidence High,Medium,Low
             --severity Critical,Important,Moderate,BestPractice,ManualReview
