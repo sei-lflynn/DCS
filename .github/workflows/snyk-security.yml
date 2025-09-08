@@ -182,7 +182,7 @@ jobs:
             # Optional gates:
             --severity-threshold=low
             # --fail-on=all
-            --all-projects
+            # --all-projects
 
       - name: Upload OSS SARIF as artifact
         if: always() && hashFiles('snyk-oss.sarif') != ''
