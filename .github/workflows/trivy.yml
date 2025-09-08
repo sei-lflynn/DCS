@@ -109,8 +109,10 @@ jobs:
           scanners: vuln
           format: sarif
           output: reports/trivy-vuln.sarif
-          severity: CRITICAL,HIGH,MEDIUM
-          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: CRITICAL,HIGH,MEDIUM,LOW
+          ignore-unfixed: false
+          timeout: '15m'
           exit-code: "0"
           # To enforce blocking on high/critical later, remove exit-code and rely on Trivy defaults.
 
@@ -123,7 +125,7 @@ jobs:
           scanners: config
           format: sarif
           output: reports/trivy-config.sarif
-          severity: CRITICAL,HIGH,MEDIUM
+          severity: CRITICAL,HIGH,MEDIUM,LOW
           exit-code: "0"
 
       # ── Scan 3: Secrets (hard-coded credentials, tokens, etc.) ───────────────────
