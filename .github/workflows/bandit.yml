@@ -177,6 +177,7 @@ jobs:
           set -euxo pipefail
           mkdir -p "$(dirname "${SARIF_OUT}")"
           bandit -r . \
+            -n 5\
             --format sarif \
             --output "${SARIF_OUT}" \
             --severity-level all \
