@@ -122,7 +122,8 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
-          scanners: config
+          # scanners: config
+          scanners: misconfig
           format: sarif
           output: reports/trivy-config.sarif
           severity: CRITICAL,HIGH,MEDIUM,LOW
