@@ -121,6 +121,7 @@ jobs:
             --sarif-file-output=${{ env.SARIF_OUT }}
             # Optional gates (uncomment to enforce):
             # --severity-threshold=high
+            --severity-threshold=low
             # --fail-on=all
 
       # Verify that a SARIF file exists; this guards the upload job.
@@ -166,6 +167,30 @@ jobs:
       #     name: snyk-oss-sarif
       #     path: snyk-oss.sarif
       #     retention-days: 14
+
+      # ── Optional: Add Snyk Open Source (dependency) scanning as a second SARIF ─────────────
+      - name: Run Snyk Open Source → SARIF
+        if: ${{ env.SNYK_TOKEN != '' }}
+        uses: snyk/actions/python@e2221410bff24446ba09102212d8bc75a567237d
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >-
+            --sarif-file-output=snyk-oss.sarif
+            # Optional gates:
+            --severity-threshold=low
+            # --fail-on=all
+
+      - name: Upload OSS SARIF as artifact
+        if: always() && hashFiles('snyk-oss.sarif') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: snyk-oss-sarif
+          path: snyk-oss.sarif
+          retention-days: 14
+
 
   # ────────────────────────────────── Job 2: Upload ──────────────────────────────────
   upload-sarif:
@@ -217,3 +242,18 @@ jobs:
       #   with:
       #     sarif_file: snyk-oss.sarif
       #     category: snyk-oss
+
+      # ── Optional: Upload Snyk OSS SARIF if you enabled the OSS steps above ─────────────
+      - name: Download OSS SARIF artifact
+        if: always()
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: snyk-oss-sarif
+          path: .
+
+      - name: Upload OSS SARIF to GitHub Code Scanning
+        if: always() && hashFiles('snyk-oss.sarif') != ''
+        uses: github/codeql-action/upload-sarif@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
+        with:
+          sarif_file: snyk-oss.sarif
+          category: snyk-oss
