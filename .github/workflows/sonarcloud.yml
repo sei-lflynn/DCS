@@ -34,25 +34,32 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - '**/*.java'
-      - '**/pom.xml'
-      - '.mvn/**'
-      - 'mvnw'
-      - 'mvnw.cmd'
-      - 'sonar-project.properties'
-      - '.github/workflows/sonarcloud.yml'
+      # Java / Maven files (cover root and submodules)
+      - "**/*.java"
+      - "pom.xml"
+      - "**/pom.xml"
+      - ".mvn/**"
+      - "mvnw"
+      - "mvnw.cmd"
+      # Sonar properties (cover root and subdirs)
+      - "sonar-project.properties"
+      - "**/sonar-project.properties"
+      # Any workflow edits
+      - ".github/workflows/**"
   pull_request:
     branches: [ "main" ]
     types: [opened, synchronize, reopened]
     paths:
-      - '**/*.java'
-      - '**/pom.xml'
-      - '.mvn/**'
-      - 'mvnw'
-      - 'mvnw.cmd'
-      - 'sonar-project.properties'
-      - '.github/workflows/sonarcloud.yml'
-  # workflow_dispatch:  # enable if you want manual runs
+      - "**/*.java"
+      - "pom.xml"
+      - "**/pom.xml"
+      - ".mvn/**"
+      - "mvnw"
+      - "mvnw.cmd"
+      - "sonar-project.properties"
+      - "**/sonar-project.properties"
+      - ".github/workflows/**"
+  workflow_dispatch:
 
 # Concurrency – cancel superseded runs on the same ref
 concurrency:
@@ -88,7 +95,7 @@ jobs:
           #   uploads.github.com
           #   objects.githubusercontent.com
 
-      # Scoped checkout credentials – don't persist the GitHub token in the repo
+      # Scoped checkout – don't persist the GitHub token in the repo
       - name: Checkout (no persisted creds)
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
