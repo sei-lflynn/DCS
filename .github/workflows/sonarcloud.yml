@@ -102,7 +102,8 @@ jobs:
           mkdir -p "${BW_OUT}"
           # Build Wrapper captures the compile so the analyzer knows exactly how files were built
           build-wrapper-linux-x86-64 --out-dir "${BW_OUT}" \
-            sh -c 'gcc -std=c17 -I. -O2 -g main.c -o main'
+            sh -c 'git submodule init; git submodule update; kmc-resources/scripts/build.sh'
+            # sh -c 'gcc -std=c17 -I. -O2 -g main.c -o main'
         timeout-minutes: 5
 
       # Fail fast if the wrapper didn't produce the expected file
