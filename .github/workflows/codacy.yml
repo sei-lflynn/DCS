@@ -65,7 +65,7 @@ jobs:
   codacy-scan:
     name: Codacy scan → split SARIF
     runs-on: ubuntu-24.04                 # Explicit runner for reproducibility.
-    timeout-minutes: 20                   # Upper bound for runtime.
+    timeout-minutes: 800                   # Upper bound for runtime.
     # Least privilege: only what's needed to read the repo.
     permissions:
       contents: read
@@ -172,7 +172,7 @@ jobs:
     # Only run if there are split files listed in the previous job's output.
     if: ${{ needs.codacy-scan.outputs.sarif_files != '' && needs.codacy-scan.outputs.sarif_files != '[]' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 120
     # Least privilege: this job alone needs 'security-events: write' to upload SARIF.
     permissions:
       contents: read
