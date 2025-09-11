@@ -34,17 +34,14 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      # Java / Maven files (cover root and submodules)
       - "**/*.java"
       - "pom.xml"
       - "**/pom.xml"
       - ".mvn/**"
       - "mvnw"
       - "mvnw.cmd"
-      # Sonar properties (cover root and subdirs)
       - "sonar-project.properties"
       - "**/sonar-project.properties"
-      # Any workflow edits
       - ".github/workflows/**"
   pull_request:
     branches: [ "main" ]
@@ -61,30 +58,27 @@ on:
       - ".github/workflows/**"
   workflow_dispatch:
 
-# Concurrency – cancel superseded runs on the same ref
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
-# Default-deny permissions at the workflow level (read-only)
 permissions:
   contents: read
 
 jobs:
   build-and-analyze:
-    name: Build + SonarCloud analyze + SARIF artifact
+    name: Build + publish JNI to local repo + Sonar + SARIF
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     permissions:
-      contents: read   # read-only; no write scopes here
+      contents: read
 
     steps:
-      # Harden egress – start in audit; switch to block + allowlist when stable
       - name: Harden runner (audit egress)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
-          # When stable, prefer:
+          # When stable, consider:
           # egress-policy: block
           # allowed-endpoints: >
           #   sonarcloud.io
@@ -95,41 +89,89 @@ jobs:
           #   uploads.github.com
           #   objects.githubusercontent.com
 
-      # Scoped checkout – don't persist the GitHub token in the repo
       - name: Checkout (no persisted creds)
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      # JDK 17 with Maven cache
       - name: Set up JDK 17
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
         with:
           distribution: temurin
           java-version: '17'
           cache: 'maven'
 
-      # Optional: quick env sanity check
       - name: Show Java & Maven versions
         run: |
           set -eux
           java -version
           mvn -v
 
-      # Build and test
-      - name: Build with Maven
-        run: mvn -B -DskipTests=true clean verify
-        # run: mvn -B -DskipTests=false clean verify
+      # ---- Build the JNI jar that kmc-sdls-service depends on ----
+      - name: Build JNI jar (Gradle or repo script)
+        run: |
+          set -euxo pipefail
+          # Try Gradle wrapper first if present in the JNI module
+          if [ -f "./gradlew" ] && [ -d "ammos-cryptolib" ]; then
+            ./gradlew :ammos-cryptolib:clean :ammos-cryptolib:jar
+          elif [ -x "kmc-resources/scripts/build.sh" ]; then
+            # Your repo's existing build script path (adjust if different)
+            kmc-resources/scripts/build.sh
+          else
+            echo "No Gradle wrapper or build script found for JNI; please adjust this step."
+            exit 1
+          fi
 
-      # SonarCloud analysis via Maven scanner
+          echo "Locate the produced JNI JAR (KmcSdlsJNI*.jar)..."
+          # Prefer Gradle's typical output path
+          JAR_CANDIDATES=$(ls -1 ammos-cryptolib/build/libs/KmcSdlsJNI*.jar 2>/dev/null || true)
+          # Fallback to any path containing the jar name
+          if [ -z "${JAR_CANDIDATES}" ]; then
+            JAR_CANDIDATES=$(ls -1 **/KmcSdlsJNI*.jar 2>/dev/null || true)
+          fi
+          echo "${JAR_CANDIDATES}"
+          if [ -z "${JAR_CANDIDATES}" ]; then
+            echo "ERROR: Could not find KmcSdlsJNI jar after build."
+            exit 2
+          fi
+          # Pick first match
+          echo "${JAR_CANDIDATES}" | head -n1 > .jni_jar_path
+
+      - name: Deploy JNI jar to file-based local repo for Maven resolution
+        run: |
+          set -euxo pipefail
+          JAR_PATH="$(cat .jni_jar_path)"
+          echo "Using JNI jar: ${JAR_PATH}"
+
+          # This path matches the file:// repository your POM is already using:
+          # id: local-maven-repo, url: file://${workspace}/kmc-sdls-service/local-maven-repo
+          mkdir -p "kmc-sdls-service/local-maven-repo"
+
+          mvn -B deploy:deploy-file \
+            -Dfile="${JAR_PATH}" \
+            -DgroupId=gov.nasa.jpl.ammos.asec.kmc \
+            -DartifactId=KmcSdlsJNI \
+            -Dversion=4.0.0 \
+            -Dpackaging=jar \
+            -DgeneratePom=true \
+            -DrepositoryId=local-maven-repo \
+            -Durl="file://${PWD}/kmc-sdls-service/local-maven-repo"
+
+          echo "Deployed to: file://${PWD}/kmc-sdls-service/local-maven-repo"
+
+      # ---- Build the reactor, excluding KMC integration tests; force updates (-U) to clear prior negative cache ----
+      - name: Build with Maven (exclude KMC ITs; force updates)
+        run: >
+          mvn -B -U clean verify
+          -DfailIfNoTests=false
+          -DexcludeTests=**/gov/nasa/jpl/ammos/kmc/keyclient/test/**/*
+
       - name: SonarCloud scan (Maven)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-        # If you use a self-hosted SonarQube, also pass -Dsonar.host.url=...
 
-      # Generate SARIF from SonarCloud issues (waits for CE task)
       - name: Generate SARIF from SonarCloud issues
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -158,8 +200,7 @@ jobs:
           project_key = read_project_key()
           print(f"Project: {project_key}")
 
-          # Wait for the most recent Compute Engine task to finish
-          for _ in range(120):  # ~6 minutes max
+          for _ in range(120):
               act = get_json(f"{base}/api/ce/activity?component={urllib.parse.quote(project_key)}&onlyCurrents=true&ps=1", token)
               tasks = act.get("tasks", [])
               if tasks:
@@ -173,7 +214,6 @@ jobs:
                   print("No CE tasks yet")
               time.sleep(3)
 
-          # Pull unresolved issues for the current branch/analysis
           p=1; page_size=500; issues=[]
           while True:
               data = get_json(f"{base}/api/issues/search?componentKeys={urllib.parse.quote(project_key)}&resolved=false&ps={page_size}&p={p}", token)
@@ -190,13 +230,7 @@ jobs:
               return {"BLOCKER":"error","CRITICAL":"error","MAJOR":"warning","MINOR":"note","INFO":"note"}.get(sev,"warning")
 
           runs = [{
-              "tool": {
-                  "driver": {
-                      "name": "SonarCloud",
-                      "informationUri": "https://sonarcloud.io",
-                      "rules": []
-                  }
-              },
+              "tool": {"driver": {"name": "SonarCloud", "informationUri": "https://sonarcloud.io", "rules": []}},
               "results": []
           }]
 
@@ -236,7 +270,6 @@ jobs:
           print(f"Wrote {len(issues)} issues to reports/sonarcloud.sarif")
           PY
 
-      # Keep an auditable copy of the SARIF. Do not upload secrets.
       - name: Upload SARIF as artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -252,7 +285,7 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-      security-events: write            # narrow write scope to this job only
+      security-events: write
       actions: read
     steps:
       - name: Harden runner (audit egress)
@@ -261,7 +294,6 @@ jobs:
           egress-policy: audit
 
       - name: Download SARIF artifact
-        # uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         uses: actions/download-artifact@v5
         with:
           name: sonarcloud-sarif
