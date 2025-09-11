@@ -40,7 +40,7 @@ on:
       - 'mvnw'
       - 'mvnw.cmd'
       - 'sonar-project.properties'
-      - '.github/workflows/sonarcloud-java.yml'
+      - '.github/workflows/sonarcloud.yml'
   pull_request:
     branches: [ "main" ]
     types: [opened, synchronize, reopened]
@@ -51,7 +51,7 @@ on:
       - 'mvnw'
       - 'mvnw.cmd'
       - 'sonar-project.properties'
-      - '.github/workflows/sonarcloud-java.yml'
+      - '.github/workflows/sonarcloud.yml'
   # workflow_dispatch:  # enable if you want manual runs
 
 # Concurrency – cancel superseded runs on the same ref
