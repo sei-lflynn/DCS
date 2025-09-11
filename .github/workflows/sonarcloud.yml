@@ -104,7 +104,7 @@ jobs:
           build-wrapper-linux-x86-64 --out-dir "${BW_OUT}" \
             sh -c 'git submodule init; git submodule update; kmc-resources/scripts/build.sh'
             # sh -c 'gcc -std=c17 -I. -O2 -g main.c -o main'
-        timeout-minutes: 5
+        timeout-minutes: 30
 
       # Fail fast if the wrapper didn't produce the expected file
       - name: Verify compile_commands.json exists
