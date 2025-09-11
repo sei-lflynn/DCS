@@ -1,7 +1,7 @@
-# SonarCloud analysis for a tiny C repo (single main.c)
+ # SonarCloud analysis for this Java repo
 # -----------------------------------------------------------------------------
 # What this does:
-#   1) Builds the code under Sonar's Build Wrapper (produces compile_commands.json)
+#   1) Builds the code with a Java-centric SonarCloud workflow that uses the Sonar Maven scanner
 #   2) Runs the SonarCloud scanner
 #   3) Waits for analysis to finish, pulls issues from SonarCloud's API,
 #      converts to SARIF, uploads as an artifact
@@ -21,57 +21,63 @@
 #       sonar.projectKey=<your_sonarcloud_project_key>
 #       sonar.organization=<your_sonarcloud_org_key>
 #       sonar.sources=.
-#   • A file named main.c at repo root (adjust paths/commands if different)
 #
 # Secret needed:
 #   • SONAR_TOKEN (Actions → Secrets) – a SonarCloud user token with access to the project
 
-name: SonarCloud (C)
+# SonarCloud analysis for a Java/Maven repo (hardened + least privilege)
+# ---------------------------------------------------------------------
+
+name: SonarCloud (Java)
 
 on:
   push:
     branches: [ "main" ]
-    # Trigger only when C sources, the workflow, or Sonar properties change
-    # paths:
-    #  - '**/*.c'
-    #  - 'sonar-project.properties'
-    #  - '.github/workflows/sonarcloud.yml'
+    paths:
+      - '**/*.java'
+      - '**/pom.xml'
+      - '.mvn/**'
+      - 'mvnw'
+      - 'mvnw.cmd'
+      - 'sonar-project.properties'
+      - '.github/workflows/sonarcloud-java.yml'
   pull_request:
     branches: [ "main" ]
     types: [opened, synchronize, reopened]
-    # paths:
-    #  - '**/*.c'
-    #  - 'sonar-project.properties'
-    #  - '.github/workflows/sonarcloud.yml'
-  # workflow_dispatch:
+    paths:
+      - '**/*.java'
+      - '**/pom.xml'
+      - '.mvn/**'
+      - 'mvnw'
+      - 'mvnw.cmd'
+      - 'sonar-project.properties'
+      - '.github/workflows/sonarcloud-java.yml'
+  # workflow_dispatch:  # enable if you want manual runs
 
-# Cancel older in‑flight runs of the same ref. Avoids CI pile‑ups on active PRs.
+# Concurrency – cancel superseded runs on the same ref
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
-# Default‑deny: grant only read by default at the workflow level.
+# Default-deny permissions at the workflow level (read-only)
 permissions:
   contents: read
 
 jobs:
-  # Job 1: build + scan + export SARIF (no write scopes here)
-  build-and-scan:
-    name: Build and analyze
-    runs-on: ubuntu-24.04            # Explicit runner version for reproducibility
-    timeout-minutes: 15              # Cap wall‑clock time for the job
+  build-and-analyze:
+    name: Build + SonarCloud analyze + SARIF artifact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     permissions:
-      contents: read                 # Read‑only; no secret write scopes here
-    env:
-      BW_OUT: bw-out                 # Directory where the Build Wrapper writes output
+      contents: read   # read-only; no write scopes here
 
     steps:
-      # Lock down outbound network. Start in audit mode; switch to block + allowlist later.
+      # Harden egress – start in audit; switch to block + allowlist when stable
       - name: Harden runner (audit egress)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
-          # When the workflow is stable, prefer:
+          # When stable, prefer:
           # egress-policy: block
           # allowed-endpoints: >
           #   sonarcloud.io
@@ -82,58 +88,47 @@ jobs:
           #   uploads.github.com
           #   objects.githubusercontent.com
 
-      # Do not persist the GITHUB_TOKEN into the repo (reduces risk in later steps)
+      # Scoped checkout credentials – don't persist the GitHub token in the repo
       - name: Checkout (no persisted creds)
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
-          fetch-depth: 0              # Full history improves blame/issue precision
-          persist-credentials: false  # Do not leave a token in .git/config
+          fetch-depth: 0
+          persist-credentials: false
 
-      # Install Sonar's Build Wrapper (wraps compiler and emits compile_commands.json)
-      - name: Install Build Wrapper
-        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@1a6d90ebcb0e6a6b1d87e37ba693fe453195ae25 # v5.3.1
-        # For SonarCloud, no SONAR_HOST_URL env is required; action defaults to sonarcloud.io
+      # JDK 17 with Maven cache
+      - name: Set up JDK 17
+        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c50f # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: 'maven'
 
-      # Compile under the Build Wrapper. This produces BW_OUT/compile_commands.json that the C analyzer needs.
-      # Note: This command compiles and links a tiny program. For real builds, run your actual build here (make, cmake, etc.).
-      - name: Wrap compile (gcc)
-        run: |
-          set -euxo pipefail
-          mkdir -p "${BW_OUT}"
-          # Build Wrapper captures the compile so the analyzer knows exactly how files were built
-          build-wrapper-linux-x86-64 --out-dir "${BW_OUT}" \
-            sh -c 'git submodule init; git submodule update; kmc-resources/scripts/build.sh'
-            # sh -c 'gcc -std=c17 -I. -O2 -g main.c -o main'
-        timeout-minutes: 30
-
-      # Fail fast if the wrapper didn't produce the expected file
-      - name: Verify compile_commands.json exists
+      # Optional: quick env sanity check
+      - name: Show Java & Maven versions
         run: |
           set -eux
-          ls -l "${BW_OUT}"
-          test -s "${BW_OUT}/compile_commands.json"
+          java -version
+          mvn -v
 
-      # Run the scanner. It reads sonar-project.properties for org/project.
-      # We pass the path to compile_commands.json so the CFamily analyzer can do its job.
-      - name: SonarCloud scan
-        uses: SonarSource/sonarqube-scan-action@1a6d90ebcb0e6a6b1d87e37ba693fe453195ae25 # v5.3.1
+      # Build and test
+      - name: Build with Maven
+        run: mvn -B -DskipTests=false clean verify
+
+      # SonarCloud analysis via Maven scanner
+      - name: SonarCloud scan (Maven)
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # SonarCloud user token; no GitHub write scope needed
-        with:
-          args: >
-            --define sonar.cfamily.compile-commands=${{ env.BW_OUT }}/compile_commands.json
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        # If you use a self-hosted SonarQube, also pass -Dsonar.host.url=...
 
-      # Convert SonarCloud issues → SARIF so GitHub Code Scanning can ingest them.
-      # Why a custom step? SonarCloud doesn’t publish SARIF directly, so we fetch issues via API and transcode.
+      # Generate SARIF from SonarCloud issues (waits for CE task)
       - name: Generate SARIF from SonarCloud issues
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          # Fetch unresolved SonarCloud issues for the most recent analysis of this project
-          # and write a minimal SARIF 2.1.0 file at reports/sonarcloud.sarif
-          import base64, json, os, time, urllib.parse, urllib.request, pathlib, sys
+          import base64, json, os, time, urllib.parse, urllib.request, pathlib
 
           def read_project_key():
               with open("sonar-project.properties", "r", encoding="utf-8") as f:
@@ -155,7 +150,7 @@ jobs:
           project_key = read_project_key()
           print(f"Project: {project_key}")
 
-          # Wait until the most recent Compute Engine (CE) task has finished
+          # Wait for the most recent Compute Engine task to finish
           for _ in range(120):  # ~6 minutes max
               act = get_json(f"{base}/api/ce/activity?component={urllib.parse.quote(project_key)}&onlyCurrents=true&ps=1", token)
               tasks = act.get("tasks", [])
@@ -232,7 +227,6 @@ jobs:
               json.dump(sarif, f, ensure_ascii=False)
           print(f"Wrote {len(issues)} issues to reports/sonarcloud.sarif")
           PY
-        timeout-minutes: 3
 
       # Keep an auditable copy of the SARIF. Do not upload secrets.
       - name: Upload SARIF as artifact
@@ -243,15 +237,14 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  # Job 2: upload SARIF to GitHub Code Scanning with the only write scope it needs
   upload-to-code-scanning:
     name: Publish SARIF to Code Scanning
-    needs: build-and-scan               # Run only after SARIF is produced
+    needs: build-and-analyze
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
-      security-events: write            # Narrow write scope to this tiny, isolated job
+      security-events: write            # narrow write scope to this job only
       actions: read
     steps:
       - name: Harden runner (audit egress)
