@@ -1,4 +1,4 @@
-# Gitleaks secret scanning (native SARIF) with hardening and best practices
+# Gitleaks secret scanning (native SARIF) with hardening and best practices 
 # =============================================================================
 # What this workflow does (in order):
 #   1) Checks out your repository with read-only permissions and no persisted credentials.
@@ -52,6 +52,7 @@ jobs:
     # Keep paths relative to the workspace; no /github/... anywhere.
     env:
       REPORT_PATH: gitleaks.sarif
+      WORKSPACE_REPORT_PATH: gitleaks-workspace.sarif
 
     steps:
       # Harden egress. Start in audit mode to learn endpoints. Once stable, flip to:
@@ -90,7 +91,27 @@ jobs:
             --verbose
             --report-format sarif
             --report-path "${{ env.REPORT_PATH }}"
+            --log-opts="--all --remotes --full-history"
           # config-path: .gitleaks.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # optional; used by some org features
+
+      # Additional scan of the working tree (untracked/generated files).
+      - name: Run Gitleaks (working tree)
+        id: gitleaks_workspace
+        continue-on-error: true
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        with:
+          args: >-
+            detect
+            --no-git
+            --source .
+            --redact
+            --no-banner
+            --verbose
+            --report-format sarif
+            --report-path "${{ env.WORKSPACE_REPORT_PATH }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # optional; used by some org features
@@ -107,3 +128,11 @@ jobs:
         with:
           sarif_file: ${{ env.REPORT_PATH }}
           category: gitleaks
+
+      # Upload the working-tree SARIF as a separate category.
+      - name: Upload SARIF to Code Scanning (working tree)
+        if: always() && hashFiles('gitleaks-workspace.sarif') != ''
+        uses: github/codeql-action/upload-sarif@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
+        with:
+          sarif_file: ${{ env.WORKSPACE_REPORT_PATH }}
+          category: gitleaks-workspace
