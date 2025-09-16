@@ -121,14 +121,21 @@ jobs:
         uses: actions/dependency-review-action@595b5aeba73380359d98a5e087f648dbb0edce1b # v4.7.3
         with:
           comment-summary-in-pr: always     # requires pull-requests: write
-          # Enforcement knobs (uncomment to gate merges):
-          # fail-on-severity: moderate      # block if any vuln ≥ moderate
-          # fail-on-cvss: 7                 # or gate by CVSS score
-          # deny-licenses: GPL-1.0-or-later, LGPL-2.0-or-later
+          # Enforcement knobs (uncomment to gate merges in the future):
+          # fail-on-severity: low            # block on ANY known vuln
+          # fail-on-cvss: 7                  # or gate by CVSS score
           # allow-ghsas: GHSA-xxxx-...,GHSA-yyyy-...   # fine-grained allowlist
           # deny-ghsas:  GHSA-zzzz-...                 # fine-grained denylist
+          # deny-licenses: GPL-1.0-or-later, LGPL-2.0-or-later
+          # allow-licenses: MIT, Apache-2.0, BSD-3-Clause
           # retry-on-snapshot-warnings: true           # Maven snapshots
-          # retry-on-snapshot-warnings-timeout: 60
+          # retry-on-snapshot-warnings-timeout: 180
+
+          # ---------------- Warning-only posture; still show rich signals ----------------
+          fail-on-scopes: runtime,development,unknown  # include dev/test deps in analysis (no fail unless gates above are enabled)
+          license-check: true                       # report license info; fails only if allow/deny-licenses are set
+          show-openssf-scorecard: true              # surface Scorecard signals in summary
+          warn-on-openssf-scorecard-level: 5        # emit warnings when Scorecard < 5/10
 
   # ---------------- Push job: no PR comment (tighter permissions) ----------------
   dependency-review-push:
@@ -179,12 +186,24 @@ jobs:
 
       # Run Dependency Review comparing base→head on push
       - name: Dependency Review (push)
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/dependency-review-action@595b5aeba73380359d98a5e087f648dbb0edce1b # v4.7.3
         with:
           base-ref: ${{ steps.base.outputs.base }}
           head-ref: ${{ steps.base.outputs.head }}
           comment-summary-in-pr: never      # not a PR; no comment
-          # Optional enforcement on push as well:
-          # fail-on-severity: moderate
-          # fail-on-cvss: 7
+
+          # Enforcement knobs (uncomment to gate merges/commits in the future):
+          # fail-on-severity: low            # block on ANY known vuln
+          # fail-on-cvss: 7                  # or gate by CVSS score
           # deny-licenses: GPL-1.0-or-later, LGPL-2.0-or-later
+          # allow-licenses: MIT, Apache-2.0, BSD-3-Clause
+
+          # ---------------- Warning-only posture; still show rich signals ----------------
+          fail-on-scopes: runtime,development,unknown  # include dev/test deps in analysis (no fail unless gates above are enabled)
+          license-check: true                       # report license info; fails only if allow/deny-licenses are set
+          show-openssf-scorecard: true              # surface Scorecard signals in summary
+          warn-on-openssf-scorecard-level: 5        # emit warnings when Scorecard < 5/10
+
+          # Optional snapshot resilience (safe to leave off or comment in later):
+          # retry-on-snapshot-warnings: true
+          # retry-on-snapshot-warnings-timeout: 180
