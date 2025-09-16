@@ -49,6 +49,11 @@ on:
       - "**/*.csproj"
       - "**/*.fsproj"
       - ".github/workflows/osv-scanner.yml"
+      # ── C/C++ dependency inputs ────────────────────────────────────────────────
+      - "**/conan.lock"                             # Conan lockfile is supported by OSV-Scanner.
+      - ".gitmodules"                               # Submodule definitions can add C/C++ deps.
+      - "**/third_party/**"                         # Vendored deps (common C/C++ practice).
+      - "**/vendor/**"                              # Vendored deps (alternative convention).
 
   # Merge queue batches (optional): catch issues in the combined set scheduled to merge.
   merge_group:
@@ -83,7 +88,7 @@ permissions:
 jobs:
   # ───────────────────────────────────────── Scan job (read-only) ─────────────────────────────────────────
   osv-scan:
-    name: OSV scan → SARIF
+    name: OSV scan → SARIF + JSON
     runs-on: ubuntu-24.04                              # Explicit OS for reproducibility.
     timeout-minutes: 20                                 # Bound execution time.
     permissions:
@@ -93,6 +98,7 @@ jobs:
     env:
       OSV_VERSION: v2.2.2                               # Pin OSV-Scanner major/minor on purpose.
       SARIF_OUT: osv.sarif                              # Write SARIF to repo root → no mkdir needed.
+      JSON_OUT: osv.json                                # Extra JSON file captures experimental findings.
 
     # Expose whether a SARIF exists so the upload job can decide to run.
     outputs:
@@ -117,6 +123,12 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+          submodules: false                          # We’ll update submodules explicitly below.
+
+      # Ensure C/C++ submodule dependencies are present for commit-based matching.
+      - name: Initialize git submodules (for C/C++)
+        run: |
+          git submodule update --init --recursive
 
       # Install a pinned Go toolchain to install a pinned OSV-Scanner v2.
       - name: Setup Go (pinned)
@@ -132,17 +144,20 @@ jobs:
           osv-scanner --version
 
       # Run the scan:
-      #   • `scan -r .` recursively searches for supported lockfiles/SBOMs.
+      #   • `scan -r .` recursively searches for supported lockfiles/SBOMs and C/C++ deps.
       #   • `--allow-no-lockfiles` converts “no manifests found” into success (exit 0).
       #     Remove this once your repo always has manifests; or replace with explicit `-L` flags.
       #   • `continue-on-error: true` ensures we still publish SARIF if vulnerabilities are found.
-      - name: Run OSV-Scanner → SARIF
+      #   • Dual output: SARIF (for GitHub UI) + JSON (for experimental_generic_findings).
+      - name: Run OSV-Scanner → SARIF + JSON
         continue-on-error: true
         run: |
           osv-scanner scan -r . \
             --allow-no-lockfiles \
-            --format sarif \
-            --output "${SARIF_OUT}"
+            --call-analysis=all \
+            --experimental-plugins lockfile,sbom,directory,artifact,govulncheck,weakcreds,cis \
+            --format sarif --output "${SARIF_OUT}" \
+            --format json  --output "${JSON_OUT}"
 
       # Record whether a SARIF file exists. The next step and the next job use this signal.
       - name: Check SARIF exists
@@ -162,6 +177,15 @@ jobs:
         with:
           name: osv-sarif
           path: ${{ env.SARIF_OUT }}
+          retention-days: 14
+
+      # Always upload JSON artifact (contains experimental_generic_findings).
+      - name: Upload JSON artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02      # v4.6.2
+        with:
+          name: osv-json
+          path: ${{ env.JSON_OUT }}
           retention-days: 14
 
   # ───────────────────────────────────── Upload job (least privilege) ─────────────────────────────────────
