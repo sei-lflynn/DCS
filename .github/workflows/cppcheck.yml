@@ -102,12 +102,16 @@ jobs:
             libpcre3-dev python3
 
       # Fetch Cppcheck source pinned to the exact commit for 2.18.3 (native SARIF is 2.16+).
-      - name: Fetch Cppcheck (pinned commit)
+      - name: Fetch Cppcheck (pinned commit, shallow)
         run: |
           set -euxo pipefail
-          git clone --no-tags --single-branch https://github.com/danmar/cppcheck.git
+          git init cppcheck
           cd cppcheck
-          git checkout --detach "$CPPCHECK_REF"
+          git remote add origin https://github.com/danmar/cppcheck.git
+          # Fetch only the single commit we need (2.18.3 tag commit), no tags/branches
+          git -c protocol.version=2 fetch --no-tags --depth=1 origin \
+            f726f98ed2c3277780ee133ec5338f6352d7b43b
+          git checkout --detach FETCH_HEAD
           git rev-parse HEAD
 
       # Build a release binary. MATCHCOMPILER improves performance; HAVE_RULES enables rules.
