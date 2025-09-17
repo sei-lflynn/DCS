@@ -102,21 +102,25 @@ jobs:
             libpcre3-dev python3
 
       # Fetch Cppcheck source pinned to the exact commit for 2.18.3 (native SARIF is 2.16+).
+      # ⬇⬇⬇ CHANGE: build the tool OUTSIDE this repository to avoid scanning its sources.
       - name: Fetch Cppcheck (pinned commit, shallow)
         run: |
           set -euxo pipefail
-          git init cppcheck
-          cd cppcheck
+          SRC="$RUNNER_TEMP/cppcheck-src"
+          mkdir -p "$SRC"
+          git init "$SRC"
+          cd "$SRC"
           git remote add origin https://github.com/danmar/cppcheck.git
           # Fetch only the single commit we need (2.18.3 tag commit), no tags/branches
           git -c protocol.version=2 fetch --no-tags --depth=1 origin \
-            f726f98ed2c3277780ee133ec5338f6352d7b43b
+            "${CPPCHECK_REF}"
           git checkout --detach FETCH_HEAD
           git rev-parse HEAD
 
       # Build a release binary. MATCHCOMPILER improves performance; HAVE_RULES enables rules.
+      # ⬇⬇⬇ CHANGE: build in $RUNNER_TEMP (not inside the repo).
       - name: Build Cppcheck
-        working-directory: cppcheck
+        working-directory: ${{ runner.temp }}/cppcheck-src
         run: |
           set -euxo pipefail
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DHAVE_RULES=ON -DUSE_MATCHCOMPILER=ON
@@ -128,7 +132,9 @@ jobs:
       #   • --output-format=sarif is supported since 2.16.0
       #   • Tune --enable/--inconclusive/--std/--platform/--library/--project as needed
       #   • Add suppressions or path filters to cut noise (see commented examples)
+      # ⬇⬇⬇ CHANGE: run the analyzer IN THIS REPOSITORY (github.workspace), not in the tool's tree.
       - name: Run Cppcheck (native SARIF)
+        working-directory: ${{ github.workspace }}
         shell: bash
         run: |
           set -euo pipefail
