@@ -147,15 +147,18 @@ jobs:
           if [ ! -s cppcheck-filelist.txt ]; then
             echo "No C/C++ files found; creating empty SARIF so the job can upload cleanly."
             ver="$(cppcheck --version | awk '{print $2}')"
-            cat > cppcheck-results.sarif <<'EOF'
-            {
-              "version": "2.1.0",
-              "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-              "runs": [
-                { "tool": { "driver": { "name": "cppcheck", "version": "__VER__" } }, "results": [] }
-              ]
-            }
-            EOF
+cat > cppcheck-results.sarif <<'SARIF'
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": { "driver": { "name": "cppcheck", "version": "__VER__" } },
+      "results": []
+    }
+  ]
+}
+SARIF
             sed -i "s/__VER__/${ver}/" cppcheck-results.sarif
             exit 0
           fi
