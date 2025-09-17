@@ -67,7 +67,7 @@ jobs:
 
     env:
       # Pin upstream Cppcheck to an immutable commit for 2.18.3:
-      CPPCHECK_REF: f726f98c6d8b1a2cd2cfb6f1f6f3a1b1b3f7c1e0  # tag 2.18.3 commit
+      CPPCHECK_REF: f726f98ed2c3277780ee133ec5338f6352d7b43b  # tag 2.18.3
       # ^ Tip: update this hash when bumping versions; keep a changelog entry.
 
     steps:
