@@ -173,6 +173,21 @@ jobs:
             --file-list=cppcheck-filelist.txt \
             2> cppcheck-stderr.log
 
+
+          # Turn up "amount found" with added arguments to above:
+          # --enable=all  # includes error/warning/style/performance/portability/information categories (same severities see in XML/SARIF)
+          # --inconclusive  # Reports issues that cppcheck isn’t fully certain about (expect more false positives).
+          # --force --max-configs=0  # Explore more #ifdef paths (can greatly increase coverage)
+          # --project=compile_commands.json   # Feed real build settings (include paths, macros, flags) using your compile_commands.json
+          # Match the actual platform and language standard (e.g., `--platform=unix64 --std=c++20`)
+          # Use addons when relevant, for extra rule sets (e.g., `--addon=misra.json --enable=style .`)
+          # Consider using Clang parser, to use Clang's AST as input before running cppcheck's analyses (experimental):
+          #                  `--clang --project=compile_commands.json`
+          # --cppcheck-build-dir=.cppcheck-cache --enable=all -j"$(nproc)" # Whole-program checks (e.g., `unusedFunction`)
+
+          # Tune scope (more relevant insights, less noise):
+          # `--file-filter` and `-i` focus analysis and can reveal issues hidden in large noisy
+
           # Examples you can add:
           #   --std=c++17 --language=c++ --platform=native
           #   --file-filter=src/** --file-filter=include/**
