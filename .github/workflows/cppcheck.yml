@@ -31,14 +31,14 @@ on:
     branches: [ "main" ]                       #  note: adjust to your default branch
     paths:
       - "**/*"                                 #  note: narrow for speed (e.g., "src/**", "lib/**")
-      - ".github/workflows/cppcheck-native.yml" # Re-run when this workflow changes
+      - ".github/workflows/cppcheck.yml" # Re-run when this workflow changes
 
   # Also run on pushes to main (covers direct commits / fast-forwards).
   push:
     branches: [ "main" ]
     paths:
       - "**/*"
-      - ".github/workflows/cppcheck-native.yml"
+      - ".github/workflows/cppcheck.yml"
 
   # Button in the Actions tab for ad-hoc/manual runs.
   workflow_dispatch: {}
