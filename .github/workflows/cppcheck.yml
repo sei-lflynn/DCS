@@ -63,3 +63,108 @@ jobs:
     timeout-minutes: 20                        #  note: fail fast if something hangs
     permissions:
       contents: read                           #  note: only needs to read code in this job
+
+    steps:
+      # Harden outbound network. Start with "audit" to see what calls happen.
+      # After several clean runs, flip to:
+      #   egress-policy: block
+      #   allowed-endpoints: >
+      #     api.github.com:443
+      #     uploads.github.com:443
+      #     objects.githubusercontent.com:443
+      #     github.com:443
+      - name: Harden the runner (egress audit)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      # Check out your repository at this commit. We disable persisted credentials
+      # because this workflow never pushes back to the repo (least privilege).
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0                       #  note: full history is a safe default
+
+      # Install cppcheck from the distro. On Ubuntu 24.04 this yields a stable,
+      # slightly older version—so we emit XML and convert to SARIF in the next step.
+      # (This preserves CWE fields and works across cppcheck versions.)
+      - name: Install Cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      # Generate:
+      #   1) errorlist.xml    → rule metadata (helps keep CWE in the SARIF)
+      #   2) report.xml       → the scan results
+      # Tweak --enable/--inconclusive/--project/--std/etc to fit your codebase.
+      # You can also ignore paths for speed/noise reduction (see example).
+      - name: Run Cppcheck (XML output with CWE where available)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cppcheck --errorlist > errorlist.xml
+          cppcheck \
+            --enable=all \
+            --inconclusive \
+            --xml --xml-version=2 \
+            --output-file=report.xml \
+            . \
+            2> cppcheck-stderr.log
+          # Example excludes: uncomment and edit to taste
+          # --suppress=*:*vendor/* --suppress=*:*third_party/*
+
+      # Convert XML → SARIF (keeps rule/CWE metadata via errorlist.xml).
+      # Pinned to a full commit SHA (no floating tags).
+      - name: Convert XML to SARIF
+        uses: Flast/cppcheck-sarif@792730dd3f0221181ad4dfcb6805ea4565942338
+        with:
+          input: report.xml
+          errorlist: errorlist.xml
+          output: cppcheck-results.sarif
+
+      # Upload the SARIF so:
+      #   1) We keep an auditable copy with a retention policy
+      #   2) The next job can download and upload it to the Security tab
+      # "if: always()" ensures we capture results even if Cppcheck exits non-zero.
+      - name: Upload Cppcheck SARIF as artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cppcheck-sarif
+          path: cppcheck-results.sarif
+          retention-days: 14                   #  note: adjust to org policy
+
+  # ──────────────────────────────── Job 2: Upload (least privilege) ────────────────────────────────
+  upload-sarif:
+    name: Upload Cppcheck SARIF to Code Scanning
+    needs: cppcheck-scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # Only this job can write security events (least privilege).
+    permissions:
+      contents: read
+      security-events: write
+      actions: read                            #  note: helpful in private repos for status; safe to keep
+
+    steps:
+      # Harden outbound network here too (mirrors the first job).
+      - name: Harden the runner (egress audit)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      # Download the SARIF that Job 1 uploaded. The "name" must match the upload step.
+      - name: Download SARIF artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: cppcheck-sarif
+          path: .
+
+      # Upload SARIF into GitHub’s Code Scanning (Security tab).
+      # The 'category' helps distinguish different tools in the UI.
+      - name: Upload Cppcheck scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3.29.11
+        with:
+          sarif_file: cppcheck-results.sarif
+          category: cppcheck
