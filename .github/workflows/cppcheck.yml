@@ -102,7 +102,7 @@ jobs:
             libpcre3-dev python3
 
       # Fetch Cppcheck source pinned to the exact commit for 2.18.3 (native SARIF is 2.16+).
-      # ⬇⬇⬇ CHANGE: build the tool OUTSIDE this repository to avoid scanning its sources.
+      # CHANGE: build the tool OUTSIDE this repository to avoid scanning its sources.
       - name: Fetch Cppcheck (pinned commit, shallow)
         run: |
           set -euxo pipefail
@@ -118,7 +118,7 @@ jobs:
           git rev-parse HEAD
 
       # Build a release binary. MATCHCOMPILER improves performance; HAVE_RULES enables rules.
-      # ⬇⬇⬇ CHANGE: build in $RUNNER_TEMP (not inside the repo).
+      # CHANGE: build in $RUNNER_TEMP (not inside the repo).
       - name: Build Cppcheck
         working-directory: ${{ runner.temp }}/cppcheck-src
         run: |
@@ -132,21 +132,44 @@ jobs:
       #   • --output-format=sarif is supported since 2.16.0
       #   • Tune --enable/--inconclusive/--std/--platform/--library/--project as needed
       #   • Add suppressions or path filters to cut noise (see commented examples)
-      # ⬇⬇⬇ CHANGE: run the analyzer IN THIS REPOSITORY (github.workspace), not in the tool's tree.
+      # CHANGE: run the analyzer IN THIS REPOSITORY and pass an explicit file list.
+      #         If no C/C++ files are found, emit an EMPTY SARIF so upload always succeeds.
       - name: Run Cppcheck (native SARIF)
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
           set -euo pipefail
           cppcheck --version
+
+          # Discover tracked C/C++ files (fast; respects .gitignore)
+          git ls-files | grep -E '\.(c|cc|cp|cxx|cpp|c\+\+|h|hh|hp|hxx|hpp|h\+\+)$' > cppcheck-filelist.txt || true
+
+          if [ ! -s cppcheck-filelist.txt ]; then
+            echo "No C/C++ files found; creating empty SARIF so the job can upload cleanly."
+            ver="$(cppcheck --version | awk '{print $2}')"
+            cat > cppcheck-results.sarif <<'EOF'
+            {
+              "version": "2.1.0",
+              "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+              "runs": [
+                { "tool": { "driver": { "name": "cppcheck", "version": "__VER__" } }, "results": [] }
+              ]
+            }
+            EOF
+            sed -i "s/__VER__/${ver}/" cppcheck-results.sarif
+            exit 0
+          fi
+
+          # Run analysis on the discovered files.
           cppcheck \
             --enable=all \
             --inconclusive \
             --inline-suppr \
             --output-format=sarif \
             --output-file=cppcheck-results.sarif \
-            . \
+            --file-list=cppcheck-filelist.txt \
             2> cppcheck-stderr.log
+
           # Examples you can add:
           #   --std=c++17 --language=c++ --platform=native
           #   --file-filter=src/** --file-filter=include/**
