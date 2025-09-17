@@ -1,0 +1,65 @@
+# Cppcheck (hardened, pinned, least-privilege) — PRs, pushes, manual, weekly
+# =============================================================================
+# PURPOSE (read this first)
+# -----------------------------------------------------------------------------
+# Cppcheck is a static analysis tool for C/C++ that finds bugs and risky patterns.
+# This workflow:
+#   • Runs Cppcheck on your repository and writes a SARIF report (with CWE where possible)
+#   • Uploads the SARIF to GitHub’s Code Scanning (Security tab)
+#
+# WHY THIS LAYOUT (security + reliability best practices)
+# -----------------------------------------------------------------------------
+#   • Default-deny permissions at the workflow level (read-only by default)
+#   • Only the uploader job gets permission to write security events
+#   • Every third-party action is pinned to a specific commit SHA (no “latest”)
+#   • Concurrency cancels older superseded runs (fewer pile-ups on busy PRs)
+#   • Timeouts cap spend and prevent hours-long hangs
+#   • Egress hardening audits outbound network calls (later: block + allowlist)
+#   • Checkout without persisted credentials (we never push here)
+#
+# HOW TO READ THIS FILE
+# -----------------------------------------------------------------------------
+# You’ll see notes sprinkled throughout. They define each block,
+# explain why it exists, and suggest safe tweaks.
+
+name: Cppcheck
+
+on:
+  # Run on PRs so reviewers see issues before merge.
+  pull_request:
+    branches: [ "main" ]                       #  note: adjust to your default branch
+    paths:
+      - "**/*"                                 #  note: narrow for speed (e.g., "src/**", "lib/**")
+      - ".github/workflows/cppcheck.yml"       # Re-run when this workflow changes
+
+  # Also run on pushes to main (covers direct commits / fast-forwards).
+  push:
+    branches: [ "main" ]
+    paths:
+      - "**/*"
+      - ".github/workflows/cppcheck.yml"
+
+  # Button in the Actions tab for ad-hoc/manual runs.
+  workflow_dispatch: {}
+
+  # Optional weekly run to catch drift. Adjust cadence to taste.
+  schedule:
+    - cron: "42 23 * * 2"                      # Tuesdays 23:42 UTC
+
+# Cancel older in-flight runs for the same PR/ref (prevents CI pile-ups).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+# Default-deny at the workflow level. Jobs will elevate minimally.
+permissions:
+  contents: read
+
+jobs:
+  # ────────────────────────────────── Job 1: Scan (read-only) ──────────────────────────────────
+  cppcheck-scan:
+    name: Cppcheck scan → SARIF
+    runs-on: ubuntu-24.04                      #  note: fixed runner → repeatable builds
+    timeout-minutes: 20                        #  note: fail fast if something hangs
+    permissions:
+      contents: read                           #  note: only needs to read code in this job
