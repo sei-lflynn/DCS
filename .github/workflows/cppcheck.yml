@@ -68,8 +68,10 @@ jobs:
     env:
       # Pin upstream Cppcheck to an immutable commit for 2.18.3:
       CPPCHECK_REF: f726f98ed2c3277780ee133ec5338f6352d7b43b  # tag 2.18.3
-      # Optional: set CPPCHECK_MAX_CONFIGS (e.g., 256) to expand #ifdef exploration
-      # CPPCHECK_MAX_CONFIGS: "256"
+      # Optional: set CPPCHECK_MAX_CONFIGS to override default ifdef cap below.
+      # Examples:
+      #   CPPCHECK_MAX_CONFIGS: "--max-configs=512"   # increase exploration
+      #   CPPCHECK_MAX_CONFIGS: ""                    # disable explicit cap (keeps --force only)
       # Update the commit when bumping versions; keep a changelog entry.
 
     steps:
@@ -197,21 +199,22 @@ jobs:
           # Run analysis on the discovered files (+ optional project database, if detected).
           # NOTE: We do not pick a C/C++ standard here and we do not assume specific directories.
 
-          # Optional cap for ifdef-config exploration. Set CPPCHECK_MAX_CONFIGS (e.g., 256) to enable.
-          # Switch to "" (currently commented-out) and it will be disabled
-          # EXTRA_MAX_CONFIGS=""
-          EXTRA_MAX_CONFIGS=256
+          # Optional cap for ifdef-config exploration.
+          # Default: "--max-configs=256" for more coverage.
+          # To change: set CPPCHECK_MAX_CONFIGS in env above, e.g.:
+          #   CPPCHECK_MAX_CONFIGS: "--max-configs=512"
+          # To disable: set CPPCHECK_MAX_CONFIGS: ""
+          EXTRA_MAX_CONFIGS="--max-configs=256"
           if [ -n "${CPPCHECK_MAX_CONFIGS:-}" ]; then
-            # Must be > 0 on modern cppcheck
-            EXTRA_MAX_CONFIGS="--max-configs=${CPPCHECK_MAX_CONFIGS}"
+            EXTRA_MAX_CONFIGS="${CPPCHECK_MAX_CONFIGS}"
           fi
 
-          #  --project CANNOT be combined with explicit files/--file-list.
-          # If PROJECT_ARG is set -> run project mode only; else -> run with file list.
+          # IMPORTANT: --project CANNOT be combined with explicit files/--file-list.
+          # So: if PROJECT_ARG is set -> run project mode only; else -> run with file list.
           if [ -n "${PROJECT_ARG}" ]; then
             cppcheck \
               --force \
-              ${EXTRA_MAX_CONFIGS} \
+              ${EXTRA_MAX_CONFIGS:+$EXTRA_MAX_CONFIGS} \
               --enable=all \
               --inconclusive \
               --inline-suppr \
@@ -222,7 +225,7 @@ jobs:
           else
             cppcheck \
               --force \
-              ${EXTRA_MAX_CONFIGS} \
+              ${EXTRA_MAX_CONFIGS:+$EXTRA_MAX_CONFIGS} \
               --enable=all \
               --inconclusive \
               --inline-suppr \
@@ -235,17 +238,17 @@ jobs:
           # Turn up "amount found" with added arguments to above:
           # --enable=all  # includes error/warning/style/performance/portability/information categories (same severities see in XML/SARIF)
           # --inconclusive  # Reports issues that cppcheck isn’t fully certain about (expect more false positives).
-          # --force  # Explore more paths; use CPPCHECK_MAX_CONFIGS (>0) to further increase ifdef coverage
+          # --force  # Explore more paths; use CPPCHECK_MAX_CONFIGS (flag above) to further increase ifdef coverage
           # --project=compile_commands.json   # Feed real build settings (include paths, macros, flags) using your compile_commands.json
           # Match the actual platform and language standard (e.g., `--platform=unix64 --std=c++20`)
           # Use addons when relevant, for extra rule sets (e.g., `--addon=misra.json --enable=style .`)
           # Consider using Clang parser, to use Clang's AST as input before running cppcheck's analyses (experimental):
           #                  `--clang --project=compile_commands.json`
           # --cppcheck-build-dir=.cppcheck-cache --enable=all -j"$(nproc)" # Whole-program checks (e.g., `unusedFunction`)
-
+          #
           # Tune scope (more relevant insights, less noise):
           # `--file-filter` and `-i` focus analysis and can reveal issues hidden in large noisy
-
+          #
           # Examples you can add:
           #   --std=c++17 --language=c++ --platform=native
           #   --file-filter=src/** --file-filter=include/**
