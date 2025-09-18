@@ -144,8 +144,8 @@ jobs:
           # Discover tracked C/C++ files (fast; respects .gitignore)
           git ls-files | grep -E '\.(c|cc|cp|cxx|cpp|c\+\+|h|hh|hp|hxx|hpp|h\+\+)$' > cppcheck-filelist.txt || true
 
-          # Also include *untracked* C/C++ files in the repo tree (common in fresh branches / generated code).
-          # Avoid directory assumptions; only exclude .git itself.
+          # Include *untracked* C/C++ files in the repo tree (e.g., in fresh branches / generated code).
+          # Only exclude .git itself.
           find . -type f \
             \( -iname '*.c' -o -iname '*.cc' -o -iname '*.cp' -o -iname '*.cxx' -o -iname '*.cpp' -o -iname '*.c++' \
                -o -iname '*.h' -o -iname '*.hh' -o -iname '*.hp' -o -iname '*.hxx' -o -iname '*.hpp' -o -iname '*.h++' \) \
@@ -176,7 +176,7 @@ jobs:
             exit 0
           fi
 
-          # Opportunistic project-aware mode (no assumptions).
+          # Opportunistic project-aware mode
           # If a compile_commands.json is already present, use it.
           PROJECT_ARG=""
           if [ -f compile_commands.json ]; then
@@ -194,8 +194,18 @@ jobs:
           fi
 
           # Run analysis on the discovered files (+ optional project database, if detected).
+          # NOTE: We do not pick a C/C++ standard here and we do not assume specific directories.
+
+          # Optional cap for ifdef-config exploration. Set CPPCHECK_MAX_CONFIGS (e.g., 256) to enable.
+          EXTRA_MAX_CONFIGS=256
+          if [ -n "${CPPCHECK_MAX_CONFIGS:-}" ]; then
+            # Must be > 0 on modern cppcheck
+            EXTRA_MAX_CONFIGS="--max-configs=${CPPCHECK_MAX_CONFIGS}"
+          fi
+
           cppcheck \
-            --force --max-configs=0 \
+            --force \
+            ${EXTRA_MAX_CONFIGS} \
             --enable=all \
             --inconclusive \
             --inline-suppr \
