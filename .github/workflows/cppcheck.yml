@@ -31,7 +31,7 @@ on:
     branches: [ "main" ]                       #  note: adjust to your default branch
     paths:
       - "**/*"                                 #  note: narrow for speed (e.g., "src/**", "lib/**")
-      - ".github/workflows/cppcheck.yml" # Re-run when this workflow changes
+      - ".github/workflows/cppcheck.yml"       # Re-run when this workflow changes
 
   # Also run on pushes to main (covers direct commits / fast-forwards).
   push:
@@ -68,7 +68,9 @@ jobs:
     env:
       # Pin upstream Cppcheck to an immutable commit for 2.18.3:
       CPPCHECK_REF: f726f98ed2c3277780ee133ec5338f6352d7b43b  # tag 2.18.3
-      # ^ Tip: update this hash when bumping versions; keep a changelog entry.
+      # Optional: set CPPCHECK_MAX_CONFIGS (e.g., 256) to expand #ifdef exploration
+      # CPPCHECK_MAX_CONFIGS: "256"
+      # Update the commit when bumping versions; keep a changelog entry.
 
     steps:
       # Harden outbound network. Start with "audit" to see what calls happen.
@@ -112,8 +114,7 @@ jobs:
           cd "$SRC"
           git remote add origin https://github.com/danmar/cppcheck.git
           # Fetch only the single commit we need (2.18.3 tag commit), no tags/branches
-          git -c protocol.version=2 fetch --no-tags --depth=1 origin \
-            "${CPPCHECK_REF}"
+          git -c protocol.version=2 fetch --no-tags --depth=1 origin "${CPPCHECK_REF}"
           git checkout --detach FETCH_HEAD
           git rev-parse HEAD
 
@@ -197,28 +198,44 @@ jobs:
           # NOTE: We do not pick a C/C++ standard here and we do not assume specific directories.
 
           # Optional cap for ifdef-config exploration. Set CPPCHECK_MAX_CONFIGS (e.g., 256) to enable.
+          # Switch to "" (currently commented-out) and it will be disabled
+          # EXTRA_MAX_CONFIGS=""
           EXTRA_MAX_CONFIGS=256
           if [ -n "${CPPCHECK_MAX_CONFIGS:-}" ]; then
             # Must be > 0 on modern cppcheck
             EXTRA_MAX_CONFIGS="--max-configs=${CPPCHECK_MAX_CONFIGS}"
           fi
 
-          cppcheck \
-            --force \
-            ${EXTRA_MAX_CONFIGS} \
-            --enable=all \
-            --inconclusive \
-            --inline-suppr \
-            --output-format=sarif \
-            --output-file=cppcheck-results.sarif \
-            --file-list=cppcheck-filelist.txt \
-            ${PROJECT_ARG:+$PROJECT_ARG} \
-            2> cppcheck-stderr.log
+          #  --project CANNOT be combined with explicit files/--file-list.
+          # If PROJECT_ARG is set -> run project mode only; else -> run with file list.
+          if [ -n "${PROJECT_ARG}" ]; then
+            cppcheck \
+              --force \
+              ${EXTRA_MAX_CONFIGS} \
+              --enable=all \
+              --inconclusive \
+              --inline-suppr \
+              --output-format=sarif \
+              --output-file=cppcheck-results.sarif \
+              ${PROJECT_ARG} \
+              2> cppcheck-stderr.log
+          else
+            cppcheck \
+              --force \
+              ${EXTRA_MAX_CONFIGS} \
+              --enable=all \
+              --inconclusive \
+              --inline-suppr \
+              --output-format=sarif \
+              --output-file=cppcheck-results.sarif \
+              --file-list=cppcheck-filelist.txt \
+              2> cppcheck-stderr.log
+          fi
 
           # Turn up "amount found" with added arguments to above:
           # --enable=all  # includes error/warning/style/performance/portability/information categories (same severities see in XML/SARIF)
           # --inconclusive  # Reports issues that cppcheck isn’t fully certain about (expect more false positives).
-          # --force --max-configs=0  # Explore more #ifdef paths (can greatly increase coverage)
+          # --force  # Explore more paths; use CPPCHECK_MAX_CONFIGS (>0) to further increase ifdef coverage
           # --project=compile_commands.json   # Feed real build settings (include paths, macros, flags) using your compile_commands.json
           # Match the actual platform and language standard (e.g., `--platform=unix64 --std=c++20`)
           # Use addons when relevant, for extra rule sets (e.g., `--addon=misra.json --enable=style .`)
