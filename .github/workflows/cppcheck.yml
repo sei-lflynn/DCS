@@ -144,6 +144,19 @@ jobs:
           # Discover tracked C/C++ files (fast; respects .gitignore)
           git ls-files | grep -E '\.(c|cc|cp|cxx|cpp|c\+\+|h|hh|hp|hxx|hpp|h\+\+)$' > cppcheck-filelist.txt || true
 
+          # Also include *untracked* C/C++ files in the repo tree (common in fresh branches / generated code).
+          # Avoid directory assumptions; only exclude .git itself.
+          find . -type f \
+            \( -iname '*.c' -o -iname '*.cc' -o -iname '*.cp' -o -iname '*.cxx' -o -iname '*.cpp' -o -iname '*.c++' \
+               -o -iname '*.h' -o -iname '*.hh' -o -iname '*.hp' -o -iname '*.hxx' -o -iname '*.hpp' -o -iname '*.h++' \) \
+            -not -path './.git/*' \
+            >> cppcheck-filelist.txt
+
+          # De-duplicate and normalize the list; remove empty lines.
+          sort -u cppcheck-filelist.txt | sed '/^[[:space:]]*$/d' > cppcheck-filelist.clean
+          mv cppcheck-filelist.clean cppcheck-filelist.txt
+
+          # If still nothing to analyze, emit a minimal valid SARIF and exit cleanly.
           if [ ! -s cppcheck-filelist.txt ]; then
             echo "No C/C++ files found; creating empty SARIF so the job can upload cleanly."
             ver="$(cppcheck --version | awk '{print $2}')"
@@ -163,16 +176,34 @@ jobs:
             exit 0
           fi
 
-          # Run analysis on the discovered files.
+          # Opportunistic project-aware mode (no assumptions).
+          # If a compile_commands.json is already present, use it.
+          PROJECT_ARG=""
+          if [ -f compile_commands.json ]; then
+            PROJECT_ARG="--project=compile_commands.json"
+          else
+            # If the repo appears to be CMake-based, try to export compile_commands.json.
+            # This often increases findings by giving cppcheck real include paths/defines.
+            if [ -f CMakeLists.txt ]; then
+              echo "Detected CMake project; attempting to export compile_commands.json for better accuracy."
+              cmake -S . -B _cppcheck_build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON >/dev/null 2>&1 || true
+              if [ -f _cppcheck_build/compile_commands.json ]; then
+                PROJECT_ARG="--project=_cppcheck_build/compile_commands.json"
+              fi
+            fi
+          fi
+
+          # Run analysis on the discovered files (+ optional project database, if detected).
           cppcheck \
+            --force --max-configs=0 \
             --enable=all \
             --inconclusive \
             --inline-suppr \
             --output-format=sarif \
             --output-file=cppcheck-results.sarif \
             --file-list=cppcheck-filelist.txt \
+            ${PROJECT_ARG:+$PROJECT_ARG} \
             2> cppcheck-stderr.log
-
 
           # Turn up "amount found" with added arguments to above:
           # --enable=all  # includes error/warning/style/performance/portability/information categories (same severities see in XML/SARIF)
